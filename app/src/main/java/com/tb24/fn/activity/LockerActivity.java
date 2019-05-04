@@ -1,10 +1,13 @@
 package com.tb24.fn.activity;
 
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +21,7 @@ import com.google.gson.JsonObject;
 import com.tb24.fn.EFortRarity;
 import com.tb24.fn.R;
 import com.tb24.fn.model.FortItemStack;
+import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
@@ -46,7 +50,7 @@ public class LockerActivity extends BaseActivity {
 		list.post(new Runnable() {
 			@Override
 			public void run() {
-				layout = new GridLayoutManager(LockerActivity.this, (int) (list.getWidth() / Utils.dp(getResources(), 72)));
+				layout = new GridLayoutManager(LockerActivity.this, (int) (list.getWidth() / Utils.dp(getResources(), 64 + 8 + 8)));
 				list.setLayoutManager(layout);
 			}
 		});
@@ -106,8 +110,7 @@ public class LockerActivity extends BaseActivity {
 		public void onBindViewHolder(@NonNull LockerViewHolder holder, int position) {
 			final FortItemStack item = data.get(position);
 			holder.backgroundable.setBackgroundResource(R.drawable.bg_common);
-			JsonElement json = activity.getThisApplication().itemRegistry.get(item.templateId);
-			String toastText = null;
+			final JsonElement json = activity.getThisApplication().itemRegistry.get(item.templateId);
 			Bitmap bitmap = null;
 
 			if (json != null) {
@@ -120,19 +123,23 @@ public class LockerActivity extends BaseActivity {
 				}
 
 				holder.backgroundable.setBackgroundResource(rarityBackground(jsonObject));
-
-				if (jsonObject.has("DisplayName") && jsonObject.has("Description")) {
-					toastText = jsonObject.get("DisplayName").getAsString() + "\n" + jsonObject.get("Description").getAsString();
-				}
 			}
 
 			holder.displayImage.setImageBitmap(bitmap);
 			holder.itemName.setText(bitmap == null ? item.templateId : null);
-			final String finalToastText = toastText;
 			holder.itemView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					Toast.makeText(activity, finalToastText == null ? item.templateId : finalToastText, Toast.LENGTH_SHORT).show();
+					if (json == null) {
+						return;
+					}
+
+					ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.fort_item_detail_box, null);
+					decorateItemDetailBox(viewGroup, item, json);
+					Toast toast = new Toast(activity);
+					toast.setView(viewGroup);
+					toast.setDuration(Toast.LENGTH_LONG);
+					toast.show();
 				}
 			});
 		}
@@ -152,8 +159,37 @@ public class LockerActivity extends BaseActivity {
 				displayImage = itemView.findViewById(R.id.item_img);
 				itemName = itemView.findViewById(R.id.item_text1);
 				favorite = itemView.findViewById(R.id.item_owned);
-				backgroundable=itemView.findViewById(R.id.backgroundable);
+				backgroundable = itemView.findViewById(R.id.backgroundable);
 			}
 		}
+	}
+
+	public static void decorateItemDetailBox(ViewGroup viewGroup, FortItemStack item, JsonElement json) {
+		JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
+		EFortRarity rarity = EFortRarity.UNCOMMON;
+
+		if (jsonObject.has("Rarity")) {
+			rarity = EFortRarity.from(jsonObject.get("Rarity").getAsString());
+		}
+
+		View viewById = viewGroup.findViewById(R.id.backgroundable);
+		viewById.setBackgroundResource(rarityBackground2(jsonObject));
+		int twelve = (int) Utils.dp(viewGroup.getResources(), 12);
+		int eight = (int) Utils.dp(viewGroup.getResources(), 8);
+		viewById.setPadding(twelve, eight, twelve, eight);
+		((TextView) viewGroup.findViewById(R.id.item_text1)).setText(rarity.name + " | " + ItemShopActivity.shortDescription(item, jsonObject));
+		((TextView) viewGroup.findViewById(R.id.item_text2)).setText(JsonUtils.getStringOr("DisplayName", jsonObject, "??"));
+		String description = JsonUtils.getStringOr("Description", jsonObject, "??");
+		CharSequence setText = "";
+
+		if (jsonObject.has("GameplayTags")) {
+			for (JsonElement s : jsonObject.get("GameplayTags").getAsJsonObject().get("gameplay_tags").getAsJsonArray()) {
+				if (s.getAsString().startsWith("Cosmetics.Set.")) {
+					setText = TextUtils.concat('\n' + "Part of the ", Utils.span(s.getAsString().substring("Cosmetics.Set.".length()), new StyleSpan(Typeface.BOLD)), " set.");
+				}
+			}
+		}
+
+		((TextView) viewGroup.findViewById(R.id.item_text3)).setText(TextUtils.concat(description, setText));
 	}
 }

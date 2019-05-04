@@ -59,6 +59,15 @@ public abstract class BaseActivity extends Activity {
 		}
 	}
 
+	public static int rarityBackground2(JsonObject jsonObject) {
+		if (jsonObject.has("Rarity")) {
+			EFortRarity rarity = EFortRarity.from(jsonObject.get("Rarity").getAsString());
+			return rarity == EFortRarity.HANDMADE ? R.drawable.bg_common2 : rarity == EFortRarity.UNCOMMON ? R.drawable.bg_uncommon2 : rarity == EFortRarity.STURDY ? R.drawable.bg_rare2 : rarity == EFortRarity.QUALITY ? R.drawable.bg_epic2 : rarity == EFortRarity.FINE ? R.drawable.bg_legendary2 : R.drawable.bg_common2;
+		} else {
+			return R.drawable.bg_uncommon2;
+		}
+	}
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == android.R.id.home) finish();

@@ -1,5 +1,6 @@
 package com.tb24.fn.activity;
 
+import android.app.AlertDialog;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,6 +18,7 @@ import android.widget.Toast;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.R;
+import com.tb24.fn.model.CommonCoreProfileAttributes;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortCatalogResponse;
 import com.tb24.fn.model.FortItemStack;
@@ -37,6 +40,18 @@ public class ItemShopActivity extends BaseActivity {
 	private ItemShopAdapter adapter;
 	private LoadingViewController lc;
 	private GridLayoutManager layout;
+
+	public static String shortDescription(FortItemStack itemStack, JsonObject jsonObject) {
+		String s;
+
+		if (jsonObject.has("ShortDescription")) {
+			s = jsonObject.get("ShortDescription").getAsString();
+		} else {
+			s = itemStack.getIdCategory().equals("AthenaItemWrap") ? "Wrap" : "";
+		}
+
+		return s;
+	}
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -111,7 +126,7 @@ public class ItemShopActivity extends BaseActivity {
 	private static class ItemShopAdapter extends RecyclerView.Adapter<ItemShopAdapter.ItemShopViewHolder> {
 		private final ItemShopActivity activity;
 		private final List<FortCatalogResponse.CatalogEntry> data;
-		private final Map<String, Bitmap> extraData = new HashMap<>();
+		private final Map<String, Bitmap> bitmapCache = new HashMap<>();
 //		private final Map<String, JsonElement> extraData2 = new HashMap<>();
 
 		public ItemShopAdapter(ItemShopActivity activity, List<FortCatalogResponse.CatalogEntry> data) {
@@ -129,11 +144,12 @@ public class ItemShopActivity extends BaseActivity {
 		}
 
 		@Override
-		public void onBindViewHolder(@NonNull ItemShopViewHolder holder, int position) {
-			FortCatalogResponse.CatalogEntry item = data.get(position);
+		public void onBindViewHolder(@NonNull final ItemShopViewHolder holder, int position) {
+			final FortCatalogResponse.CatalogEntry item = data.get(position);
 			holder.backgroundable.setBackgroundResource(R.drawable.bg_common);
 			holder.shortDescription.setText(null);
 			Bitmap bitmap = null;
+			JsonElement jsonFirst = null;
 
 			if (item.itemGrants != null) {
 //				Log.d("ItemShopActivity", "devName >> " + item.devName);
@@ -153,22 +169,16 @@ public class ItemShopActivity extends BaseActivity {
 					JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
 
 					if (i == 0) {
-						if (extraData.containsKey(itemStack.templateId)) {
-							bitmap = extraData.get(itemStack.templateId);
+						jsonFirst = json;
+
+						if (bitmapCache.containsKey(itemStack.templateId)) {
+							bitmap = bitmapCache.get(itemStack.templateId);
 						} else {
-							extraData.put(itemStack.templateId, bitmap = getBitmapImageFromItemStackData(activity, itemStack, jsonObject));
+							bitmapCache.put(itemStack.templateId, bitmap = getBitmapImageFromItemStackData(activity, itemStack, jsonObject));
 						}
 
 						try {
-							String s = ";";
-
-							if (jsonObject.has("ShortDescription")) {
-								s = jsonObject.get("ShortDescription").getAsString();
-							} else {
-								s = itemStack.getIdCategory().equals("AthenaItemWrap") ? "Wrap" : "";
-							}
-
-							holder.shortDescription.setText(s);
+							holder.shortDescription.setText(shortDescription(itemStack, jsonObject));
 							holder.backgroundable.setBackgroundResource(rarityBackground(jsonObject));
 						} catch (NullPointerException e) {
 							Log.w("ItemShopActivity", "Failed setting short description or rarity background for " + itemStack.templateId, e);
@@ -202,7 +212,7 @@ public class ItemShopActivity extends BaseActivity {
 
 			holder.priceGroup.setVisibility(owned ? View.GONE : View.VISIBLE);
 			holder.owned.setVisibility(owned ? View.VISIBLE : View.GONE);
-			FortCatalogResponse.Price price = item.prices[0];
+			final FortCatalogResponse.Price price = item.prices[0];
 			String banner = null;
 
 			if (price.saleType != null) {
@@ -235,6 +245,64 @@ public class ItemShopActivity extends BaseActivity {
 //			} else {
 //				holder.blur.setImageDrawable(null);
 //			}
+
+			holder.itemView.setOnClickListener(new View.OnClickListener() {
+				int index = 0;
+
+				@Override
+				public void onClick(View v) {
+					ViewGroup view = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.item_shop_panel_detail, null);
+					makeView(view);
+					new AlertDialog.Builder(activity).setView(view).show().getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+				}
+
+				private void makeView(ViewGroup view) {
+					TextView priceTv = view.findViewById(R.id.item_price);
+					TextView itemSale = view.findViewById(R.id.item_sale_from);
+					ViewGroup sacRoot = view.findViewById(R.id.sac_root);
+					TextView sacName = view.findViewById(R.id.sac_name);
+					final Button btnPurchase = view.findViewById(R.id.btn_item_shop_purchase);
+					final Button btnGift = view.findViewById(R.id.btn_item_shop_gift);
+					FortItemStack itemStack = item.itemGrants[index];
+					CommonCoreProfileAttributes attributes = activity.getThisApplication().gson.fromJson(activity.getThisApplication().dataCommonCore.profileChanges.get(0).profile.stats.attributes, CommonCoreProfileAttributes.class);
+					JsonElement json = activity.getThisApplication().itemRegistry.get(itemStack.templateId);
+
+					if (json != null) {
+						LockerActivity.decorateItemDetailBox(view, itemStack, json);
+					}
+
+					priceTv.setText(String.format("%,d", price.basePrice));
+
+					if (price.saleType != null) {
+						itemSale.setVisibility(View.VISIBLE);
+						itemSale.setText(String.format("%,d", price.regularPrice));
+					} else {
+						itemSale.setVisibility(View.GONE);
+					}
+
+					View.OnClickListener cl = new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							if (v == btnPurchase) {
+								// TODO THE MOMENT OF GLORY
+							} else if (v == btnGift) {
+
+							}
+						}
+					};
+					btnPurchase.setOnClickListener(cl);
+					btnGift.setOnClickListener(cl);
+					btnGift.setVisibility(attributes.allowed_to_send_gifts && item.giftInfo != null && item.giftInfo.bIsEnabled ? View.VISIBLE : View.GONE);
+					view.findViewById(R.id.no_refund).setVisibility(item.refundable ? View.GONE : View.VISIBLE);
+
+					if (attributes.mtx_affiliate != null) {
+						sacRoot.setVisibility(View.VISIBLE);
+						sacName.setText(attributes.mtx_affiliate);
+					} else {
+						sacRoot.setVisibility(View.GONE);
+					}
+				}
+			});
 		}
 
 		@Override
