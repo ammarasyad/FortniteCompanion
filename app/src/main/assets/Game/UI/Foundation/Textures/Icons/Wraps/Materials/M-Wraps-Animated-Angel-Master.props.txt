@@ -1,0 +1,19 @@
+TwoSided = false
+bDisableDepthTest = false
+bIsMasked = false
+ReferencedTextures[4] =
+{
+    ReferencedTextures[0] = Texture2D'/Game/UI/Foundation/Textures/Icons/Wraps/Materials/T-Wrap-Angel-Gradient.T-Wrap-Angel-Gradient'
+    ReferencedTextures[1] = Texture2D'/Game/UI/Foundation/Textures/Icons/Wraps/Materials/T-Wrap-Animated-Angel-L.T-Wrap-Animated-Angel-L'
+    ReferencedTextures[2] = Texture2D'/Game/UI/Foundation/Textures/Icons/Wraps/Materials/T-Wraps-AnimUV.T-Wraps-AnimUV'
+    ReferencedTextures[3] = Texture2D'/Game/UI/Foundation/Textures/Icons/Wraps/Materials/T_UI_Wrap_Angel_M.T_UI_Wrap_Angel_M'
+}
+BlendMode = BLEND_Translucent (2)
+OpacityMaskClipValue = 0.333
+FlattenedTexture = None
+MobileBaseTexture = None
+MobileNormalTexture = None
+bUseMobileSpecular = false
+MobileSpecularPower = 16
+MobileSpecularMask = MSM_Constant (0)
+MobileMaskTexture = None

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:id="@+id/br_stats_scrollview"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:splitMotionEvents="false">
+
+		<Button
+			android:id="@+id/br_stats_btn_platform_cycle"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:singleLine="true" />
+
+		<Button
+			android:id="@+id/br_stats_btn_mode_cycle"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:singleLine="true" />
+	</LinearLayout>
+
+	<LinearLayout
+		android:id="@+id/br_stats_hero"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:baselineAligned="false"
+		android:divider="@drawable/the_divider"
+		android:showDividers="middle">
+
+		<LinearLayout
+			android:id="@+id/br_stats_1_container"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:background="?android:selectableItemBackground"
+			android:orientation="vertical">
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:fontFamily="@font/burbank_big_condensed"
+				android:gravity="center"
+				android:paddingTop="16dp"
+				android:paddingBottom="4dp"
+				android:textColor="?android:textColorPrimary"
+				android:textFontWeight="900"
+				android:textSize="36sp"
+				tools:text="0" />
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:fontFamily="@font/burbank_small"
+				android:gravity="center"
+				android:paddingBottom="16dp"
+				android:textFontWeight="700"
+				tools:text="First" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:id="@+id/br_stats_2_container"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:background="?android:selectableItemBackground"
+			android:orientation="vertical">
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:fontFamily="@font/burbank_big_condensed"
+				android:gravity="center"
+				android:paddingTop="16dp"
+				android:paddingBottom="4dp"
+				android:textColor="?android:textColorPrimary"
+				android:textFontWeight="900"
+				android:textSize="36sp"
+				tools:text="0" />
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:fontFamily="@font/burbank_small"
+				android:gravity="center"
+				android:paddingBottom="16dp"
+				android:textFontWeight="700"
+				tools:text="Second" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:id="@+id/br_stats_3_container"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1"
+			android:background="?android:selectableItemBackground"
+			android:orientation="vertical">
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:fontFamily="@font/burbank_big_condensed"
+				android:gravity="center"
+				android:paddingTop="16dp"
+				android:paddingBottom="4dp"
+				android:textColor="?android:textColorPrimary"
+				android:textFontWeight="900"
+				android:textSize="36sp"
+				tools:text="0" />
+
+			<TextView
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:fontFamily="@font/burbank_small"
+				android:gravity="center"
+				android:paddingBottom="16dp"
+				android:textFontWeight="700"
+				tools:text="Third" />
+		</LinearLayout>
+	</LinearLayout>
+
+	<LinearLayout
+		android:id="@+id/br_stats_extras"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical" />
+
+</LinearLayout>

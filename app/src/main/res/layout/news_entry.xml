@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginBottom="4dp">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="#FFFFFFFF"
+		android:orientation="vertical"
+		android:paddingLeft="16dp"
+		android:paddingTop="16dp"
+		android:paddingRight="16dp"
+		android:paddingBottom="16dp">
+
+		<ImageView
+			android:id="@+id/news_entry_image"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:adjustViewBounds="true" />
+
+		<TextView
+			android:id="@+id/news_entry_title"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="12dp"
+			android:fontFamily="@font/burbank_big_condensed"
+			android:textColor="?android:textColorPrimary"
+			android:textFontWeight="900"
+			android:textSize="24sp"
+			android:textStyle="bold"
+			tools:text="title" />
+
+		<TextView
+			android:id="@+id/news_entry_body"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="2dp"
+			android:fontFamily="@font/burbank_small"
+			android:lineSpacingExtra="2dp"
+			android:textFontWeight="500"
+			tools:text="body" />
+	</LinearLayout>
+
+	<TextView
+		android:id="@+id/news_entry_adspace"
+		style="@style/BannerStyle"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="8dp"
+		android:layout_marginTop="8dp"
+		tools:text="adspace" />
+
+</FrameLayout>

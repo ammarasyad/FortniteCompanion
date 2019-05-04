@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content">
+
+	<android.support.constraint.ConstraintLayout
+		android:id="@+id/backgroundable"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_horizontal"
+		android:layout_margin="4dp"
+		android:background="@drawable/bg_legendary"
+		android:foreground="?android:selectableItemBackground"
+		android:gravity="center_horizontal|bottom">
+
+		<ImageView
+			android:id="@+id/item_img"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:adjustViewBounds="true"
+			android:scaleType="fitCenter"
+			app:layout_constraintBottom_toBottomOf="@id/with_bg_blur"
+			app:layout_constraintTop_toTopOf="parent" />
+
+		<!--<com.tb24.fn.util.FitWidthAtBottomImageView-->
+			<!--android:id="@+id/bg_blur"-->
+			<!--android:layout_width="0dp"-->
+			<!--android:layout_height="0dp"-->
+			<!--android:scaleType="matrix"-->
+			<!--app:layout_constraintBottom_toBottomOf="@id/with_bg_blur"-->
+			<!--app:layout_constraintEnd_toEndOf="@id/with_bg_blur"-->
+			<!--app:layout_constraintStart_toStartOf="@id/with_bg_blur"-->
+			<!--app:layout_constraintTop_toTopOf="@id/with_bg_blur" />-->
+
+		<LinearLayout
+			android:id="@+id/with_bg_blur"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:background="#40000000"
+			android:gravity="center_horizontal"
+			android:orientation="vertical"
+			android:padding="6dp"
+			app:layout_constraintBottom_toTopOf="@id/frameLayout">
+
+			<com.tb24.fn.util.ForcedMarqueeTextView
+				android:id="@+id/item_text1"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginBottom="-2dp"
+				android:ellipsize="marquee"
+				android:fontFamily="@font/burbank_big_condensed"
+				android:gravity="center_horizontal"
+				android:shadowColor="#000000"
+				android:shadowRadius="4.0"
+				android:singleLine="true"
+				android:textAllCaps="true"
+				android:textAppearance="?android:textAppearanceListItem"
+				android:textColor="#FFFFFF"
+				android:textFontWeight="900"
+				android:textSize="24sp"
+				tools:text="Item Name" />
+
+			<TextView
+				android:id="@+id/item_text3"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:ellipsize="marquee"
+				android:singleLine="true"
+				android:textColor="#C0FFFFFF"
+				tools:text="Type" />
+
+		</LinearLayout>
+
+		<FrameLayout
+			android:id="@+id/frameLayout"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:background="#000724"
+			android:padding="2dp"
+			app:layout_constraintBottom_toBottomOf="parent">
+
+			<LinearLayout
+				android:id="@+id/item_price_group"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center">
+
+				<ImageView
+					android:layout_width="24dp"
+					android:layout_height="24dp"
+					android:src="@drawable/t_items_mtx_l" />
+
+				<TextView
+					android:id="@+id/item_text2"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="4dp"
+					android:singleLine="true"
+					android:textColor="#FFFFFF"
+					android:textStyle="bold"
+					tools:text="1,800" />
+
+				<com.tb24.fn.util.StrikeTextView
+					android:id="@+id/item_sale_from"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginStart="4dp"
+					android:paddingStart="2dp"
+					android:paddingEnd="2dp"
+					android:singleLine="true"
+					android:textColor="#AAAAAA"
+					android:textStyle="bold"
+					tools:text="1,800" />
+			</LinearLayout>
+
+			<LinearLayout
+				android:id="@+id/item_owned"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:gravity="center"
+				android:visibility="gone">
+
+				<TextView
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_marginEnd="4dp"
+					android:singleLine="true"
+					android:text="Owned"
+					android:textAllCaps="true"
+					android:textColor="#C0FFFFFF"
+					android:textStyle="bold" />
+
+				<ImageView
+					android:layout_width="24dp"
+					android:layout_height="24dp"
+					android:src="@drawable/t_icon_check_128"
+					android:tint="#359B5C" />
+			</LinearLayout>
+		</FrameLayout>
+	</android.support.constraint.ConstraintLayout>
+
+	<TextView
+		android:id="@+id/news_entry_adspace"
+		style="@style/BannerStyle"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		tools:text="adspace" />
+</FrameLayout>

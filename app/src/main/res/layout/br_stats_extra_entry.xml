@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_marginTop="2dp"
+	android:layout_marginBottom="2dp"
+	android:background="@drawable/the_bg"
+	android:gravity="center_vertical"
+	android:paddingLeft="16dp"
+	android:paddingTop="4dp"
+	android:paddingRight="16dp"
+	android:paddingBottom="4dp">
+
+	<TextView
+		android:id="@+id/br_stat_name"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_weight="1"
+		android:fontFamily="@font/burbank_small"
+		android:textAllCaps="true"
+		tools:text="Stat Name" />
+
+	<TextView
+		android:id="@+id/br_stat_value"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:fontFamily="@font/burbank_small"
+		android:gravity="end"
+		android:textColor="?android:textColorPrimary"
+		android:textFontWeight="900"
+		android:textSize="20sp"
+		tools:text="000" />
+</LinearLayout>

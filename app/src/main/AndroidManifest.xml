@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	package="com.tb24.fn">
+
+	<!-- To auto-complete the email text field in the login form with the user's emails -->
+	<uses-permission android:name="android.permission.GET_ACCOUNTS" />
+	<uses-permission android:name="android.permission.READ_PROFILE" />
+	<uses-permission android:name="android.permission.READ_CONTACTS" />
+	<uses-permission android:name="android.permission.INTERNET" />
+
+	<application
+		android:name=".FortniteCompanionApp"
+		android:allowBackup="true"
+		android:icon="@mipmap/ic_launcher"
+		android:label="@string/app_name"
+		android:networkSecurityConfig="@xml/network_security_config"
+		android:roundIcon="@mipmap/ic_launcher_round"
+		android:supportsRtl="true"
+		android:theme="@style/AppTheme"
+		tools:ignore="GoogleAppIndexingWarning">
+		<activity android:name=".activity.MainActivity">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity android:name=".activity.BRStatsActivity" />
+		<activity
+			android:name=".activity.ProfileActivity"
+			android:label="@string/title_profile" />
+		<activity
+			android:name=".activity.LoginActivity"
+			android:label="@string/title_activity_login" />
+		<activity
+			android:name=".activity.NewsActivity"
+			android:label="@string/title_news" />
+		<activity
+			android:name=".activity.ItemShopActivity"
+			android:label="@string/title_item_shop" />
+		<activity
+			android:name=".activity.EventsActivity"
+			android:label="@string/title_events"
+			android:theme="@android:style/Theme.DeviceDefault" />
+		<activity android:name=".activity.EventDetailActivity" />
+		<activity android:name=".activity.EventWindowLeaderboardActivity" />
+		<activity
+			android:name=".activity.SettingsActivity"
+			android:label="@string/title_activity_settings" />
+		<activity
+			android:name=".activity.StwWorldInfoActivity"
+			android:label="Save the World Info" />
+		<activity
+			android:name=".activity.LockerActivity"
+			android:label="@string/title_locker" />
+	</application>
+
+</manifest>

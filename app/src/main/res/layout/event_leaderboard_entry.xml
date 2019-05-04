@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="48dp"
+	android:gravity="center_vertical"
+	android:paddingStart="16dp">
+
+	<TextView
+		android:id="@+id/lb_place"
+		android:layout_width="48dp"
+		android:layout_height="wrap_content"
+		android:fontFamily="@font/burbank_small"
+		android:gravity="right"
+		android:singleLine="true"
+		android:textAppearance="?android:textAppearanceListItem"
+		android:textColor="?android:colorAccent"
+		tools:text="#1000" />
+
+	<LinearLayout
+		android:id="@+id/lb_bg"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:gravity="center_vertical"
+		android:paddingEnd="16dp">
+
+		<com.tb24.fn.util.ForcedMarqueeTextView
+			android:id="@+id/lb_title"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="8dp"
+			android:layout_weight="1"
+			android:ellipsize="marquee"
+			android:focusable="true"
+			android:focusableInTouchMode="true"
+			android:fontFamily="@font/burbank_small"
+			android:marqueeRepeatLimit="marquee_forever"
+			android:singleLine="true"
+			android:textAppearance="?android:textAppearanceListItem"
+			tools:text="Player[ &amp; player ...]" />
+
+		<TextView
+			android:id="@+id/lb_points"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginStart="8dp"
+			android:fontFamily="@font/burbank_small"
+			android:singleLine="true"
+			android:textAppearance="?android:textAppearanceListItem"
+			tools:text="99" />
+	</LinearLayout>
+
+</LinearLayout>

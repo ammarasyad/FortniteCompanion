@@ -1,0 +1,7 @@
+<android.support.v7.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+	<android.support.v7.preference.DropDownPreference
+		app:defaultValue="NAW"
+		app:key="matchmaking_region"
+		app:title="Region" />
+
+</android.support.v7.preference.PreferenceScreen>

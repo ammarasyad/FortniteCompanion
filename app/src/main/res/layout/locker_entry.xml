@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:layout_margin="4dp">
+
+	<RelativeLayout
+		android:id="@+id/backgroundable"
+		android:layout_width="64dp"
+		android:layout_height="64dp"
+		android:layout_centerHorizontal="true"
+		android:background="@drawable/bg_legendary"
+		android:foreground="?android:selectableItemBackground"
+		android:gravity="bottom">
+		<!--android:layout_height="96dp"-->
+
+		<TextView
+			android:id="@+id/item_text1"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:textSize="8sp"
+			tools:text="AthenaItem:blablabla" />
+
+		<ImageView
+			android:id="@+id/item_img"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:adjustViewBounds="true"
+			android:scaleType="fitCenter" />
+
+	</RelativeLayout>
+</RelativeLayout>

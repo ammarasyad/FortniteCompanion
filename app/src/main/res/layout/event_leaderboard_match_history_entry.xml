@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:gravity="center_vertical">
+
+	<TextView
+		android:id="@+id/lb_mh_n"
+		android:fontFamily="@font/burbank_big_condensed"
+		android:textColor="?android:textColorPrimary"
+		android:textFontWeight="900"
+		android:textSize="20sp"
+		tools:text="#10" />
+
+	<TextView
+		android:id="@+id/lb_mh_d"
+		android:layout_marginStart="16dp"
+		android:fontFamily="@font/burbank_big_condensed"
+		android:textColor="?android:textColorPrimary"
+		android:textFontWeight="900"
+		android:textSize="20sp"
+		tools:text="\?? Minutes" />
+
+	<TextView
+		android:id="@+id/lb_mh_e"
+		android:layout_marginStart="8dp"
+		android:drawablePadding="2dp"
+		android:drawableTint="?android:textColorPrimary"
+		android:fontFamily="@font/burbank_big_condensed"
+		android:gravity="center_vertical"
+		android:textColor="?android:textColorPrimary"
+		android:textFontWeight="900"
+		android:textSize="20sp"
+		tools:text="10" />
+
+	<TextView
+		android:id="@+id/lb_mh_p"
+		android:layout_marginStart="8dp"
+		android:drawablePadding="2dp"
+		android:drawableTint="?android:textColorPrimary"
+		android:fontFamily="@font/burbank_big_condensed"
+		android:gravity="center_vertical"
+		android:textColor="?android:textColorPrimary"
+		android:textFontWeight="900"
+		android:textSize="20sp"
+		tools:text="12" />
+</TableRow>

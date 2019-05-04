@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="wrap_content"
+	android:layout_height="wrap_content"
+	android:gravity="center_vertical"
+	android:paddingRight="16dp">
+
+	<ImageView
+		android:layout_width="24dp"
+		android:layout_height="24dp"
+		android:src="@drawable/t_items_mtx_l" />
+
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginLeft="4dp"
+		android:text="v-bucks"
+		android:textColor="?android:textColorPrimary" />
+</LinearLayout>
