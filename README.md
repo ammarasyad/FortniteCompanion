@@ -6,10 +6,10 @@ Extremely experimantal Mini Fortnite Client Android app.
 * View events and its leaderboard
 * View stats of yourself or other player's
 * View BR cosmetics
-* View item shop, full display for unencrypted items
+* View Item Shop, full display for unencrypted items
+* Make Battle Royale Item Shop purchases
 
 ## To-do
-* Make purchases
 * Add creative map code
 * Apply cosmetic item
 * Manage daily challenges
@@ -18,5 +18,5 @@ Extremely experimantal Mini Fortnite Client Android app.
 * Most importantly, finding out a way to mitm HTTP POST requests on the actual Fortnite client
 
 ## Credits
-* [Umodel](https://www.gildor.org/en/projects/umodel) for extracting the .uassets from the PAKs
+* [Umodel](https://www.gildor.org/en/projects/umodel) for extracting/exporting the .uassets from the PAKs
 * [John Wick Parse](https://github.com/SirWaddles/JohnWickParse) for parsing the item data from the .uassets
