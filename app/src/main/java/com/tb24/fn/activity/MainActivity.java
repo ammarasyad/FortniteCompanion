@@ -36,6 +36,7 @@ import retrofit2.Response;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener, View.OnLongClickListener {
 	private static final int[] MAX_XPS = new int[]{100, 200, 300, 400, 500, 650, 800, 950, 1100, 1250, 1400, 1550, 1700, 1850, 2000, 2150, 2300, 2450, 2600, 2750, 2900, 3050, 3200, 3350, 3500, 3650, 3800, 3950, 4100, 4250, 4400, 4550, 4700, 4850, 5000, 5150, 5300, 5450, 5600, 5800, 6000, 6200, 6400, 6600, 6800, 7000, 7200, 7400, 7600, 7800, 8100, 8400, 8700, 9000, 9300, 9600, 9900, 10200, 10500, 10800, 11200, 11600, 12000, 12400, 12800, 13200, 13600, 14000, 14400, 14800, 15300, 15800, 16300, 16800, 17300, 17800, 18300, 18800, 19300, 19800, 20800, 21800, 22800, 23800, 24800, 25800, 26800, 27800, 28800, 30800, 32800, 34800, 36800, 38800, 40800, 42800, 45800, 49800, 54800};
+	private static final int UPDATE_IF_OK_REQ_CODE = 0;
 
 	private SharedPreferences prefs;
 	private Button loginBtn;
@@ -73,7 +74,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		loggedIn = prefs.getBoolean("is_logged_in", false);
 		findViewById(R.id.main_screen_btn_stats).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_events).setEnabled(loggedIn);
-		findViewById(R.id.main_screen_btn_item_shop).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_stw).setEnabled(loggedIn);
 
 		if (loggedIn) {
@@ -103,23 +103,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
-								if (getThisApplication().dataCommonCore == null) {
-									menuVbucks.setVisible(false);
-									return;
-								}
-
-								int vBucksQty = 0;
-
-								for (Map.Entry<String, FortItemStack> entry : getThisApplication().dataCommonCore.profileChanges.get(0).profile.items.entrySet()) {
-									if (entry.getValue().templateId.equals("Currency:MtxGiveaway")) {
-										vBucksQty += entry.getValue().quantity;
-									}
-
-									Log.d("FortItemStack", ">> " + entry.getValue().templateId);
-								}
-
-								menuVbucks.setVisible(true);
-								((TextView) vBucksView.getChildAt(1)).setText(String.format("%,d", vBucksQty));
+								countAndSetVbucks(MainActivity.this, vBucksView);
 							}
 						});
 					}
@@ -147,8 +131,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
-								findViewById(R.id.main_screen_btn_profile).setEnabled(getThisApplication().dataAthena != null);
-								findViewById(R.id.main_screen_btn_locker).setEnabled(getThisApplication().dataAthena != null);
+								boolean enabled = getThisApplication().dataAthena != null;
+								findViewById(R.id.main_screen_btn_profile).setEnabled(enabled);
+								findViewById(R.id.main_screen_btn_locker).setEnabled(enabled);
+								findViewById(R.id.main_screen_btn_item_shop).setEnabled(enabled);
 								loadProfile();
 							}
 						});
@@ -180,6 +166,25 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			updateLogInButtonText(null);
 			profileFrame.setVisibility(View.GONE);
 		}
+	}
+
+	public static int countAndSetVbucks(BaseActivity activity, ViewGroup vbxView) {
+		if (activity.getThisApplication().dataCommonCore == null) {
+			vbxView.setVisibility(View.GONE);
+			return 0;
+		}
+
+		int vBucksQty = 0;
+
+		for (Map.Entry<String, FortItemStack> entry : activity.getThisApplication().dataCommonCore.profileChanges.get(0).profile.items.entrySet()) {
+			if (entry.getValue().templateId.equals("Currency:MtxGiveaway")) {
+				vBucksQty += entry.getValue().quantity;
+			}
+		}
+
+		vbxView.setVisibility(View.VISIBLE);
+		((TextView) vbxView.getChildAt(1)).setText(String.format("%,d", vBucksQty));
+		return vBucksQty;
 	}
 
 	private void validateLoggedIn(EpicError error) {
@@ -253,7 +258,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == 0 && resultCode == RESULT_OK) {
+		if (requestCode == UPDATE_IF_OK_REQ_CODE && resultCode == RESULT_OK) {
 			checkLogin();
 		}
 	}
@@ -304,7 +309,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 				editText.setSingleLine();
 				break;
 			case R.id.main_screen_btn_item_shop:
-				startActivity(new Intent(this, ItemShopActivity.class));
+				startActivityForResult(new Intent(this, ItemShopActivity.class), UPDATE_IF_OK_REQ_CODE);
 				break;
 			case R.id.main_screen_btn_news:
 				Intent intent = new Intent(this, NewsActivity.class);
@@ -359,7 +364,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 							.setNegativeButton("No", null)
 							.show();
 				} else {
-					startActivityForResult(new Intent(this, LoginActivity.class), 0);
+					startActivityForResult(new Intent(this, LoginActivity.class), UPDATE_IF_OK_REQ_CODE);
 				}
 				break;
 		}
@@ -367,7 +372,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menuVbucks = menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS).setVisible(false);
+		menuVbucks = menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		vBucksView.setVisibility(View.GONE);
 		menu.add(0, 900, 0, "Dump Login Data");
 		menu.add(0, 901, 0, "Settings");
 		return super.onCreateOptionsMenu(menu);

@@ -1,0 +1,482 @@
+{
+  "channels": {
+	"client-matchmaking": {
+	  "states": [
+		{
+		  "validFrom": "2019-05-04T16:27:14.899Z",
+		  "activeEvents": [],
+		  "state": {
+			"region": {
+			  "NAE": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				]
+			  },
+			  "NAW": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				]
+			  },
+			  "EU": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				]
+			  },
+			  "BR": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				]
+			  },
+			  "OCE": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				],
+				"eventFlagsForcedOff": [
+				  "Playlist_DefaultDuo"
+				]
+			  },
+			  "ASIA": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				]
+			  },
+			  "NA": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				]
+			  },
+			  "CN": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				],
+				"eventFlagsForcedOff": [
+				  "Playlist_Fortnite_B_Duos",
+				  "Playlist_Deimos_DuoCN"
+				]
+			  },
+			  "REGIONID": {
+				"eventFlagsForcedOff": [
+				  "Playlist_Deimos_Duo_WinterCN"
+				]
+			  }
+			}
+		  }
+		},
+		{
+		  "validFrom": "2019-05-04T17:00:00.000Z",
+		  "activeEvents": [],
+		  "state": {
+			"region": {
+			  "NAE": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				],
+				"eventFlagsForcedOff": [
+				  "Playlist_Playground"
+				]
+			  },
+			  "NAW": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				],
+				"eventFlagsForcedOff": [
+				  "Playlist_Playground"
+				]
+			  },
+			  "EU": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				],
+				"eventFlagsForcedOff": [
+				  "Playlist_Playground"
+				]
+			  },
+			  "BR": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				],
+				"eventFlagsForcedOff": [
+				  "Playlist_Playground"
+				]
+			  },
+			  "OCE": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				],
+				"eventFlagsForcedOff": [
+				  "Playlist_DefaultDuo",
+				  "Playlist_Playground"
+				]
+			  },
+			  "ASIA": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				],
+				"eventFlagsForcedOff": [
+				  "Playlist_Playground"
+				]
+			  },
+			  "NA": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				],
+				"eventFlagsForcedOff": [
+				  "Playlist_Playground"
+				]
+			  },
+			  "CN": {
+				"eventFlagsForcedOn": [
+				  "Playlist_Ashton_Sm",
+				  "Playlist_Ashton_Md",
+				  "Playlist_Ashton_Lg"
+				],
+				"eventFlagsForcedOff": [
+				  "Playlist_Fortnite_B_Duos",
+				  "Playlist_Deimos_DuoCN",
+				  "Playlist_Playground"
+				]
+			  },
+			  "REGIONID": {
+				"eventFlagsForcedOff": [
+				  "Playlist_Deimos_Duo_WinterCN"
+				]
+			  }
+			}
+		  }
+		},
+		{
+		  "validFrom": "2019-05-04T18:35:00.000Z",
+		  "activeEvents": [],
+		  "state": {
+			"region": {
+			  "OCE": {
+				"eventFlagsForcedOff": [
+				  "Playlist_DefaultDuo",
+				  "Playlist_Playground",
+				  "Playlist_DefaultSolo",
+				  "Playlist_DefaultSquad",
+				  "Playlist_Respawn_24",
+				  "Playlist_Ashton_Sm"
+				],
+				"eventFlagsForcedOn": [
+				  "Playlist_Music_Low",
+				  "Playlist_Music_Med",
+				  "Playlist_Music_High"
+				]
+			  },
+			  "CN": {
+				"eventFlagsForcedOff": [
+				  "Playlist_Fortnite_B_Duos",
+				  "Playlist_Deimos_DuoCN",
+				  "Playlist_Playground"
+				]
+			  },
+			  "REGIONID": {
+				"eventFlagsForcedOff": [
+				  "Playlist_Deimos_Duo_WinterCN"
+				]
+			  },
+			  "NAE": {
+				"eventFlagsForcedOff": [
+				  "Playlist_Playground",
+				  "Playlist_DefaultSolo",
+				  "Playlist_DefaultDuo",
+				  "Playlist_DefaultSquad",
+				  "Playlist_Respawn_24",
+				  "Playlist_Ashton_Sm"
+				],
+				"eventFlagsForcedOn": [
+				  "Playlist_Music_Low",
+				  "Playlist_Music_Med",
+				  "Playlist_Music_High"
+				]
+			  },
+			  "NAW": {
+				"eventFlagsForcedOff": [
+				  "Playlist_Playground",
+				  "Playlist_DefaultSolo",
+				  "Playlist_DefaultDuo",
+				  "Playlist_DefaultSquad",
+				  "Playlist_Respawn_24",
+				  "Playlist_Ashton_Sm"
+				],
+				"eventFlagsForcedOn": [
+				  "Playlist_Music_Low",
+				  "Playlist_Music_Med",
+				  "Playlist_Music_High"
+				]
+			  },
+			  "EU": {
+				"eventFlagsForcedOff": [
+				  "Playlist_Playground",
+				  "Playlist_DefaultSolo",
+				  "Playlist_DefaultDuo",
+				  "Playlist_DefaultSquad",
+				  "Playlist_Respawn_24",
+				  "Playlist_Ashton_Sm"
+				],
+				"eventFlagsForcedOn": [
+				  "Playlist_Music_Low",
+				  "Playlist_Music_Med",
+				  "Playlist_Music_High"
+				]
+			  },
+			  "BR": {
+				"eventFlagsForcedOff": [
+				  "Playlist_Playground",
+				  "Playlist_DefaultSolo",
+				  "Playlist_DefaultDuo",
+				  "Playlist_DefaultSquad",
+				  "Playlist_Respawn_24",
+				  "Playlist_Ashton_Sm"
+				],
+				"eventFlagsForcedOn": [
+				  "Playlist_Music_Low",
+				  "Playlist_Music_Med",
+				  "Playlist_Music_High"
+				]
+			  },
+			  "ASIA": {
+				"eventFlagsForcedOff": [
+				  "Playlist_Playground",
+				  "Playlist_DefaultSolo",
+				  "Playlist_DefaultDuo",
+				  "Playlist_DefaultSquad",
+				  "Playlist_Respawn_24",
+				  "Playlist_Ashton_Sm"
+				],
+				"eventFlagsForcedOn": [
+				  "Playlist_Music_Low",
+				  "Playlist_Music_Med",
+				  "Playlist_Music_High"
+				]
+			  },
+			  "NA": {
+				"eventFlagsForcedOff": [
+				  "Playlist_Playground",
+				  "Playlist_DefaultSolo",
+				  "Playlist_DefaultDuo",
+				  "Playlist_DefaultSquad",
+				  "Playlist_Respawn_24",
+				  "Playlist_Ashton_Sm"
+				],
+				"eventFlagsForcedOn": [
+				  "Playlist_Music_Low",
+				  "Playlist_Music_Med",
+				  "Playlist_Music_High"
+				]
+			  }
+			}
+		  }
+		}
+	  ],
+	  "cacheExpire": "2019-05-04T18:27:14.899Z"
+	},
+	"tk": {
+	  "states": [
+		{
+		  "validFrom": "2019-05-04T16:27:14.899Z",
+		  "activeEvents": [],
+		  "state": {
+			"k": []
+		  }
+		}
+	  ],
+	  "cacheExpire": "2019-05-04T18:27:14.899Z"
+	},
+	"client-events": {
+	  "states": [
+		{
+		  "validFrom": "2019-05-04T16:27:14.899Z",
+		  "activeEvents": [
+			{
+			  "eventType": "EventFlag.Spring2019",
+			  "activeUntil": "2019-05-15T00:00:00.000Z",
+			  "activeSince": "2019-02-05T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.Spring2019.Phase1",
+			  "activeUntil": "2019-05-15T00:00:00.000Z",
+			  "activeSince": "2019-02-05T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.PassiveMiniBosses",
+			  "activeUntil": "2019-05-15T00:00:00.000Z",
+			  "activeSince": "2019-02-05T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.ActiveStorms",
+			  "activeUntil": "2019-05-15T00:00:00.000Z",
+			  "activeSince": "2019-02-05T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.ElementalZone.Fire",
+			  "activeUntil": "2019-05-15T00:00:00.000Z",
+			  "activeSince": "2019-02-05T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.ElementalZone.Nature",
+			  "activeUntil": "2019-05-15T00:00:00.000Z",
+			  "activeSince": "2019-02-05T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.ElementalZone.Water",
+			  "activeUntil": "2019-05-15T00:00:00.000Z",
+			  "activeSince": "2019-02-05T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.MissionAlert.MegaAlert",
+			  "activeUntil": "2019-05-15T00:00:00.000Z",
+			  "activeSince": "2019-02-05T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.BetaStorms.B",
+			  "activeUntil": "2019-05-17T00:00:00.000Z",
+			  "activeSince": "2019-02-13T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.LobbySeason8",
+			  "activeUntil": "2019-05-23T14:30:00.000Z",
+			  "activeSince": "2019-02-26T14:30:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.Spring2019.Phase2",
+			  "activeUntil": "2019-05-15T00:00:00.000Z",
+			  "activeSince": "2019-03-05T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.TwineDiff.21",
+			  "activeUntil": "2019-07-30T00:00:00.000Z",
+			  "activeSince": "2019-04-16T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.TwineDiff.22",
+			  "activeUntil": "2019-07-30T00:00:00.000Z",
+			  "activeSince": "2019-04-16T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.TwineDiff.23",
+			  "activeUntil": "2019-07-30T00:00:00.000Z",
+			  "activeSince": "2019-04-16T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.TwineDiff.24",
+			  "activeUntil": "2019-07-30T00:00:00.000Z",
+			  "activeSince": "2019-04-16T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.TwineDiff.25",
+			  "activeUntil": "2019-07-30T00:00:00.000Z",
+			  "activeSince": "2019-04-16T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.Twine.BetaStorms.B.21",
+			  "activeUntil": "2019-07-30T00:00:00.000Z",
+			  "activeSince": "2019-04-16T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.Twine.BetaStorms.B.22",
+			  "activeUntil": "2019-07-30T00:00:00.000Z",
+			  "activeSince": "2019-04-16T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.Twine.BetaStorms.B.23",
+			  "activeUntil": "2019-07-30T00:00:00.000Z",
+			  "activeSince": "2019-04-16T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.Twine.BetaStorms.B.24",
+			  "activeUntil": "2019-07-30T00:00:00.000Z",
+			  "activeSince": "2019-04-16T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.Twine.BetaStorms.B.25",
+			  "activeUntil": "2019-07-30T00:00:00.000Z",
+			  "activeSince": "2019-04-16T00:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.LTM_Ashton",
+			  "activeUntil": "2019-05-06T13:00:00.000Z",
+			  "activeSince": "2019-04-25T07:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.UnvaultingCountdown",
+			  "activeUntil": "2019-05-04T19:01:00.000Z",
+			  "activeSince": "2019-05-01T16:00:00.000Z"
+			},
+			{
+			  "eventType": "EventFlag.LTE_S8_ExtraCredit",
+			  "activeUntil": "2019-05-09T07:00:00.000Z",
+			  "activeSince": "2019-05-03T13:00:00.000Z"
+			}
+		  ],
+		  "state": {
+			"activeStorefronts": [],
+			"eventNamedWeights": {},
+			"activeEvents": [
+			  {
+				"instanceId": "6fgbohaeq4pe2sfhtmv7mg64h3[2]0",
+				"devName": "Event_Ashton",
+				"eventName": "CalendarEvent_Season8_Ashton",
+				"eventStart": "2019-04-25T07:00:00Z",
+				"eventEnd": "2019-05-06T13:00:00Z",
+				"eventType": "EventFlag.LTM_Ashton"
+			  },
+			  {
+				"instanceId": "6f0or3g52bbljpd1pgs7jqpekh[2]0",
+				"devName": "Event_S8_ExtraCredit",
+				"eventName": "CalendarEvent_Season8_ExtraCredit",
+				"eventStart": "2019-05-03T13:00:00Z",
+				"eventEnd": "2019-05-09T07:00:00Z",
+				"eventType": "EventFlag.LTE_S8_ExtraCredit"
+			  }
+			],
+			"seasonNumber": 8,
+			"seasonTemplateId": "AthenaSeason:athenaseason8",
+			"matchXpBonusPoints": 0,
+			"seasonBegin": "2019-02-26T14:30:00Z",
+			"seasonEnd": "2019-05-23T14:30:00Z",
+			"seasonDisplayedEnd": "2019-05-09T07:30:00Z",
+			"weeklyStoreEnd": "2019-05-05T00:00:00Z",
+			"stwEventStoreEnd": "2019-05-15T00:00:00.000Z",
+			"stwWeeklyStoreEnd": "2019-05-09T00:00:00.000Z",
+			"dailyStoreEnd": "2019-05-05T00:00:00Z"
+		  }
+		}
+	  ],
+	  "cacheExpire": "2019-05-04T18:27:14.899Z"
+	}
+  },
+  "eventsTimeOffsetHrs": 0.0,
+  "currentTime": "2019-05-04T16:44:40.260Z"
+}

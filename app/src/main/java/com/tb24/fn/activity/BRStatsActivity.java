@@ -144,7 +144,7 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 
 	private void fetchStatsIdReady(String id) {
 		loaded = false;
-		final Call<FortStatsV2Response> call = getThisApplication().fortnitePublicService.getStatsV2ForAccountId(id);
+		final Call<FortStatsV2Response> call = getThisApplication().fortnitePublicService.statsV2(id);
 		lc.loading();
 		new Thread(new Runnable() {
 			@Override

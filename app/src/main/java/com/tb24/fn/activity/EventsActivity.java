@@ -18,7 +18,7 @@ import com.tb24.fn.R;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.EventDownloadResponse;
 import com.tb24.fn.model.FortBasicDataResponse;
-import com.tb24.fn.util.EnumRegion;
+import com.tb24.fn.util.ERegion;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
@@ -41,14 +41,14 @@ public class EventsActivity extends WithBasicDataActivity {
 	private RecyclerView list;
 	private EventAdapter adapter;
 	private LoadingViewController lc;
-	private EnumRegion region;
+	private ERegion region;
 	private Call<EventDownloadResponse> downloadCall;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.common_loadable_recycler_view);
 		setupActionBar();
-		region = EnumRegion.from(PreferenceManager.getDefaultSharedPreferences(this).getString("matchmaking_region", EnumRegion.NAW.toString()));
+		region = ERegion.from(PreferenceManager.getDefaultSharedPreferences(this).getString("matchmaking_region", ERegion.NAW.toString()));
 		list = findViewById(R.id.main_recycler_view);
 		list.post(new Runnable() {
 			@Override

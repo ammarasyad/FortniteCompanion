@@ -30,11 +30,11 @@ public class FortMcpResponse {
 		public String profileId;
 		public String version;
 		public Map<String, FortItemStack> items;
-		public NameMe stats;
+		public Stats stats;
 		public int commandRevision;
 	}
 
-	public static class NameMe {
+	public static class Stats {
 		public JsonObject attributes;
 	}
 }

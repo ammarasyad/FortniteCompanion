@@ -10,7 +10,7 @@ import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceManager;
 
 import com.tb24.fn.R;
-import com.tb24.fn.util.EnumRegion;
+import com.tb24.fn.util.ERegion;
 import com.tb24.fn.util.Utils;
 
 public class SettingsActivity extends BaseActivity {
@@ -30,12 +30,12 @@ public class SettingsActivity extends BaseActivity {
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 			setPreferencesFromResource(R.xml.pref_general, rootKey);
 			DropDownPreference prefRegion = (DropDownPreference) findPreference("matchmaking_region");
-			int len = EnumRegion.values().length;
+			int len = ERegion.values().length;
 			String[] values = new String[len], names = new String[len];
-			EnumRegion[] regions = EnumRegion.values();
+			ERegion[] regions = ERegion.values();
 
 			for (int i = 0; i < regions.length; i++) {
-				EnumRegion region = regions[i];
+				ERegion region = regions[i];
 				values[i] = region.toString();
 				names[i] = region.name;
 			}

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="wrap_content"
 	android:layout_height="wrap_content"
 	android:gravity="center_vertical"
-	android:paddingRight="16dp">
+	android:paddingEnd="12dp">
 
 	<ImageView
 		android:layout_width="24dp"
@@ -13,7 +14,8 @@
 	<TextView
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:layout_marginLeft="4dp"
-		android:text="v-bucks"
-		android:textColor="?android:textColorPrimary" />
+		android:layout_marginStart="4dp"
+		android:textColor="?android:textColorPrimary"
+		android:textStyle="bold"
+		tools:text="V-Bucks" />
 </LinearLayout>

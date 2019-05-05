@@ -1,0 +1,79 @@
+[
+  {
+	"uniqueFilename": "ClientSettings.Sav",
+	"filename": "ClientSettings.Sav",
+	"hash": "56deff5b5831fb6081d6ec03746d3459b447e7e5",
+	"hash256": "c82bd5f30fae11edb8cfd3d9f6bddfb4d1a82b7159845a895a6da2a9c550423f",
+	"length": 239913,
+	"contentType": "text/plain",
+	"uploaded": "2019-05-03T14:59:37.386Z",
+	"storageType": "S3",
+	"accountId": "bd7021824e39499d8be7936cf1e1189d"
+  },
+  {
+	"uniqueFilename": "ClientSettingsAndroid.Sav",
+	"filename": "ClientSettingsAndroid.Sav",
+	"hash": "7d4d8942e9d8f64662375f9d0961494bbdee739a",
+	"hash256": "7f39026381a0f83aced54df4acb0b3421d403836dc53b907fd8fab308b3d96b3",
+	"length": 2524,
+	"contentType": "text/plain",
+	"uploaded": "2019-01-06T11:53:09.766Z",
+	"storageType": "S3",
+	"accountId": "bd7021824e39499d8be7936cf1e1189d"
+  },
+  {
+	"uniqueFilename": "ClientSettingsIOS.Sav",
+	"filename": "ClientSettingsIOS.Sav",
+	"hash": "462bbbb3af86323ce10f3b562c72e8ef8e51dbbf",
+	"hash256": "32d27c9eede971999ad15fd322753617e75d1558dd3b2f46ce6848edad5bcb9d",
+	"length": 154595,
+	"contentType": "text/plain",
+	"uploaded": "2019-05-03T01:16:03.190Z",
+	"storageType": "S3",
+	"accountId": "bd7021824e39499d8be7936cf1e1189d"
+  },
+  {
+	"uniqueFilename": "ba9d21d6-7249-4ceb-a88d-034a8bf9ff4a_r0_a0.sav",
+	"filename": "ba9d21d6-7249-4ceb-a88d-034a8bf9ff4a_r0_a0.sav",
+	"hash": "ef1ddba4b66429f772f4a792bfb215b38c45a27b",
+	"hash256": "ce25353fc7708989af2084cf3e21824bdc4e2a103b4d602214dab4a9cab71c3a",
+	"length": 465350,
+	"contentType": "text/plain",
+	"uploaded": "2019-05-01T07:56:55.198Z",
+	"storageType": "S3",
+	"accountId": "bd7021824e39499d8be7936cf1e1189d"
+  },
+  {
+	"uniqueFilename": "ba9d21d6-7249-4ceb-a88d-034a8bf9ff4a_r0_a1.sav",
+	"filename": "ba9d21d6-7249-4ceb-a88d-034a8bf9ff4a_r0_a1.sav",
+	"hash": "940ba2ceeb2b580c0456df202663a5a7eee8540b",
+	"hash256": "cb2e0bc55663841c2638172611ace8595b43656fd035b0feb1bd33f003688694",
+	"length": 465350,
+	"contentType": "text/plain",
+	"uploaded": "2019-05-01T07:56:34.630Z",
+	"storageType": "S3",
+	"accountId": "bd7021824e39499d8be7936cf1e1189d"
+  },
+  {
+	"uniqueFilename": "85bb47e0-d4a2-4b00-8375-abfaf441725b_r0_a0.sav",
+	"filename": "85bb47e0-d4a2-4b00-8375-abfaf441725b_r0_a0.sav",
+	"hash": "684286e221353513c8fa615e69ffa32be72eaae0",
+	"hash256": "45fa6ff081fa1b408ebd864e7c415d973d12feb8f685f196cb20bdee200cc23d",
+	"length": 205746,
+	"contentType": "text/plain",
+	"uploaded": "2019-05-01T08:23:23.099Z",
+	"storageType": "S3",
+	"accountId": "bd7021824e39499d8be7936cf1e1189d"
+  },
+  {
+	"uniqueFilename": "85bb47e0-d4a2-4b00-8375-abfaf441725b_r0_a1.sav",
+	"filename": "85bb47e0-d4a2-4b00-8375-abfaf441725b_r0_a1.sav",
+	"hash": "2c472e56d80853b4f716613f92e6aa7d17276818",
+	"hash256": "6dd9d5f05b6381a07e5e2335af55f3514d2e3ab387a0347cd2c5272a89c01c6b",
+	"length": 205222,
+	"contentType": "text/plain",
+	"uploaded": "2019-05-01T08:23:18.739Z",
+	"storageType": "S3",
+	"accountId": "bd7021824e39499d8be7936cf1e1189d"
+  }
+]

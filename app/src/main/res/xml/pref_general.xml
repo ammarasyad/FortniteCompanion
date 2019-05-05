@@ -4,4 +4,9 @@
 		app:key="matchmaking_region"
 		app:title="Region" />
 
+	<android.support.v7.preference.CheckBoxPreference
+		app:defaultValue="false"
+		app:key="fake_purchases"
+		app:title="Simulate purchases" />
+
 </android.support.v7.preference.PreferenceScreen>

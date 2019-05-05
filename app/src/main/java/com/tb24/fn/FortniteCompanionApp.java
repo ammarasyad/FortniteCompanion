@@ -4,7 +4,6 @@ import android.app.Application;
 import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
-import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.EventDownloadResponse;
 import com.tb24.fn.model.FortBasicDataResponse;
 import com.tb24.fn.model.FortMcpResponse;
@@ -14,7 +13,7 @@ import com.tb24.fn.network.EventsPublicServiceLive;
 import com.tb24.fn.network.FortniteContentWebsiteService;
 import com.tb24.fn.network.FortnitePublicService;
 import com.tb24.fn.network.PersonaPublicService;
-import com.tb24.fn.util.EnumRegion;
+import com.tb24.fn.util.ERegion;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -34,7 +33,7 @@ public class FortniteCompanionApp extends Application {
 	public FortMcpResponse dataMetadata;
 	public FortBasicDataResponse basicData;
 	public EventDownloadResponse eventData;
-	public EnumRegion eventDataRegion;
+	public ERegion eventDataRegion;
 	public Gson gson = new Gson();
 	public Registry itemRegistry;
 //	public AthenaProfileAttributes apa;

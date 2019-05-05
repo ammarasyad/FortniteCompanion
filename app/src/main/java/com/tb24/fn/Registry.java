@@ -29,10 +29,10 @@ public class Registry {
 		registerPath("AthenaMusicPack", "Game/Athena/Items/Cosmetics/MusicPacks");
 		registerPath("AthenaPickaxe", "Game/Athena/Items/Cosmetics/Pickaxes");
 		registerPath("AthenaSkyDiveContrail", "Game/Athena/Items/Cosmetics/Contrails");
+		registerPath("Token", "Game/Items/Tokens", "Game/Items/Tokens/Fake_LS_Tokens");
 		registerPath("AthenaHero_", "Game/Athena/Heroes");
 		registerPath("AthenaWeapon_", "Game/Athena/Items/Weapons");
 		registerPath("DisplayAsset_", "Game/Catalog/DisplayAssets");
-		registerPath("Token", "Game/Items/Tokens");
 
 		for (Map.Entry<String, List<String>> entry : paths.entrySet()) {
 			for (String path : entry.getValue()) {

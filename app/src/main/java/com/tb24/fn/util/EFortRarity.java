@@ -1,4 +1,4 @@
-package com.tb24.fn;
+package com.tb24.fn.util;
 
 public enum EFortRarity {
 	HANDMADE("Common"), UNCOMMON("Uncommon"), STURDY("Rare"), QUALITY("Epic"), FINE("Legendary"), ELEGANT("Mythic"), MASTERWORK("T"), LEGENDARY("I");

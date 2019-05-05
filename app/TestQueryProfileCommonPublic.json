@@ -1,0 +1,32 @@
+{
+  "profileRevision": 3,
+  "profileId": "common_public",
+  "profileChangesBaseRevision": 3,
+  "profileChanges": [
+	{
+	  "changeType": "fullProfileUpdate",
+	  "profile": {
+		"_id": "f8f17b6a1baa439b85fed8796108b42c",
+		"created": "2018-03-29T10:17:01.993Z",
+		"updated": "2019-04-16T11:29:49.898Z",
+		"rvn": 3,
+		"wipeNumber": 9,
+		"accountId": "bd7021824e39499d8be7936cf1e1189d",
+		"profileId": "common_public",
+		"version": "fortnite_start",
+		"items": {},
+		"stats": {
+		  "attributes": {
+			"banner_color": "defaultcolor21",
+			"homebase_name": "The Crib",
+			"banner_icon": "brseason07seasonlevel100"
+		  }
+		},
+		"commandRevision": 2
+	  }
+	}
+  ],
+  "profileCommandRevision": 2,
+  "serverTime": "2019-05-04T17:12:33.563Z",
+  "responseVersion": 1
+}

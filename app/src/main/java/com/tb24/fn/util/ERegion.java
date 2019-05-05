@@ -1,16 +1,16 @@
 package com.tb24.fn.util;
 
-public enum EnumRegion {
+public enum ERegion {
 	NAE("NA-East"), NAW("NA-West"), OCE("Oceania"), ASIA("Asia"), EU("Europe"), BR("Brazil");
 
 	public final String name;
 
-	EnumRegion(String name) {
+	ERegion(String name) {
 		this.name = name;
 	}
 
-	public static EnumRegion from(String s) {
-		for (EnumRegion region : values()) {
+	public static ERegion from(String s) {
+		for (ERegion region : values()) {
 			if (region.toString().equals(s)) {
 				return region;
 			}

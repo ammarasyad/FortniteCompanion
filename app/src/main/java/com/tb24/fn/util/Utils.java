@@ -227,7 +227,7 @@ public final class Utils {
 		return s;
 	}
 
-	public static void networkErrorDialog(Activity activity, IOException e) {
+	public static void networkErrorDialog(Activity activity, Throwable e) {
 		dialogOkNonMain(activity, STRINGS[RANDOM.nextInt(STRINGS.length - 1)], userFriendlyNetError(e));
 	}
 
@@ -296,7 +296,7 @@ public final class Utils {
 				cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
 	}
 
-	public static CharSequence userFriendlyNetError(IOException e) {
+	public static CharSequence userFriendlyNetError(Throwable e) {
 		return e.toString();
 	}
 

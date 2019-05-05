@@ -30,7 +30,7 @@
 	</style>
 
 	<style name="CustomActionBarTitle" parent="android:TextAppearance.DeviceDefault.Widget.ActionBar.Title">
-		<item name="android:fontFamily">@font/noto_sans</item>
+		<item name="android:fontFamily">@font/burbank_small</item>
 		<item name="android:textColor">?android:colorAccent</item>
 		<item name="android:textFontWeight">500</item>
 	</style>
@@ -66,4 +66,8 @@
 		<item name="android:textStyle">bold</item>
 	</style>
 
+	<style name="ItemShopAnim">
+		<item name="android:windowEnterAnimation">@anim/tw_dialog_enter_material</item>
+		<item name="android:windowExitAnimation">@anim/tw_dialog_exit_material</item>
+	</style>
 </resources>
