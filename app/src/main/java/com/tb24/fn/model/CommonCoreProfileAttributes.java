@@ -2,7 +2,7 @@ package com.tb24.fn.model;
 
 import java.util.Date;
 
-public class CommonCoreProfileAttributes {
+public class CommonCoreProfileAttributes extends ProfileAttributes {
 	public Date mtx_affiliate_set_time;
 	public Integer inventory_limit_bonus;
 	public String current_mtx_platform;

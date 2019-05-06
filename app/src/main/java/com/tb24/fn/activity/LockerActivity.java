@@ -13,10 +13,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.collect.ComparisonChain;
+import com.google.common.eventbus.Subscribe;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.R;
+import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.FortItemStack;
+import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.util.EFortRarity;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
@@ -24,9 +27,7 @@ import com.tb24.fn.util.Utils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class LockerActivity extends BaseActivity {
 	private RecyclerView list;
@@ -51,11 +52,24 @@ public class LockerActivity extends BaseActivity {
 			}
 		});
 		lc = new LoadingViewController(this, list, "");
-		displayData();
+		displayData(getThisApplication().profileData.get("athena"));
+		getThisApplication().eventBus.register(this);
 	}
 
-	private void displayData() {
-		ArrayList<FortItemStack> data = new ArrayList<>(getThisApplication().dataAthena.profileChanges.get(0).profile.items.values());
+	@Subscribe
+	public void onProfileUpdated(ProfileUpdatedEvent event) {
+		if (event.profileId.equals("athena")) {
+			displayData(event.profileObj);
+		}
+	}
+
+	private void displayData(FortMcpProfile profile) {
+		if (profile == null) {
+			lc.loading();
+			return;
+		}
+
+		ArrayList<FortItemStack> data = new ArrayList<>(profile.items.values());
 		Collections.sort(data, new Comparator<FortItemStack>() {
 			@Override
 			public int compare(FortItemStack o1, FortItemStack o2) {
@@ -89,7 +103,6 @@ public class LockerActivity extends BaseActivity {
 	private static class LockerAdapter extends RecyclerView.Adapter<LockerAdapter.LockerViewHolder> {
 		private final LockerActivity activity;
 		private final List<FortItemStack> data;
-		private final Map<String, Bitmap> extraData = new HashMap<>();
 
 		public LockerAdapter(LockerActivity activity, List<FortItemStack> data) {
 			this.activity = activity;
@@ -111,13 +124,7 @@ public class LockerActivity extends BaseActivity {
 
 			if (json != null) {
 				JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
-
-				if (extraData.containsKey(item.templateId)) {
-					bitmap = extraData.get(item.templateId);
-				} else {
-					extraData.put(item.templateId, bitmap = getBitmapImageFromItemStackData(activity, item, jsonObject));
-				}
-
+				bitmap = getBitmapImageFromItemStackData(activity, item, jsonObject);
 				holder.rarityBackground.setBackgroundResource(rarityBackground(jsonObject));
 			}
 
@@ -133,7 +140,7 @@ public class LockerActivity extends BaseActivity {
 					}
 
 					ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.fort_item_detail_box, null);
-					decorateItemDetailBox(viewGroup, item, json);
+					populateItemDetailBox(viewGroup, item, json);
 					Toast toast = new Toast(activity);
 					toast.setView(viewGroup);
 					toast.setDuration(Toast.LENGTH_LONG);

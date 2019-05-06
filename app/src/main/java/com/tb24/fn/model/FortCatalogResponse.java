@@ -6,8 +6,8 @@ import com.google.gson.JsonObject;
 import java.util.Date;
 
 public class FortCatalogResponse {
-	public int refreshIntervalHrs;
-	public int dailyPurchaseHrs;
+	public Integer refreshIntervalHrs;
+	public Integer dailyPurchaseHrs;
 	public Date expiration;
 	public Storefront[] storefronts;
 
@@ -23,15 +23,15 @@ public class FortCatalogResponse {
 		public String offerType;
 		public Price[] prices;
 		public String[] categories;
-		public int dailyLimit;
-		public int weeklyLimit;
-		public int monthlyLimit;
+		public Integer dailyLimit;
+		public Integer weeklyLimit;
+		public Integer monthlyLimit;
 		public String[] appStoreId;
 		public Requirement[] requirements;
 		public MetaInfo[] metaInfo;
 		public String catalogGroup;
-		public int catalogGroupPriority;
-		public int sortPriority;
+		public Integer catalogGroupPriority;
+		public Integer sortPriority;
 		public String title;
 		public String shortDescription;
 		public String description;
@@ -58,19 +58,19 @@ public class FortCatalogResponse {
 	public static class Price {
 		public String currencyType;
 		public String currencySubType;
-		public int regularPrice;
-		public int finalPrice;
+		public Integer regularPrice;
+		public Integer finalPrice;
 		//nonexistent if not sale
 		public String saleType;
 		//date
 		public Date saleExpiration;
-		public int basePrice;
+		public Integer basePrice;
 	}
 
 	public static class Requirement {
 		public String requirementType;
 		public String requiredId;
-		public int minQuantity;
+		public Integer minQuantity;
 	}
 
 	public static class MetaInfo {

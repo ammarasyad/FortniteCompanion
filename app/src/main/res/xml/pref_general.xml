@@ -2,11 +2,16 @@
 	<android.support.v7.preference.DropDownPreference
 		app:defaultValue="NAW"
 		app:key="matchmaking_region"
-		app:title="Region" />
+		app:title="Events Region" />
 
 	<android.support.v7.preference.CheckBoxPreference
 		app:defaultValue="false"
 		app:key="fake_purchases"
+		app:summary="If you wanna flex"
 		app:title="Simulate purchases" />
+
+	<android.support.v7.preference.Preference
+		app:key="dump_login_data"
+		app:title="Dump login data" />
 
 </android.support.v7.preference.PreferenceScreen>

@@ -50,6 +50,9 @@ public class EventsActivity extends WithBasicDataActivity {
 		setupActionBar();
 		region = ERegion.from(PreferenceManager.getDefaultSharedPreferences(this).getString("matchmaking_region", ERegion.NAW.toString()));
 		list = findViewById(R.id.main_recycler_view);
+		int p = (int) Utils.dp(getResources(), 8);
+		list.setPadding(p, p, p, p);
+		list.setClipToPadding(false);
 		list.post(new Runnable() {
 			@Override
 			public void run() {
@@ -78,8 +81,9 @@ public class EventsActivity extends WithBasicDataActivity {
 		}
 
 		lc.loading();
-		downloadCall = getThisApplication().eventsPublicServiceLive.download(prefs.getString("epic_account_id", ""), region.toString(), "Windows", prefs.getString("epic_account_id", ""));
-		new Thread(new Runnable() {
+		String accountId = prefs.getString("epic_account_id", "");
+		downloadCall = getThisApplication().eventsPublicServiceLive.download(accountId, region.toString(), "Windows", accountId);
+		new Thread() {
 			@Override
 			public void run() {
 				try {
@@ -111,7 +115,7 @@ public class EventsActivity extends WithBasicDataActivity {
 					});
 				}
 			}
-		}).start();
+		}.start();
 	}
 
 	public void display(FortBasicDataResponse data) {

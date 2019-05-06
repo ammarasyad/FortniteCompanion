@@ -89,7 +89,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 						Response<FortMcpResponse> execute = callMcpCommonCore.execute();
 
 						if (execute.isSuccessful()) {
-							getThisApplication().dataCommonCore = execute.body();
+							getThisApplication().executeProfileChanges(execute.body());
 						} else {
 							EpicError error = EpicError.parse(execute);
 
@@ -104,6 +104,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 							@Override
 							public void run() {
 								countAndSetVbucks(MainActivity.this, vBucksView);
+								findViewById(R.id.main_screen_btn_item_shop).setEnabled(getThisApplication().profileData.containsKey("common_core"));
 							}
 						});
 					}
@@ -117,7 +118,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 						Response<FortMcpResponse> execute = callMcpAthena.execute();
 
 						if (execute.isSuccessful()) {
-							getThisApplication().dataAthena = execute.body();
+							getThisApplication().executeProfileChanges(execute.body());
 						} else {
 							EpicError error = EpicError.parse(execute);
 
@@ -131,10 +132,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
-								boolean enabled = getThisApplication().dataAthena != null;
+								boolean enabled = getThisApplication().profileData.containsKey("athena");
 								findViewById(R.id.main_screen_btn_profile).setEnabled(enabled);
-								findViewById(R.id.main_screen_btn_locker).setEnabled(enabled);
-								findViewById(R.id.main_screen_btn_item_shop).setEnabled(enabled);
 								loadProfile();
 							}
 						});
@@ -151,7 +150,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 							@Override
 							public void run() {
 								if (response.isSuccessful()) {
-									updateLogInButtonText(response.body()[0].getDisplayName());
+									updateLogInButtonText(getThisApplication().currentLoggedInDisplayName = response.body()[0].getDisplayName());
 								} else {
 									validateLoggedIn(EpicError.parse(response));
 								}
@@ -169,14 +168,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	}
 
 	public static int countAndSetVbucks(BaseActivity activity, ViewGroup vbxView) {
-		if (activity.getThisApplication().dataCommonCore == null) {
+		if (!activity.getThisApplication().profileData.containsKey("common_core")) {
 			vbxView.setVisibility(View.GONE);
 			return 0;
 		}
 
 		int vBucksQty = 0;
 
-		for (Map.Entry<String, FortItemStack> entry : activity.getThisApplication().dataCommonCore.profileChanges.get(0).profile.items.entrySet()) {
+		for (Map.Entry<String, FortItemStack> entry : activity.getThisApplication().profileData.get("common_core").items.entrySet()) {
 			if (entry.getValue().templateId.equals("Currency:MtxGiveaway")) {
 				vBucksQty += entry.getValue().quantity;
 			}
@@ -212,9 +211,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	}
 
 	private void loadProfile() {
-		FortMcpResponse dataAthena = getThisApplication().dataAthena;
-
-		if (dataAthena == null) {
+		if (!getThisApplication().profileData.containsKey("athena")) {
 			profileFrame.setVisibility(View.GONE);
 			return;
 		}
@@ -223,9 +220,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		profileLoader.setVisibility(View.INVISIBLE);
 		profileContainer.setVisibility(View.VISIBLE);
 		profileFrame.setVisibility(View.VISIBLE);
-		AthenaProfileAttributes attributes = getThisApplication().gson.fromJson(dataAthena.profileChanges.get(0).profile.stats.attributes, AthenaProfileAttributes.class);
+		AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileData.get("athena").stats.attributesObj;
 		((TextView) findViewById(R.id.p_season)).setText("Season " + attributes.season_num);
-		((TextView) findViewById(R.id.p_level)).setText("" + attributes.level);
+		((TextView) findViewById(R.id.p_level)).setText(String.valueOf(attributes.level));
 		int i = MAX_XPS[attributes.level - 1];
 		ProgressBar progressBar = findViewById(R.id.progressBar);
 		boolean battlePassMax = attributes.book_level == 100;
@@ -242,13 +239,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			findViewById(R.id.p_lvl_up_reward).setVisibility(View.VISIBLE);
 			int next = attributes.book_level + 1;
 			((ImageView) findViewById(R.id.p_lvl_up_reward_img)).setImageDrawable(getDrawable(battlePassMax ? R.drawable.t_fnbr_seasonalxp_l : R.drawable.t_fnbr_battlepoints_l));
-			((TextView) findViewById(R.id.p_lvl_up_reward)).setText("" + (next % 10 == 0 ? 10 : next % 5 == 0 ? 5 : 2) * (battlePassMax ? 100 : 1));
+			((TextView) findViewById(R.id.p_lvl_up_reward)).setText(String.valueOf((next % 10 == 0 ? 10 : next % 5 == 0 ? 5 : 2) * (battlePassMax ? 100 : 1)));
 			((TextView) findViewById(R.id.p_xp_progress)).setText(String.format("%,d / %,d", attributes.xp, i));
 		}
 
 		((ImageView) findViewById(R.id.p_battle_pass_img)).setImageDrawable(getDrawable(attributes.book_purchased ? R.drawable.t_fnbr_battlepass_l : R.drawable.t_fnbr_battlepass_default_l));
 		((TextView) findViewById(R.id.p_battle_pass_type)).setText(attributes.book_purchased ? "Battle Pass" : "Free Pass");
-		((TextView) findViewById(R.id.p_battle_pass_tier)).setText("" + attributes.book_level);
+		((TextView) findViewById(R.id.p_battle_pass_tier)).setText(String.valueOf(attributes.book_level));
 		((TextView) findViewById(R.id.p_battle_pass_stars)).setText(battlePassMax ? "MAX" : (attributes.book_xp + " / 10"));
 	}
 
@@ -304,6 +301,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 						BRStatsActivity.openStats(MainActivity.this, new GameProfile(prefs.getString("epic_account_id", ""), null));
 					}
 				});
+				dialog.show();
 				EditText editText = dialog.findViewById(R.id.dialog_edit_text_field);
 				editText.setHint(null);
 				editText.setSingleLine();
@@ -343,17 +341,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 											try {
 												Response<Void> response = call.execute();
 
-												if (response.isSuccessful()) {
-													getThisApplication().clearLoginData();
-													runOnUiThread(new Runnable() {
-														@Override
-														public void run() {
-															recreate();
-														}
-													});
-												} else {
-													Utils.dialogOkNonMain(MainActivity.this, "Can't Log Out", EpicError.parse(response).getDisplayText());
-												}
+//												if (response.isSuccessful()) {
+												getThisApplication().clearLoginData();
+												runOnUiThread(new Runnable() {
+													@Override
+													public void run() {
+														recreate();
+													}
+												});
+//												} else {
+//													Utils.dialogOkNonMain(MainActivity.this, "Can't Log Out", EpicError.parse(response).getDisplayText());
+//												}
 											} catch (IOException e) {
 												Utils.networkErrorDialog(MainActivity.this, e);
 											}
@@ -374,17 +372,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menuVbucks = menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		vBucksView.setVisibility(View.GONE);
-		menu.add(0, 900, 0, "Dump Login Data");
 		menu.add(0, 901, 0, "Settings");
 		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		if (item.getItemId() == 900) {
-			Log.d("MainActivity", "Access Token: " + prefs.getString("epic_account_access_token", null));
-			Log.d("MainActivity", "Refresh Token: " + prefs.getString("epic_account_refresh_token", null));
-		} else if (item.getItemId() == 901) {
+		if (item.getItemId() == 901) {
 			startActivity(new Intent(this, SettingsActivity.class));
 		}
 

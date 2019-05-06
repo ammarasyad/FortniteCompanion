@@ -24,7 +24,7 @@ import com.tb24.fn.util.Utils;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class BaseActivity extends Activity {
-	public static Bitmap getBitmapImageFromItemStackData(BaseActivity activity, FortItemStack input, JsonObject jsonObject) {
+	private static Bitmap getBitmapImageFromItemStackDataInternal(BaseActivity activity, FortItemStack item, JsonObject jsonObject) {
 		try {
 			if (jsonObject.has("SmallPreviewImage")) {
 				String path = jsonObject.get("SmallPreviewImage").getAsJsonObject().get("asset_path_name").getAsString();
@@ -53,10 +53,26 @@ public abstract class BaseActivity extends Activity {
 				}
 			}
 		} catch (NullPointerException e) {
-			Log.w("ItemShopActivity", "Failed getting image for item " + input.templateId + '\n' + e.toString());
+			Log.w("ItemShopActivity", "Failed getting image for item " + item.templateId + '\n' + e.toString());
 		}
 
 		return null;
+	}
+
+	public static Bitmap getBitmapImageFromItemStackData(BaseActivity activity, FortItemStack item, JsonObject jsonObject) {
+		Bitmap bitmap = activity.getThisApplication().bitmapCache.get(item.templateId);
+
+		synchronized (activity.getThisApplication().bitmapCache) {
+			if (bitmap == null) {
+				bitmap = getBitmapImageFromItemStackDataInternal(activity, item, jsonObject);
+
+				if (bitmap != null) {
+					activity.getThisApplication().bitmapCache.put(item.templateId, bitmap);
+				}
+			}
+		}
+
+		return bitmap;
 	}
 
 	public static int rarityBackground(JsonObject jsonObject) {
@@ -90,11 +106,11 @@ public abstract class BaseActivity extends Activity {
 	}
 
 	@NotNull
-	private static String shortDescriptionFromCtg(String idCategory) {
+	public static String shortDescriptionFromCtg(String idCategory) {
 		return idCategory.equals("AthenaCharacter") ? "Outfit" : idCategory.equals("AthenaPickaxe") ? "Harvesting Tool" : idCategory.equals("AthenaDance") ? "Emote" : idCategory.equals("AthenaItemWrap") ? "Wrap" : "";
 	}
 
-	public static void decorateItemDetailBox(ViewGroup viewGroup, FortItemStack item, JsonElement json) {
+	public static void populateItemDetailBox(ViewGroup viewGroup, FortItemStack item, JsonElement json) {
 		JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
 		EFortRarity rarity = EFortRarity.UNCOMMON;
 
@@ -108,7 +124,7 @@ public abstract class BaseActivity extends Activity {
 		int eight = (int) Utils.dp(viewGroup.getResources(), 8);
 		viewById.setPadding(twelve, eight, twelve, eight);
 		((TextView) viewGroup.findViewById(R.id.item_text1)).setText(rarity.name + " | " + BaseActivity.shortDescription(item, jsonObject));
-		((TextView) viewGroup.findViewById(R.id.item_text2)).setText(JsonUtils.getStringOr("DisplayName", jsonObject, "??"));
+		((TextView) viewGroup.findViewById(R.id.item_text2)).setText((item.attributes != null && item.attributes.has("DUMMY") ? "[Dummy] " : "") + JsonUtils.getStringOr("DisplayName", jsonObject, "??"));
 		String description = JsonUtils.getStringOr("Description", jsonObject, "");
 		CharSequence setText = "";
 
@@ -123,11 +139,13 @@ public abstract class BaseActivity extends Activity {
 		}
 
 		CharSequence concat = TextUtils.concat(description, setText);
+		TextView textItemDescription = viewGroup.findViewById(R.id.item_text3);
 
 		if (concat.length() == 0) {
-
+			textItemDescription.setVisibility(View.GONE);
 		} else {
-			((TextView) viewGroup.findViewById(R.id.item_text3)).setText(concat);
+			textItemDescription.setVisibility(View.VISIBLE);
+			textItemDescription.setText(concat);
 		}
 	}
 

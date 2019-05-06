@@ -70,7 +70,6 @@
 				android:layout_width="0dp"
 				android:layout_height="100dp"
 				android:layout_columnWeight="1"
-				android:enabled="false"
 				android:text="@string/title_locker" />
 
 			<Button
@@ -94,7 +93,7 @@
 				android:layout_height="100dp"
 				android:layout_columnSpan="2"
 				android:layout_columnWeight="1"
-				android:text="Save the World Info" />
+				android:text="@string/title_stw_info" />
 		</GridLayout>
 
 		<Button

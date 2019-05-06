@@ -9,12 +9,10 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.icu.text.MeasureFormat;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
 import android.os.Build;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.SpannableString;
@@ -31,7 +29,6 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.common.base.Charsets;
@@ -148,41 +145,51 @@ public final class Utils {
 	public static AlertDialog createEditTextDialog(Context ctx, @Nullable String title, CharSequence posText, final EditTextDialogCallback callback) {
 		View view = LayoutInflater.from(ctx).inflate(R.layout.dialog_edit_text, null);
 		final EditText editText = view.findViewById(R.id.dialog_edit_text_field);
-		final AlertDialog ad = new AlertDialog.Builder(ctx).setTitle(title).setView(view).setPositiveButton(posText, new DialogInterface.OnClickListener() {
+		final AlertDialog ad = new AlertDialog.Builder(ctx)
+				.setTitle(title)
+				.setView(view)
+				.setPositiveButton(posText, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						callback.onResult(editText.getText().toString());
+					}
+				})
+				.setNegativeButton(android.R.string.cancel, null)
+				.create();
+		ad.setOnShowListener(new DialogInterface.OnShowListener() {
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				callback.onResult(editText.getText().toString());
-			}
-		}).setNegativeButton(android.R.string.cancel, null).show();
-		editText.requestFocus();
-		final Button button = ad.getButton(DialogInterface.BUTTON_POSITIVE);
-		button.setEnabled(false);
-		editText.addTextChangedListener(new TextWatcher() {
-			@Override
-			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-			}
-
-			@Override
-			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-			}
-
-			@Override
-			public void afterTextChanged(Editable editable) {
-				button.setEnabled(editable.toString().trim().length() > 0);
-			}
-		});
-		editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-			@Override
-			public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-				if (i == EditorInfo.IME_ACTION_DONE) {
-					if (button.isEnabled()) {
-						button.callOnClick();
+			public void onShow(DialogInterface dialog) {
+				final Button button = ad.getButton(DialogInterface.BUTTON_POSITIVE);
+				button.setEnabled(false);
+				editText.addTextChangedListener(new TextWatcher() {
+					@Override
+					public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 					}
 
-					return true;
-				}
+					@Override
+					public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+					}
 
-				return false;
+					@Override
+					public void afterTextChanged(Editable editable) {
+						button.setEnabled(editable.toString().trim().length() > 0);
+					}
+				});
+				editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+					@Override
+					public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+						if (i == EditorInfo.IME_ACTION_DONE) {
+							if (button.isEnabled()) {
+								button.callOnClick();
+							}
+
+							return true;
+						}
+
+						return false;
+					}
+				});
+				editText.requestFocus();
 			}
 		});
 		return ad;

@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import java.util.Date;
 import java.util.List;
 
-public class AthenaProfileAttributes {
+public class AthenaProfileAttributes extends ProfileAttributes {
 	public List<AthenaPastSeasonData> past_seasons;
 	public int season_match_boost;
 	public String favorite_victorypose;
@@ -53,7 +53,6 @@ public class AthenaProfileAttributes {
 	public int season_friend_match_boost;
 	public String favorite_musicpack;
 	public String banner_icon;
-
 
 	public static class WithStat {
 		public int numWins;

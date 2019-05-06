@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
-	android:layout_margin="16dp"
+	android:layout_marginStart="8dp"
+	android:layout_marginTop="8dp"
+	android:layout_marginEnd="8dp"
+	android:layout_marginBottom="8dp"
 	android:gravity="center">
 
 	<ImageView
 		android:id="@+id/item_img"
 		android:layout_width="200dp"
-		android:layout_height="252dp" />
+		android:layout_height="252dp"
+		android:foreground="?android:selectableItemBackground" />
 
 	<LinearLayout
 		android:layout_width="match_parent"
@@ -18,7 +23,6 @@
 		android:layout_alignEnd="@+id/item_img"
 		android:layout_alignBottom="@+id/item_img"
 		android:layout_centerHorizontal="true"
-		android:foreground="?android:selectableItemBackground"
 		android:gravity="bottom"
 		android:orientation="vertical"
 		android:padding="8dp">
@@ -30,11 +34,11 @@
 			android:autoSizeTextType="uniform"
 			android:fontFamily="@font/burbank_small"
 			android:gravity="center"
-			android:text="Title"
 			android:textAllCaps="true"
 			android:textColor="#FFFFFFFF"
 			android:textFontWeight="900"
-			android:textStyle="italic" />
+			android:textStyle="italic"
+			tools:text="Title" />
 
 		<TextView
 			android:id="@+id/item_text2"
@@ -43,11 +47,11 @@
 			android:autoSizeTextType="uniform"
 			android:fontFamily="@font/burbank_small"
 			android:gravity="center"
-			android:text="Line2"
 			android:textAllCaps="true"
 			android:textColor="#FFFFFFFF"
 			android:textFontWeight="900"
-			android:textStyle="italic" />
+			android:textStyle="italic"
+			tools:text="Line2" />
 
 		<TextView
 			android:id="@+id/item_text3"
@@ -57,10 +61,10 @@
 			android:fontFamily="@font/burbank_small"
 			android:gravity="center"
 			android:singleLine="true"
-			android:text="Line3"
 			android:textAllCaps="true"
 			android:textColor="#FFFFFFFF"
 			android:textFontWeight="900"
-			android:textSize="12sp" />
+			android:textSize="12sp"
+			tools:text="Line3" />
 	</LinearLayout>
 </RelativeLayout>

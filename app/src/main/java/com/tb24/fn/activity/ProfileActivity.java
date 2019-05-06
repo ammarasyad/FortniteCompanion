@@ -1,14 +1,10 @@
 package com.tb24.fn.activity;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.view.ViewGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.google.common.base.Function;
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import com.tb24.fn.R;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.WorldInfoResponse;
@@ -16,7 +12,6 @@ import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import retrofit2.Call;
 import retrofit2.Response;

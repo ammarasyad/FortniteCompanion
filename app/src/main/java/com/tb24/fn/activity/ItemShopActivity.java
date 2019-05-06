@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.common.collect.ComparisonChain;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.R;
@@ -41,17 +42,18 @@ import com.tb24.fn.model.FortCatalogResponse;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.PurchaseCatalogEntry;
-import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -74,7 +76,7 @@ public class ItemShopActivity extends BaseActivity {
 		setContentView(R.layout.common_loadable_recycler_view);
 		setupActionBar();
 		fakePurchases = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fake_purchases", false);
-		attributes = getThisApplication().gson.fromJson(getThisApplication().dataCommonCore.profileChanges.get(0).profile.stats.attributes, CommonCoreProfileAttributes.class);
+		attributes = (CommonCoreProfileAttributes) getThisApplication().profileData.get("common_core").stats.attributesObj;
 		soundPool = new SoundPool.Builder().setMaxStreams(4).setAudioAttributes(new AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()).build();
 		int purchasedSound1 = soundPool.load(this, R.raw.store_purchaseitem_athena_01, 1);
 		int purchasedSound2 = soundPool.load(this, R.raw.store_purchaseitem_athena_02, 1);
@@ -132,12 +134,28 @@ public class ItemShopActivity extends BaseActivity {
 	}
 
 	public void display(FortCatalogResponse data) {
-		Toast.makeText(this, "Expiration: " + Utils.formatDateSimple(data.expiration), Toast.LENGTH_LONG).show();
+//		Toast.makeText(this, "Expiration: " + Utils.formatDateSimple(data.expiration), Toast.LENGTH_LONG).show();
 		List<FortCatalogResponse.CatalogEntry> entries = new ArrayList<>();
 
 		for (FortCatalogResponse.Storefront storefront : data.storefronts) {
-			if (storefront.name.equals("BRWeeklyStorefront") || storefront.name.equals("BRDailyStorefront")) {
-				entries.addAll(Arrays.asList(storefront.catalogEntries));
+			List<FortCatalogResponse.CatalogEntry> c = Arrays.asList(storefront.catalogEntries);
+
+			if (storefront.name.equals("BRWeeklyStorefront")) {
+				Collections.sort(c, new Comparator<FortCatalogResponse.CatalogEntry>() {
+					@Override
+					public int compare(FortCatalogResponse.CatalogEntry o1, FortCatalogResponse.CatalogEntry o2) {
+						return ComparisonChain.start().compare(o1.categories[0], o2.categories[0]).compare(o2.sortPriority, o1.sortPriority).result();
+					}
+				});
+				entries.addAll(c);
+			} else if (storefront.name.equals("BRDailyStorefront")) {
+				Collections.sort(c, new Comparator<FortCatalogResponse.CatalogEntry>() {
+					@Override
+					public int compare(FortCatalogResponse.CatalogEntry o1, FortCatalogResponse.CatalogEntry o2) {
+						return o1.itemGrants[0].getIdName().compareTo(o2.itemGrants[0].getIdName());
+					}
+				});
+				entries.addAll(c);
 			}
 		}
 
@@ -231,8 +249,6 @@ public class ItemShopActivity extends BaseActivity {
 	private static class ItemShopAdapter extends RecyclerView.Adapter<ItemShopAdapter.ItemShopViewHolder> {
 		private final ItemShopActivity activity;
 		private final List<FortCatalogResponse.CatalogEntry> data;
-		private final Map<String, Bitmap> bitmapCache = new HashMap<>();
-//		private final Map<String, JsonElement> extraData2 = new HashMap<>();
 
 		public ItemShopAdapter(ItemShopActivity activity, List<FortCatalogResponse.CatalogEntry> data) {
 			this.activity = activity;
@@ -256,7 +272,7 @@ public class ItemShopActivity extends BaseActivity {
 			Bitmap bitmap = null;
 			JsonElement jsonFirst = null;
 			String[] fromDevName = item.devName.substring("[VIRTUAL]".length(), item.devName.lastIndexOf(" for ")).replaceAll("1 x ", "").split(", ");
-			List<String> compiledNames = new ArrayList<>();
+			final List<String> compiledNames = new ArrayList<>();
 			final List<JsonElement> jsons = new ArrayList<>();
 
 			for (int i = 0; i < item.itemGrants.length; i++) {
@@ -265,40 +281,42 @@ public class ItemShopActivity extends BaseActivity {
 				jsons.add(json);
 
 				if (json == null) {
+					// item data not found from assets, item is encrypted or new
 					compiledNames.add(fromDevName[i]);
+
+					if (i == 0) {
+						holder.itemName.setText(fromDevName[i]);
+						holder.shortDescription.setText(shortDescriptionFromCtg(itemStack.getIdCategory()));
+					}
+
 					continue;
 				}
 
 				JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
+				String displayName = jsonObject.get("DisplayName").getAsString();
+				compiledNames.add(displayName);
 
 				if (i == 0) {
 					jsonFirst = json;
-
-					if (bitmapCache.containsKey(itemStack.templateId)) {
-						bitmap = bitmapCache.get(itemStack.templateId);
-					} else {
-						bitmapCache.put(itemStack.templateId, bitmap = getBitmapImageFromItemStackData(activity, itemStack, jsonObject));
-					}
+					bitmap = getBitmapImageFromItemStackData(activity, itemStack, jsonObject);
 
 					try {
+						holder.itemName.setText(displayName);
 						holder.shortDescription.setText(shortDescription(itemStack, jsonObject));
 						holder.backgroundable.setBackgroundResource(rarityBackground(jsonObject));
 					} catch (NullPointerException e) {
 						Log.w("ItemShopActivity", "Failed setting short description or rarity background for " + itemStack.templateId, e);
 					}
 				}
-
-				compiledNames.add(jsonObject.get("DisplayName").getAsString());
 			}
 
-			holder.itemName.setText(compiledNames.get(0));
 			holder.displayImage.setImageBitmap(bitmap);
 			boolean owned = false;
 
-			if (activity.getThisApplication().dataAthena != null) {
+			if (activity.getThisApplication().profileData.containsKey("athena")) {
 				for (FortCatalogResponse.Requirement requirement : item.requirements) {
 					if (requirement.requirementType.equals("DenyOnItemOwnership")) {
-						for (Map.Entry<String, FortItemStack> inventoryItem : activity.getThisApplication().dataAthena.profileChanges.get(0).profile.items.entrySet()) {
+						for (Map.Entry<String, FortItemStack> inventoryItem : activity.getThisApplication().profileData.get("athena").items.entrySet()) {
 							if (inventoryItem.getValue().templateId.equals(requirement.requiredId) && inventoryItem.getValue().quantity >= requirement.minQuantity) {
 								owned = true;
 								break;
@@ -332,6 +350,8 @@ public class ItemShopActivity extends BaseActivity {
 					banner = "Collect the set!";
 				} else if (banner.equals("New")) {
 					banner = "New!";
+				} else if (banner.equals("SelectableStyles")) {
+					banner = "Selectable styles!";
 				}
 			}
 
@@ -350,11 +370,12 @@ public class ItemShopActivity extends BaseActivity {
 			final JsonElement finalJsonFirst = jsonFirst;
 			holder.itemView.setOnClickListener(new View.OnClickListener() {
 				private ViewGroup view;
+				private ViewGroup group;
 				private ViewGroup owned;
 				private Button btnPurchase, btnGift;
 				private View.OnClickListener buttonsClickListener;
 				private boolean purchasePending, purchaseSuccess;
-				private int previewingIndex = 0;
+				private int previewingIndex = -1;
 
 				@Override
 				public void onClick(View v) {
@@ -374,8 +395,7 @@ public class ItemShopActivity extends BaseActivity {
 					btnGift = view.findViewById(R.id.btn_item_shop_gift);
 					ViewGroup sacRoot = view.findViewById(R.id.sac_root);
 					TextView sacName = view.findViewById(R.id.sac_name);
-					ViewGroup group = view.findViewById(R.id.item_shop_all_item_grants);
-					updateItemInfo();
+					group = view.findViewById(R.id.item_shop_all_item_grants);
 
 					if (item.itemGrants.length > 1) {
 						for (int i = 0; i < item.itemGrants.length; i++) {
@@ -386,18 +406,20 @@ public class ItemShopActivity extends BaseActivity {
 							slotView.setOnClickListener(new View.OnClickListener() {
 								@Override
 								public void onClick(View v) {
-									previewingIndex = finalI;
-									updateItemInfo();
+									updateItemInfo(finalI);
 								}
 							});
+
 							LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams((int) Utils.dp(activity.getResources(), 66), (int) Utils.dp(activity.getResources(), 110));
-							lp.setMarginEnd((int) Utils.dp(activity.getResources(), 8));
+							int m = (int) Utils.dp(activity.getResources(), 4);
+							lp.setMargins(m, m, m, m);
 							group.addView(slotView, lp);
 						}
 					} else {
 						// TODO big item slot icon
 					}
 
+					updateItemInfo(0);
 					priceTv.setText(String.format("%,d", price.basePrice));
 
 					if (price.saleType != null) {
@@ -412,7 +434,7 @@ public class ItemShopActivity extends BaseActivity {
 						public void onClick(View v) {
 							if (v == btnPurchase) {
 								if (!activity.fakePurchases) {
-									Utils.createEditTextDialog(activity, "Warning! You will commence a real transaction. Type \"" + CONFIRM_PHRASE + "\" to proceed.", activity.getString(android.R.string.ok), new Utils.EditTextDialogCallback() {
+									AlertDialog dialog = Utils.createEditTextDialog(activity, "Purchase " + compiledNames.get(0), activity.getString(android.R.string.ok), new Utils.EditTextDialogCallback() {
 										@Override
 										public void onResult(String s) {
 											if (s.equals(CONFIRM_PHRASE)) {
@@ -420,6 +442,9 @@ public class ItemShopActivity extends BaseActivity {
 											}
 										}
 									});
+									dialog.setMessage("Type \"" + CONFIRM_PHRASE + "\" to proceed");
+									dialog.show();
+									((EditText) dialog.findViewById(R.id.dialog_edit_text_field)).setHint(CONFIRM_PHRASE);
 								} else {
 									doPurchase(item);
 								}
@@ -441,12 +466,25 @@ public class ItemShopActivity extends BaseActivity {
 					}
 				}
 
-				private void updateItemInfo() {
+				private void updateItemInfo(int to) {
+					if (item.itemGrants.length > 1 && previewingIndex >= 0) {
+						group.getChildAt(previewingIndex).setSelected(false);
+					}
+
+					previewingIndex = to;
+
+					if (item.itemGrants.length > 1) {
+						group.getChildAt(previewingIndex).setSelected(true);
+					}
+
 					FortItemStack itemStack = item.itemGrants[previewingIndex];
 					JsonElement json = jsons.get(previewingIndex);
 
 					if (json != null) {
-						BaseActivity.decorateItemDetailBox(view, itemStack, json);
+						BaseActivity.populateItemDetailBox(view, itemStack, json);
+					} else {
+						((TextView) view.findViewById(R.id.item_text1)).setText("Unknown | " + shortDescriptionFromCtg(itemStack.getIdCategory()));
+						((TextView) view.findViewById(R.id.item_text2)).setText(compiledNames.get(previewingIndex));
 					}
 				}
 
@@ -483,25 +521,23 @@ public class ItemShopActivity extends BaseActivity {
 									Response<FortMcpResponse> mcpResponse = call.execute();
 
 									if (mcpResponse.isSuccessful()) {
-										activity.getThisApplication().dataCommonCore = mcpResponse.body();
+										activity.getThisApplication().executeProfileChanges(mcpResponse.body());
 										// TODO profile update listener
 										// hooray
-										activity.runOnUiThread(new Runnable() {
-											@Override
-											public void run() {
-												purchaseSuccess();
-											}
-										});
+										purchaseSuccess();
 									} else {
 										Utils.dialogError(activity, EpicError.parse(mcpResponse).getDisplayText());
 									}
 								} else {
 									// fake it
 									Thread.sleep(2000);
+									activity.getThisApplication().executeProfileChanges(activity.getThisApplication().gson.fromJson("{\"multiUpdate\":[{\"profileRevision\":7045,\"profileId\":\"athena\",\"profileChangesBaseRevision\":7043,\"profileChanges\":[{\"changeType\":\"itemAdded\",\"itemId\":\"" + UUID.randomUUID() + "\",\"item\":{\"templateId\":\"" + item.itemGrants[0].templateId + "\",\"attributes\":{\"max_level_bonus\":0,\"level\":1,\"item_seen\":false,\"xp\":0,\"variants\":[],\"favorite\":false,\"DUMMY\":true},\"quantity\":1}}],\"profileCommandRevision\":6412}]}", FortMcpResponse.class));
 									purchaseSuccess();
 								}
-							} catch (Exception e) {
+							} catch (IOException e) {
 								Utils.networkErrorDialog(activity, e);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
 							} finally {
 								activity.runOnUiThread(new Runnable() {
 									@Override
@@ -520,20 +556,14 @@ public class ItemShopActivity extends BaseActivity {
 						@Override
 						public void run() {
 							purchaseSuccess = true;
-							activity.setResult(RESULT_OK);
+//							activity.setResult(RESULT_OK);
 							FortItemStack firstItemGrant = item.itemGrants[0];
-							String firstItemName = firstItemGrant.templateId;
-
-							if (finalJsonFirst != null) {
-								firstItemName = JsonUtils.getStringOr("DisplayName", finalJsonFirst.getAsJsonArray().get(0).getAsJsonObject(), firstItemGrant.templateId);
-							}
-
 							View purchasedDialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_purchased, null);
 							View purchasedText = purchasedDialogView.findViewById(R.id.item_shop_purchased_text);
 							View purchasedCheck = purchasedDialogView.findViewById(R.id.item_shop_purchased_check);
 							TextView purchasedItemTitle = purchasedDialogView.findViewById(R.id.item_shop_purchased_item_title);
 							View slotView = purchasedDialogView.findViewById(R.id.to_set_background);
-							purchasedItemTitle.setText(firstItemName);
+							purchasedItemTitle.setText(compiledNames.get(0));
 							populateSlotView(firstItemGrant, purchasedDialogView, jsons.get(0));
 							final Dialog dialog = new Dialog(activity);
 							dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -546,22 +576,22 @@ public class ItemShopActivity extends BaseActivity {
 							dialog.show();
 							dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
 							int duration = 250;
-							Interpolator bounceInterpolator = AnimationUtils.loadInterpolator(activity, R.anim.elastic_50_menu_popup);
+							Interpolator samsungBounceInterpolator = AnimationUtils.loadInterpolator(activity, R.anim.elastic_50_menu_popup);
 							slotView.setScaleX(2.75F);
 							slotView.setScaleY(2.75F);
 							slotView.setAlpha(0.0F);
-							slotView.animate().scaleX(1.0F).scaleY(1.0F).alpha(1.0F).setDuration(500).start();
+							slotView.animate().scaleX(1.0F).scaleY(1.0F).alpha(1.0F).setInterpolator(samsungBounceInterpolator).setDuration(duration);
 							purchasedItemTitle.setTranslationX(400.0F);
 							purchasedItemTitle.setAlpha(0.0F);
-							purchasedItemTitle.animate().translationX(0.0F).alpha(1.0F).setInterpolator(bounceInterpolator).setDuration(duration).setStartDelay(duration).start();
+							purchasedItemTitle.animate().translationX(0.0F).alpha(1.0F).setInterpolator(samsungBounceInterpolator).setDuration(duration).setStartDelay(duration);
 							purchasedText.setTranslationY(100.0F);
 							purchasedText.setScaleX(0.0F);
-							purchasedText.animate().translationY(0.0F).scaleX(1.0F).setInterpolator(bounceInterpolator).setDuration(duration).setStartDelay(duration + duration).start();
+							purchasedText.animate().translationY(0.0F).scaleX(1.0F).setInterpolator(samsungBounceInterpolator).setDuration(duration).setStartDelay(duration + duration);
 							purchasedCheck.setRotation(540.0F);
 							purchasedCheck.setScaleX(2.0F);
 							purchasedCheck.setScaleY(2.0F);
 							purchasedCheck.setAlpha(0.0F);
-							purchasedCheck.animate().rotation(0.0F).scaleX(1.0F).scaleY(1.0F).alpha(1.0F).setInterpolator(bounceInterpolator).setDuration(375).setStartDelay(duration + duration + duration).start();
+							purchasedCheck.animate().rotation(0.0F).scaleX(1.0F).scaleY(1.0F).alpha(1.0F).setInterpolator(samsungBounceInterpolator).setDuration(375).setStartDelay(duration + duration + duration);
 							activity.soundPool.play(activity.sounds[new Random().nextInt(activity.sounds.length)], 1.0F, 1.0F, 0, 0, 1.0F);
 							purchasedDialogView.postDelayed(new Runnable() {
 								@Override
@@ -576,7 +606,7 @@ public class ItemShopActivity extends BaseActivity {
 			});
 		}
 
-		private void populateSlotView(FortItemStack itemStack, View slotView, JsonElement json) {
+		private void populateSlotView(FortItemStack item, View slotView, JsonElement json) {
 			View rarityBackground = slotView.findViewById(R.id.to_set_background);
 			TextView quantity = slotView.findViewById(R.id.item_slot_quantity);
 			rarityBackground.setBackgroundResource(R.drawable.bg_common);
@@ -584,14 +614,14 @@ public class ItemShopActivity extends BaseActivity {
 
 			if (json != null) {
 				JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
-				bitmap = getBitmapImageFromItemStackData(activity, itemStack, jsonObject);
+				bitmap = getBitmapImageFromItemStackData(activity, item, jsonObject);
 				rarityBackground.setBackgroundResource(rarityBackground(jsonObject));
 			}
 
 			((ImageView) slotView.findViewById(R.id.item_img)).setImageBitmap(bitmap);
-			((TextView) slotView.findViewById(R.id.item_slot_dbg_text)).setText(bitmap == null ? itemStack.templateId : null);
-			quantity.setVisibility(itemStack.quantity > 1 ? View.VISIBLE : View.GONE);
-			quantity.setText(String.valueOf(itemStack.quantity));
+			((TextView) slotView.findViewById(R.id.item_slot_dbg_text)).setText(bitmap == null ? item.templateId : null);
+			quantity.setVisibility(item.quantity > 1 ? View.VISIBLE : View.GONE);
+			quantity.setText(String.valueOf(item.quantity));
 		}
 
 

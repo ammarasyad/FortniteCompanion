@@ -1,11 +1,20 @@
 package com.tb24.fn;
 
 import android.app.Application;
+import android.graphics.Bitmap;
 import android.preference.PreferenceManager;
+import android.util.Log;
+import android.util.LruCache;
 
+import com.google.common.eventbus.EventBus;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.EventDownloadResponse;
 import com.tb24.fn.model.FortBasicDataResponse;
+import com.tb24.fn.model.FortItemStack;
+import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.network.AccountPublicService;
 import com.tb24.fn.network.DefaultInterceptor;
@@ -14,6 +23,10 @@ import com.tb24.fn.network.FortniteContentWebsiteService;
 import com.tb24.fn.network.FortnitePublicService;
 import com.tb24.fn.network.PersonaPublicService;
 import com.tb24.fn.util.ERegion;
+import com.tb24.fn.util.JsonUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -26,17 +39,15 @@ public class FortniteCompanionApp extends Application {
 	public AccountPublicService accountPublicService;
 	public PersonaPublicService personaService;
 	public EventsPublicServiceLive eventsPublicServiceLive;
-	public FortMcpResponse dataCommonPublic;
-	public FortMcpResponse dataCommonCore;
-	public FortMcpResponse dataAthena;
-	public FortMcpResponse dataCampaign;
-	public FortMcpResponse dataMetadata;
+	public Map<String, FortMcpProfile> profileData = new HashMap<>();
 	public FortBasicDataResponse basicData;
 	public EventDownloadResponse eventData;
 	public ERegion eventDataRegion;
-	public Gson gson = new Gson();
+	public Gson gson = new GsonBuilder().registerTypeAdapter(FortMcpProfile.class, new FortMcpProfile.Serializer()).create();
 	public Registry itemRegistry;
-//	public AthenaProfileAttributes apa;
+	public EventBus eventBus = new EventBus();
+	public String currentLoggedInDisplayName;
+	public final LruCache<String, Bitmap> bitmapCache = new LruCache<>(512);
 
 	@Override
 	public void onCreate() {
@@ -63,8 +74,34 @@ public class FortniteCompanionApp extends Application {
 				.remove("epic_account_access_token")
 				.remove("epic_account_id")
 				.apply();
-		dataCommonCore = null;
-		dataAthena = null;
+		profileData.clear();
 		eventData = null;
+	}
+
+	public void executeProfileChanges(FortMcpResponse response) {
+		if (response.profileChanges != null) {
+			for (JsonObject obj : response.profileChanges) {
+				String changeType = JsonUtils.getStringOr("changeType", obj, "");
+
+				if (changeType.equals("fullProfileUpdate")) {
+					FortMcpProfile parsed = gson.fromJson(obj.get("profile"), FortMcpProfile.class);
+					profileData.put(response.profileId, parsed);
+					eventBus.post(new ProfileUpdatedEvent(response.profileId, parsed));
+					Log.d("MCP-Profile", String.format("Full profile update (rev=%d, version=%s@w=%d) for %s accountId=MCP:%s profileId=%s", parsed.rvn, parsed.version, parsed.wipeNumber, currentLoggedInDisplayName, parsed.accountId, parsed.profileId));
+				} else if (changeType.equals("itemAdded")) {
+					if (!profileData.containsKey(response.profileId)) {
+						return;
+					}
+
+					profileData.get(response.profileId).items.put(obj.get("itemId").getAsString(), gson.fromJson(obj.get("item"), FortItemStack.class));
+				}
+			}
+		}
+
+		if (response.multiUpdate != null) {
+			for (FortMcpResponse multiUpdateEntry : response.multiUpdate) {
+				executeProfileChanges(multiUpdateEntry);
+			}
+		}
 	}
 }

@@ -1,6 +1,7 @@
 package com.tb24.fn.activity;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v14.preference.PreferenceFragment;
@@ -8,6 +9,7 @@ import android.support.v7.preference.DropDownPreference;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceManager;
+import android.util.Log;
 
 import com.tb24.fn.R;
 import com.tb24.fn.util.ERegion;
@@ -61,6 +63,17 @@ public class SettingsActivity extends BaseActivity {
 
 			preference.setSummary(Utils.makeItDark(summary, getActivity()));
 			return true;
+		}
+
+		@Override
+		public boolean onPreferenceTreeClick(Preference preference) {
+			if (preference.getKey().equals("dump_login_data")) {
+				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+				Log.d("LoginDump", "Access Token: " + prefs.getString("epic_account_token_type", null) + " " + prefs.getString("epic_account_access_token", null));
+				Log.d("LoginDump", "Refresh Token: " + prefs.getString("epic_account_refresh_token", null));
+			}
+
+			return super.onPreferenceTreeClick(preference);
 		}
 
 		private void bindPreferenceSummaryToValue(Preference preference) {
