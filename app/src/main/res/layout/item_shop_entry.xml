@@ -25,14 +25,14 @@
 			app:layout_constraintTop_toTopOf="parent" />
 
 		<!--<com.tb24.fn.util.FitWidthAtBottomImageView-->
-			<!--android:id="@+id/bg_blur"-->
-			<!--android:layout_width="0dp"-->
-			<!--android:layout_height="0dp"-->
-			<!--android:scaleType="matrix"-->
-			<!--app:layout_constraintBottom_toBottomOf="@id/with_bg_blur"-->
-			<!--app:layout_constraintEnd_toEndOf="@id/with_bg_blur"-->
-			<!--app:layout_constraintStart_toStartOf="@id/with_bg_blur"-->
-			<!--app:layout_constraintTop_toTopOf="@id/with_bg_blur" />-->
+		<!--android:id="@+id/bg_blur"-->
+		<!--android:layout_width="0dp"-->
+		<!--android:layout_height="0dp"-->
+		<!--android:scaleType="matrix"-->
+		<!--app:layout_constraintBottom_toBottomOf="@id/with_bg_blur"-->
+		<!--app:layout_constraintEnd_toEndOf="@id/with_bg_blur"-->
+		<!--app:layout_constraintStart_toStartOf="@id/with_bg_blur"-->
+		<!--app:layout_constraintTop_toTopOf="@id/with_bg_blur" />-->
 
 		<LinearLayout
 			android:id="@+id/with_bg_blur"

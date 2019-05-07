@@ -278,7 +278,8 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 	}
 
 	private boolean isPasswordValid(String password) {
-		return password.length() >= 7 && !password.contains(" ") && password.matches(".*\\d.*");
+//		return password.length() >= 7 && !password.contains(" ") && password.matches(".*\\d.*");
+		return true;
 	}
 
 	@Override
@@ -290,6 +291,7 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 	public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
 		List<String> emails = new ArrayList<>();
 		cursor.moveToFirst();
+
 		while (!cursor.isAfterLast()) {
 			emails.add(cursor.getString(ProfileQuery.ADDRESS));
 			cursor.moveToNext();
@@ -300,7 +302,6 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 
 	@Override
 	public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
 	}
 
 	private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
