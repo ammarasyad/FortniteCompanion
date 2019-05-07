@@ -69,7 +69,8 @@
 			<Button
 				android:id="@+id/btn_get_one_time_password"
 				android:layout_width="match_parent"
-				android:layout_height="wrap_content"
+				android:layout_height="32dp"
+				android:layout_marginTop="8dp"
 				android:background="?android:selectableItemBackground"
 				android:text="Get one-time password" />
 

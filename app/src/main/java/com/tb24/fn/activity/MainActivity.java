@@ -24,6 +24,7 @@ import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.GameProfile;
+import com.tb24.fn.model.XGameProfile;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
@@ -48,7 +49,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	private Call<FortMcpResponse> callMcpCommonPublic;
 	private Call<FortMcpResponse> callMcpCommonCore;
 	private Call<FortMcpResponse> callMcpAthena;
-	private Call<GameProfile[]> callSelfName;
+	private Call<XGameProfile> callSelfName;
 	private LoadingViewController profileLc;
 
 	@Override
@@ -94,17 +95,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			callMcpCommonPublic = getThisApplication().requestFullProfileUpdate("common_public");
 			callMcpCommonCore = getThisApplication().requestFullProfileUpdate("common_core");
 			callMcpAthena = getThisApplication().requestFullProfileUpdate("athena");
-			callSelfName = getThisApplication().accountPublicService.accountsMultiple(Collections.singletonList(accountId));
+			callSelfName = getThisApplication().accountPublicService.account(accountId);
 			new Thread() {
 				@Override
 				public void run() {
 					try {
-						final Response<GameProfile[]> response = callSelfName.execute();
+						final Response<XGameProfile> response = callSelfName.execute();
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
 								if (response.isSuccessful()) {
-									updateLogInButtonText(getThisApplication().currentLoggedInDisplayName = response.body()[0].getDisplayName());
+									updateLogInButtonText((getThisApplication().currentLoggedIn = response.body()).getDisplayName());
 								} else {
 									validateLoggedIn(EpicError.parse(response));
 								}

@@ -46,10 +46,10 @@ public interface AccountPublicService {
 	Call<Void> oauthSessionsKillWithType(@Field("killType") String killType);
 
 	@GET("/account/api/public/account")
-	Call<GameProfile[]> accountsMultiple(@Query("accountId") List<String> ids);
+	Call<GameProfile[]> accountMultiple(@Query("accountId") List<String> ids);
 
 	@GET("/account/api/public/account/{id}")
-	Call<XGameProfile> account(@Query("id") String id);
+	Call<XGameProfile> account(@Path("id") String id);
 
 	@GET("/account/api/public/account/{id}/externalAuths")
 	Call<ExternalAuth[]> accountExternalAuths(@Query("id") String id);

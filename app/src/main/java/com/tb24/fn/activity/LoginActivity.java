@@ -175,7 +175,7 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 	}
 
 	private void handleLogin(final String email, String password) {
-		loginRequest = getThisApplication().accountPublicService.oauthToken("basic " + FortniteCompanionApp.CLIENT_TOKEN_FORTNITE, "password", ImmutableMap.of("username", email, "password", password), false);
+		loginRequest = getThisApplication().accountPublicService.oauthToken(FortniteCompanionApp.CLIENT_TOKEN_FORTNITE, "password", ImmutableMap.of("username", email, "password", password), false);
 		new Thread() {
 			@Override
 			public void run() {
@@ -190,14 +190,14 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 							public void run() {
 								final TwoFactorAuthExtendedError error = EpicError.parse(response, TwoFactorAuthExtendedError.class);
 
-								if (error.errorCode.equals("errors.com.epicgames.common.two_factor_authentication.required") || error.numericErrorCode == 1042 && error.metadata.twoFactorMethod.equals("email")) {
+								if (error.errorCode.equals("errors.com.epicgames.common.two_factor_authentication.required") || error.numericErrorCode == 1042) {
 									AlertDialog dialog = Utils.createEditTextDialog(LoginActivity.this, "Enter your security code", getString(R.string.action_login), new Utils.EditTextDialogCallback() {
 										@Override
 										public void onResult(String s) {
 											handleTwoFa(s, error);
 										}
 									});
-									dialog.setMessage(String.format("Your account has two-factor security enabled. Enter the security code emailed to you at %s.", email));
+									dialog.setMessage(error.metadata.twoFactorMethod.equals("email") ? String.format("Your account has two-factor security enabled. Enter the security code emailed to you at %s.", email) : error.metadata.twoFactorMethod.equals("authenticator") ? "Your account has two-factor security enabled. Enter the security code from your authenticator app." : null);
 									dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
 										@Override
 										public void onCancel(DialogInterface dialog) {
@@ -224,7 +224,7 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 	}
 
 	private void handleTwoFa(String s, TwoFactorAuthExtendedError error) {
-		twoFaRequest = getThisApplication().accountPublicService.oauthToken("basic " + FortniteCompanionApp.CLIENT_TOKEN_FORTNITE, "otp", ImmutableMap.of("otp", s, "challenge", error.challenge), false);
+		twoFaRequest = getThisApplication().accountPublicService.oauthToken(FortniteCompanionApp.CLIENT_TOKEN_FORTNITE, "otp", ImmutableMap.of("otp", s, "challenge", error.challenge), false);
 		new Thread() {
 			@Override
 			public void run() {
@@ -278,25 +278,12 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 	}
 
 	private boolean isPasswordValid(String password) {
-//		return password.length() > 4;
-		return !password.isEmpty();
+		return password.length() >= 7 && !password.contains(" ") && password.matches("\\d");
 	}
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-		return new CursorLoader(this,
-				// Retrieve data rows for the device user's 'profile' contact.
-				Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
-						ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
-
-				// Select only email addresses.
-				ContactsContract.Contacts.Data.MIMETYPE +
-						" = ?", new String[]{ContactsContract.CommonDataKinds.Email
-				.CONTENT_ITEM_TYPE},
-
-				// Show primary email addresses first. Note that there won't be
-				// a primary email address if the user hasn't specified one.
-				ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
+		return new CursorLoader(this, Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI, ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION, ContactsContract.Contacts.Data.MIMETYPE + " = ?", new String[]{ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE}, ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
 	}
 
 	@Override
@@ -318,9 +305,7 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 
 	private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
 		//Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-		ArrayAdapter<String> adapter =
-				new ArrayAdapter<>(LoginActivity.this,
-						android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
+		ArrayAdapter<String> adapter = new ArrayAdapter<>(LoginActivity.this, android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
 		mEmailView.setAdapter(adapter);
 	}

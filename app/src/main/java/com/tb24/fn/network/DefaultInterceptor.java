@@ -3,19 +3,32 @@ package com.tb24.fn.network;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 
+import com.tb24.fn.util.Utils;
+
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
+import java.util.UUID;
 
 import okhttp3.Request;
 import okhttp3.Response;
 
 public class DefaultInterceptor implements okhttp3.Interceptor {
 	private final SharedPreferences defaultSharedPreferences;
+	private String deviceId;
 
 	public DefaultInterceptor(Context ctx) {
 		defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+
+		try {
+			deviceId = Utils.toHexString(MessageDigest.getInstance("MD5").digest(Settings.Secure.getString(ctx.getContentResolver(), Settings.Secure.ANDROID_ID).getBytes()));
+		} catch (NoSuchAlgorithmException e) {
+			deviceId = UUID.randomUUID().toString().replace("-", "");
+		}
 	}
 
 	@NonNull
@@ -28,6 +41,7 @@ public class DefaultInterceptor implements okhttp3.Interceptor {
 		}
 
 		builder.addHeader("Accept-Language", localeToBcp47Language(Locale.getDefault()));
+		builder.addHeader("X-Epic-Device-ID", deviceId);
 		return chain.proceed(builder.build());
 	}
 

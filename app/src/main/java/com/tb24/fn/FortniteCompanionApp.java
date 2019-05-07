@@ -17,6 +17,7 @@ import com.tb24.fn.model.FortBasicDataResponse;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.FortMcpResponse;
+import com.tb24.fn.model.XGameProfile;
 import com.tb24.fn.network.AccountPublicService;
 import com.tb24.fn.network.DefaultInterceptor;
 import com.tb24.fn.network.EventsPublicServiceLive;
@@ -39,7 +40,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FortniteCompanionApp extends Application {
-	public static final String CLIENT_TOKEN_FORTNITE = "MzQ0NmNkNzI2OTRjNGE0NDg1ZDgxYjc3YWRiYjIxNDE6OTIwOWQ0YTVlMjVhNDU3ZmI5YjA3NDg5ZDMxM2I0MWE=";
+	public static final String CLIENT_TOKEN_FORTNITE = "basic MzQ0NmNkNzI2OTRjNGE0NDg1ZDgxYjc3YWRiYjIxNDE6OTIwOWQ0YTVlMjVhNDU3ZmI5YjA3NDg5ZDMxM2I0MWE=";
 	public FortniteContentWebsiteService fortniteContentWebsiteService;
 	public FortnitePublicService fortnitePublicService;
 	public AccountPublicService accountPublicService;
@@ -52,7 +53,7 @@ public class FortniteCompanionApp extends Application {
 	public Gson gson = new GsonBuilder().registerTypeAdapter(FortMcpProfile.class, new FortMcpProfile.Serializer()).create();
 	public Registry itemRegistry;
 	public EventBus eventBus = new EventBus();
-	public String currentLoggedInDisplayName;
+	public XGameProfile currentLoggedIn;
 	public final LruCache<String, Bitmap> bitmapCache = new LruCache<>(512);
 
 	@Override
@@ -93,7 +94,7 @@ public class FortniteCompanionApp extends Application {
 					FortMcpProfile parsed = gson.fromJson(obj.get("profile"), FortMcpProfile.class);
 					profileData.put(response.profileId, parsed);
 					eventBus.post(new ProfileUpdatedEvent(response.profileId, parsed));
-					Log.d("MCP-Profile", String.format("Full profile update (rev=%d, version=%s@w=%d) for %s accountId=MCP:%s profileId=%s", parsed.rvn, parsed.version, parsed.wipeNumber, currentLoggedInDisplayName, parsed.accountId, parsed.profileId));
+					Log.d("MCP-Profile", String.format("Full profile update (rev=%d, version=%s@w=%d) for %s accountId=MCP:%s profileId=%s", parsed.rvn, parsed.version, parsed.wipeNumber, currentLoggedIn == null ? "" : currentLoggedIn.getDisplayName(), parsed.accountId, parsed.profileId));
 				} else if (changeType.equals("itemAdded")) {
 					if (!profileData.containsKey(response.profileId)) {
 						return;
