@@ -41,8 +41,7 @@
 			android:label="@string/title_item_shop" />
 		<activity
 			android:name=".activity.EventsActivity"
-			android:label="@string/title_events"
-			android:theme="@android:style/Theme.DeviceDefault" />
+			android:label="@string/title_events" />
 		<activity android:name=".activity.EventDetailActivity" />
 		<activity android:name=".activity.EventWindowLeaderboardActivity" />
 		<activity

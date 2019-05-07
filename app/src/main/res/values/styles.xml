@@ -1,11 +1,12 @@
 <resources>
 
 	<!-- Base application theme. -->
-	<style name="AppTheme" parent="android:Theme.DeviceDefault.Light">
+	<style name="AppTheme" parent="android:Theme.DeviceDefault">
 		<!-- Customize your theme here. -->
-		<item name="android:colorPrimaryDark">#FF00675b</item>
-		<item name="android:windowLightStatusBar">true</item>
-		<item name="android:statusBarColor">?android:colorPrimary</item>
+		<item name="android:colorPrimary">@color/colorPrimary</item>
+		<item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
+		<item name="android:colorAccent">@color/btn_primary_m_hovered_grad_rgba0</item>
+		<item name="android:windowBackground">?android:colorPrimaryDark</item>
 		<item name="android:fontFamily">@font/noto_sans</item>
 		<item name="android:textAppearanceButton">@style/CustomButton</item>
 		<item name="android:actionBarStyle">@style/CustomActionBar</item>
@@ -17,7 +18,7 @@
 		<item name="android:textStyle">bold</item>
 	</style>
 
-	<style name="CustomActionBar" parent="android:Widget.DeviceDefault.Light.ActionBar.Solid">
+	<style name="CustomActionBar" parent="android:Widget.DeviceDefault.ActionBar.Solid">
 		<item name="android:titleTextStyle">@style/CustomActionBarTitle</item>
 		<item name="android:subtitleTextStyle">@style/CustomActionBarSubtitle</item>
 		<!--<item name="android:colorControlNormal">?android:colorAccent</item>-->

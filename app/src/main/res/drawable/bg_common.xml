@@ -7,10 +7,10 @@
 				android:endColor="@color/r_c_b_light"
 				android:startColor="@color/r_c_b_dark" />
 			<padding
-				android:bottom="4dp"
-				android:left="4dp"
-				android:right="4dp"
-				android:top="4dp" />
+				android:bottom="@dimen/rarity_bg_square_padding"
+				android:left="@dimen/rarity_bg_square_padding"
+				android:right="@dimen/rarity_bg_square_padding"
+				android:top="@dimen/rarity_bg_square_padding" />
 		</shape>
 	</item>
 	<item>

@@ -10,15 +10,12 @@
 		android:orientation="vertical">
 
 		<FrameLayout
-			android:id="@+id/p_frame"
+			android:id="@+id/profile_frame"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content">
 
-			<include
-				layout="@layout/profile_view"
-				android:visibility="invisible" />
-
 			<LinearLayout
+				android:id="@+id/loadable_loading"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				android:gravity="center">
@@ -36,6 +33,18 @@
 					android:textAllCaps="true"
 					android:textColor="?android:textColorPrimary" />
 			</LinearLayout>
+
+			<include
+				layout="@layout/profile_view"
+				android:visibility="invisible" />
+
+			<TextView
+				android:id="@+id/loadable_empty_text"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:gravity="center"
+				android:textAllCaps="true"
+				android:textColor="?android:textColorPrimary" />
 		</FrameLayout>
 
 		<GridLayout

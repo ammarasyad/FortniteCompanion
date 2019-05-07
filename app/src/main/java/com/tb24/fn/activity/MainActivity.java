@@ -18,18 +18,20 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.gson.JsonObject;
 import com.tb24.fn.R;
+import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.EpicError;
-import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.GameProfile;
+import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
+
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -42,10 +44,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	private Button loginBtn;
 	private boolean loggedIn;
 	private MenuItem menuVbucks;
-	private ViewGroup vBucksView, profileFrame, profileContainer, profileLoader;
+	private ViewGroup vBucksView, profileFrame, profileContent, profileLoader;
+	private Call<FortMcpResponse> callMcpCommonPublic;
 	private Call<FortMcpResponse> callMcpCommonCore;
 	private Call<FortMcpResponse> callMcpAthena;
 	private Call<GameProfile[]> callSelfName;
+	private LoadingViewController profileLc;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,10 +68,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		loginBtn = findViewById(R.id.main_screen_btn_login);
 		loginBtn.setOnClickListener(this);
-		profileFrame = findViewById(R.id.p_frame);
-		profileContainer = findViewById(R.id.p_root);
-		profileLoader = (ViewGroup) profileFrame.getChildAt(1);
+		profileFrame = findViewById(R.id.profile_frame);
+		profileContent = findViewById(R.id.p_root);
+		profileLc = new LoadingViewController(profileFrame, profileContent, "No profile data") {
+			@Override
+			public boolean shouldShowEmpty() {
+				return !getThisApplication().profileData.containsKey("athena");
+			}
+		};
 		checkLogin();
+		getThisApplication().eventBus.register(this);
 	}
 
 	private void checkLogin() {
@@ -78,68 +88,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
 		if (loggedIn) {
 			updateLogInButtonText("...");
-			profileLoader.setVisibility(View.VISIBLE);
-			profileContainer.setVisibility(View.INVISIBLE);
+			profileLc.loading();
 			String accountId = prefs.getString("epic_account_id", "");
-			callMcpCommonCore = getThisApplication().fortnitePublicService.mcp("QueryProfile", accountId, "common_core", -1, true, new JsonObject());
-			new Thread() {
-				@Override
-				public void run() {
-					try {
-						Response<FortMcpResponse> execute = callMcpCommonCore.execute();
-
-						if (execute.isSuccessful()) {
-							getThisApplication().executeProfileChanges(execute.body());
-						} else {
-							EpicError error = EpicError.parse(execute);
-
-							if (!checkAuthError(error)) {
-								Utils.dialogError(MainActivity.this, error.getDisplayText());
-							}
-						}
-					} catch (IOException e) {
-						Utils.networkErrorDialog(MainActivity.this, e);
-					} finally {
-						runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								countAndSetVbucks(MainActivity.this, vBucksView);
-								findViewById(R.id.main_screen_btn_item_shop).setEnabled(getThisApplication().profileData.containsKey("common_core"));
-							}
-						});
-					}
-				}
-			}.start();
-			callMcpAthena = getThisApplication().fortnitePublicService.mcp("QueryProfile", accountId, "athena", -1, true, new JsonObject());
-			new Thread() {
-				@Override
-				public void run() {
-					try {
-						Response<FortMcpResponse> execute = callMcpAthena.execute();
-
-						if (execute.isSuccessful()) {
-							getThisApplication().executeProfileChanges(execute.body());
-						} else {
-							EpicError error = EpicError.parse(execute);
-
-							if (!checkAuthError(error)) {
-								Utils.dialogError(MainActivity.this, error.getDisplayText());
-							}
-						}
-					} catch (IOException e) {
-						Utils.networkErrorDialog(MainActivity.this, e);
-					} finally {
-						runOnUiThread(new Runnable() {
-							@Override
-							public void run() {
-								boolean enabled = getThisApplication().profileData.containsKey("athena");
-								findViewById(R.id.main_screen_btn_profile).setEnabled(enabled);
-								loadProfile();
-							}
-						});
-					}
-				}
-			}.start();
+			callMcpCommonPublic = getThisApplication().requestFullProfileUpdate("common_public");
+			callMcpCommonCore = getThisApplication().requestFullProfileUpdate("common_core");
+			callMcpAthena = getThisApplication().requestFullProfileUpdate("athena");
 			callSelfName = getThisApplication().accountPublicService.getGameProfilesByIds(Collections.singletonList(accountId));
 			new Thread() {
 				@Override
@@ -163,27 +116,51 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			}.start();
 		} else {
 			updateLogInButtonText(null);
-			profileFrame.setVisibility(View.GONE);
+			profileLc.content();
 		}
 	}
 
-	public static int countAndSetVbucks(BaseActivity activity, ViewGroup vbxView) {
-		if (!activity.getThisApplication().profileData.containsKey("common_core")) {
-			vbxView.setVisibility(View.GONE);
-			return 0;
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onProfileUpdated(ProfileUpdatedEvent event) {
+		if (event.profileId.equals("common_public")) {
+			// TODO display self banner
+		} else if (event.profileId.equals("common_core")) {
+			menuVbucks.setVisible(true);
+			countAndSetVbucks(MainActivity.this, vBucksView);
+			findViewById(R.id.main_screen_btn_item_shop).setEnabled(event.profileObj != null);
+		} else if (event.profileId.equals("athena")) {
+			findViewById(R.id.main_screen_btn_profile).setEnabled(event.profileObj != null);
+			displayAthenaLevelAndBattlePass();
+		}
+	}
+
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onProfileUpdateFailed(ProfileUpdatedEvent event) {
+		if (event.profileId.equals("athena") && !getThisApplication().profileData.containsKey("athena")) {
+			profileLc.content();
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		getThisApplication().eventBus.unregister(this);
+
+		if (callMcpCommonPublic != null) {
+			callMcpCommonPublic.cancel();
 		}
 
-		int vBucksQty = 0;
-
-		for (Map.Entry<String, FortItemStack> entry : activity.getThisApplication().profileData.get("common_core").items.entrySet()) {
-			if (entry.getValue().templateId.equals("Currency:MtxGiveaway")) {
-				vBucksQty += entry.getValue().quantity;
-			}
+		if (callMcpCommonCore != null) {
+			callMcpCommonCore.cancel();
 		}
 
-		vbxView.setVisibility(View.VISIBLE);
-		((TextView) vbxView.getChildAt(1)).setText(String.format("%,d", vBucksQty));
-		return vBucksQty;
+		if (callMcpAthena != null) {
+			callMcpAthena.cancel();
+		}
+
+		if (callSelfName != null) {
+			callSelfName.cancel();
+		}
 	}
 
 	private void validateLoggedIn(EpicError error) {
@@ -210,16 +187,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		return invalidToken || tokenVerificationFailed || authenticationFailed;
 	}
 
-	private void loadProfile() {
+	private void displayAthenaLevelAndBattlePass() {
+		profileLc.content();
+
 		if (!getThisApplication().profileData.containsKey("athena")) {
-			profileFrame.setVisibility(View.GONE);
 			return;
 		}
 
 		//TODO animate
-		profileLoader.setVisibility(View.INVISIBLE);
-		profileContainer.setVisibility(View.VISIBLE);
-		profileFrame.setVisibility(View.VISIBLE);
 		AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileData.get("athena").stats.attributesObj;
 		((TextView) findViewById(R.id.p_season)).setText("Season " + attributes.season_num);
 		((TextView) findViewById(R.id.p_level)).setText(String.valueOf(attributes.level));
@@ -371,7 +346,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menuVbucks = menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
-		vBucksView.setVisibility(View.GONE);
+		menuVbucks.setVisible(false);
 		menu.add(0, 901, 0, "Settings");
 		return super.onCreateOptionsMenu(menu);
 	}

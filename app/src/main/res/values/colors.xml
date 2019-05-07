@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<color name="colorPrimary">#008577</color>
-	<color name="colorPrimaryDark">#00574B</color>
+	<color name="colorPrimary">#1C2238</color>
+	<color name="colorPrimaryDark">#000724</color>
 	<color name="colorAccent">#D81B60</color>
+	<color name="item_detail_box_transparent_bg_color">#C0004480</color>
 	<color name="r_l_b_light">#F8A356</color>
 	<color name="r_l_b_dark">#CA7541</color>
 	<color name="r_l_c_light">#F8A356</color>
 	<color name="r_l_c_dark">#E08044</color>
-	<color name="item_detail_box_transparent_bg_color">#C0004480</color>
 	<color name="r_e_b_light">#BE56F8</color>
 	<color name="r_e_b_dark">#8B41CA</color>
 	<color name="r_e_c_dark">#421A73</color>
@@ -24,4 +24,15 @@
 	<color name="r_c_b_dark">#858585</color>
 	<color name="r_c_c_dark">#464646</color>
 	<color name="r_c_c_light">#929292</color>
+
+	<color name="btn_primary_l_base_grad_rgba0">#B8CBE8</color>
+	<color name="btn_primary_l_base_grad_rgba1">#6A91CB</color>
+	<color name="btn_primary_m_hovered_grad_rgba0">#FFF371</color>
+	<color name="btn_primary_m_hovered_grad_rgba1">#FFE013</color>
+	<color name="btn_primary_m_hovered_shine_grad_rgba0">#FFF371</color>
+	<color name="btn_primary_m_hovered_shine_grad_rgba1">#FFE013</color>
+	<color name="btn_primary_l_disabled_grad_rgba0">#406BB6</color>
+	<color name="btn_primary_l_disabled_grad_rgba1">#172854</color>
+	<color name="btn_primary_m_fadeddisabled_grad_rgba0">#6885B6</color>
+	<color name="btn_primary_m_fadeddisabled_grad_rgba1">#1F283F</color>
 </resources>

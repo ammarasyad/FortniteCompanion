@@ -13,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.collect.ComparisonChain;
-import com.google.common.eventbus.Subscribe;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.R;
@@ -23,6 +22,9 @@ import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.util.EFortRarity;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
+
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,11 +58,17 @@ public class LockerActivity extends BaseActivity {
 		getThisApplication().eventBus.register(this);
 	}
 
-	@Subscribe
+	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onProfileUpdated(ProfileUpdatedEvent event) {
 		if (event.profileId.equals("athena")) {
 			displayData(event.profileObj);
 		}
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		getThisApplication().eventBus.unregister(this);
 	}
 
 	private void displayData(FortMcpProfile profile) {
@@ -96,13 +104,20 @@ public class LockerActivity extends BaseActivity {
 				return ComparisonChain.start().compare(o1.getIdCategory(), o2.getIdCategory()).compare(rarity2, rarity1).compare(o1.getIdName(), o2.getIdName()).result();
 			}
 		});
-		list.setAdapter(new LockerAdapter(this, data));
+
+		if (adapter == null) {
+			list.setAdapter(adapter = new LockerAdapter(this, data));
+		} else {
+			adapter.data = data;
+			adapter.notifyDataSetChanged();
+		}
+
 		lc.content();
 	}
 
 	private static class LockerAdapter extends RecyclerView.Adapter<LockerAdapter.LockerViewHolder> {
 		private final LockerActivity activity;
-		private final List<FortItemStack> data;
+		private List<FortItemStack> data;
 
 		public LockerAdapter(LockerActivity activity, List<FortItemStack> data) {
 			this.activity = activity;

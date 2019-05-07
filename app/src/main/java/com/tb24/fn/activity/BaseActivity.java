@@ -23,6 +23,8 @@ import com.tb24.fn.util.Utils;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
+
 public abstract class BaseActivity extends Activity {
 	private static Bitmap getBitmapImageFromItemStackDataInternal(BaseActivity activity, FortItemStack item, JsonObject jsonObject) {
 		try {
@@ -147,6 +149,25 @@ public abstract class BaseActivity extends Activity {
 			textItemDescription.setVisibility(View.VISIBLE);
 			textItemDescription.setText(concat);
 		}
+	}
+
+	public static int countAndSetVbucks(BaseActivity activity, ViewGroup vbxView) {
+		if (!activity.getThisApplication().profileData.containsKey("common_core")) {
+			vbxView.setVisibility(View.GONE);
+			return 0;
+		}
+
+		int vBucksQty = 0;
+
+		for (Map.Entry<String, FortItemStack> entry : activity.getThisApplication().profileData.get("common_core").items.entrySet()) {
+			if (entry.getValue().templateId.equals("Currency:MtxGiveaway")) {
+				vBucksQty += entry.getValue().quantity;
+			}
+		}
+
+		vbxView.setVisibility(View.VISIBLE);
+		((TextView) vbxView.getChildAt(1)).setText(String.format("%,d", vBucksQty));
+		return vBucksQty;
 	}
 
 	@Override

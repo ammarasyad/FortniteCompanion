@@ -42,6 +42,7 @@ import com.tb24.fn.model.FortCatalogResponse;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.PurchaseCatalogEntry;
+import com.tb24.fn.util.EFortRarity;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
@@ -68,7 +69,7 @@ public class ItemShopActivity extends BaseActivity {
 	private GridLayoutManager layout;
 	private ViewGroup vBucksView;
 	private CommonCoreProfileAttributes attributes;
-	private int vbucks;
+	private int vBucksQty;
 	private int[] sounds;
 
 	protected void onCreate(Bundle savedInstanceState) {
@@ -152,7 +153,29 @@ public class ItemShopActivity extends BaseActivity {
 				Collections.sort(c, new Comparator<FortCatalogResponse.CatalogEntry>() {
 					@Override
 					public int compare(FortCatalogResponse.CatalogEntry o1, FortCatalogResponse.CatalogEntry o2) {
-						return o1.itemGrants[0].getIdName().compareTo(o2.itemGrants[0].getIdName());
+						JsonElement jsonElement = getThisApplication().itemRegistry.get(o1.itemGrants[0].templateId);
+						JsonElement jsonElement1 = getThisApplication().itemRegistry.get(o2.itemGrants[0].templateId);
+						EFortRarity rarity1 = EFortRarity.HANDMADE, rarity2 = EFortRarity.HANDMADE;
+
+						if (jsonElement != null) {
+							JsonObject jsonObject = jsonElement.getAsJsonArray().get(0).getAsJsonObject();
+							rarity1 = EFortRarity.UNCOMMON;
+
+							if (jsonObject.has("Rarity")) {
+								rarity1 = EFortRarity.from(jsonObject.get("Rarity").getAsString());
+							}
+						}
+
+						if (jsonElement1 != null) {
+							JsonObject jsonObject1 = jsonElement1.getAsJsonArray().get(0).getAsJsonObject();
+							rarity2 = EFortRarity.UNCOMMON;
+
+							if (jsonObject1.has("Rarity")) {
+								rarity2 = EFortRarity.from(jsonObject1.get("Rarity").getAsString());
+							}
+						}
+
+						return ComparisonChain.start().compare(rarity2, rarity1).compare(o2.prices[0].basePrice, o1.prices[0].basePrice).compare(o1.itemGrants[0].getIdName(), o2.itemGrants[0].getIdName()).result();
 					}
 				});
 				entries.addAll(c);
@@ -172,7 +195,7 @@ public class ItemShopActivity extends BaseActivity {
 	}
 
 	private void updateFromProfile() {
-		vbucks = MainActivity.countAndSetVbucks(this, vBucksView);
+		vBucksQty = BaseActivity.countAndSetVbucks(this, vBucksView);
 
 		if (adapter != null) {
 			adapter.notifyDataSetChanged();
@@ -433,7 +456,10 @@ public class ItemShopActivity extends BaseActivity {
 						@Override
 						public void onClick(View v) {
 							if (v == btnPurchase) {
-								if (!activity.fakePurchases) {
+								if (activity.fakePurchases) {
+									Toast.makeText(activity, "This purchase is simulated!", Toast.LENGTH_SHORT).show();
+									doPurchase(item);
+								} else {
 									AlertDialog dialog = Utils.createEditTextDialog(activity, "Purchase " + compiledNames.get(0), activity.getString(android.R.string.ok), new Utils.EditTextDialogCallback() {
 										@Override
 										public void onResult(String s) {
@@ -445,8 +471,6 @@ public class ItemShopActivity extends BaseActivity {
 									dialog.setMessage("Type \"" + CONFIRM_PHRASE + "\" to proceed");
 									dialog.show();
 									((EditText) dialog.findViewById(R.id.dialog_edit_text_field)).setHint(CONFIRM_PHRASE);
-								} else {
-									doPurchase(item);
 								}
 							} else if (v == btnGift) {
 								Toast.makeText(activity, "Will make it later!", Toast.LENGTH_SHORT).show();
@@ -495,8 +519,9 @@ public class ItemShopActivity extends BaseActivity {
 					btnPurchase.setEnabled(!purchasePending);
 					btnPurchase.setVisibility(finallyOwned ? View.GONE : View.VISIBLE);
 
-					if (!finallyOwned && activity.vbucks < price.basePrice) {
+					if (!finallyOwned && activity.vBucksQty < price.basePrice) {
 						btnPurchase.setEnabled(false);
+						// TODO "Get V-Bucks"
 						btnPurchase.setText("Not enough V-Bucks");
 					}
 
@@ -516,23 +541,22 @@ public class ItemShopActivity extends BaseActivity {
 						@Override
 						public void run() {
 							try {
-								if (!activity.fakePurchases) {
-									//TODO whats the response
+								if (activity.fakePurchases) {
+									// fake it
+									Thread.sleep(2000);
+									activity.getThisApplication().executeProfileChanges(activity.getThisApplication().gson.fromJson("{\"multiUpdate\":[{\"profileRevision\":7045,\"profileId\":\"athena\",\"profileChangesBaseRevision\":7043,\"profileChanges\":[{\"changeType\":\"itemAdded\",\"itemId\":\"" + UUID.randomUUID() + "\",\"item\":{\"templateId\":\"" + item.itemGrants[0].templateId + "\",\"attributes\":{\"max_level_bonus\":0,\"level\":1,\"item_seen\":false,\"xp\":0,\"variants\":[],\"favorite\":false,\"DUMMY\":true},\"quantity\":1}}],\"profileCommandRevision\":6412}]}", FortMcpResponse.class));
+									purchaseSuccess();
+								} else {
+									// here we're going for real
 									Response<FortMcpResponse> mcpResponse = call.execute();
 
 									if (mcpResponse.isSuccessful()) {
 										activity.getThisApplication().executeProfileChanges(mcpResponse.body());
-										// TODO profile update listener
 										// hooray
 										purchaseSuccess();
 									} else {
 										Utils.dialogError(activity, EpicError.parse(mcpResponse).getDisplayText());
 									}
-								} else {
-									// fake it
-									Thread.sleep(2000);
-									activity.getThisApplication().executeProfileChanges(activity.getThisApplication().gson.fromJson("{\"multiUpdate\":[{\"profileRevision\":7045,\"profileId\":\"athena\",\"profileChangesBaseRevision\":7043,\"profileChanges\":[{\"changeType\":\"itemAdded\",\"itemId\":\"" + UUID.randomUUID() + "\",\"item\":{\"templateId\":\"" + item.itemGrants[0].templateId + "\",\"attributes\":{\"max_level_bonus\":0,\"level\":1,\"item_seen\":false,\"xp\":0,\"variants\":[],\"favorite\":false,\"DUMMY\":true},\"quantity\":1}}],\"profileCommandRevision\":6412}]}", FortMcpResponse.class));
-									purchaseSuccess();
 								}
 							} catch (IOException e) {
 								Utils.networkErrorDialog(activity, e);

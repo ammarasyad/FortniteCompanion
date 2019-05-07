@@ -93,23 +93,23 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="8dp"
-			android:background="#FFFF00"
+			android:background="@drawable/btn_primary_shiny"
 			android:fontFamily="@font/burbank_big_condensed"
 			android:foreground="?android:selectableItemBackground"
 			android:minWidth="220dp"
 			android:paddingStart="12dp"
 			android:paddingEnd="12dp"
-			android:text="Purchase items"
 			android:textColor="#1C2238"
 			android:textFontWeight="900"
-			android:textSize="28sp" />
+			android:textSize="28sp"
+			tools:text="Purchase items" />
 
 		<Button
 			android:id="@+id/btn_item_shop_gift"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="8dp"
-			android:background="#A0A0A0"
+			android:background="@drawable/btn_primary"
 			android:fontFamily="@font/burbank_big_condensed"
 			android:foreground="?android:selectableItemBackground"
 			android:minWidth="220dp"

@@ -6,11 +6,12 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.LruCache;
 
-import com.google.common.eventbus.EventBus;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.tb24.fn.event.ProfileUpdateFailedEvent;
 import com.tb24.fn.event.ProfileUpdatedEvent;
+import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.EventDownloadResponse;
 import com.tb24.fn.model.FortBasicDataResponse;
 import com.tb24.fn.model.FortItemStack;
@@ -25,10 +26,15 @@ import com.tb24.fn.network.PersonaPublicService;
 import com.tb24.fn.util.ERegion;
 import com.tb24.fn.util.JsonUtils;
 
+import org.greenrobot.eventbus.EventBus;
+
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -93,7 +99,9 @@ public class FortniteCompanionApp extends Application {
 						return;
 					}
 
-					profileData.get(response.profileId).items.put(obj.get("itemId").getAsString(), gson.fromJson(obj.get("item"), FortItemStack.class));
+					FortMcpProfile profile = profileData.get(response.profileId);
+					profile.items.put(obj.get("itemId").getAsString(), gson.fromJson(obj.get("item"), FortItemStack.class));
+					eventBus.post(new ProfileUpdatedEvent(response.profileId, profile));
 				}
 			}
 		}
@@ -103,5 +111,26 @@ public class FortniteCompanionApp extends Application {
 				executeProfileChanges(multiUpdateEntry);
 			}
 		}
+	}
+
+	public Call<FortMcpResponse> requestFullProfileUpdate(final String profileId) {
+		final Call<FortMcpResponse> call = fortnitePublicService.mcp("QueryProfile", PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""), profileId, -1, true, new JsonObject());
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					Response<FortMcpResponse> execute = call.execute();
+
+					if (execute.isSuccessful()) {
+						executeProfileChanges(execute.body());
+					} else {
+						eventBus.post(new ProfileUpdateFailedEvent(profileId, EpicError.parse(execute)));
+					}
+				} catch (IOException e) {
+					Log.e("MCP-Profile", "Failed requesting profile update " + profileId, e);
+				}
+			}
+		}.start();
+		return call;
 	}
 }
