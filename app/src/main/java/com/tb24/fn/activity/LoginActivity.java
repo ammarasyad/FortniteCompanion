@@ -278,7 +278,7 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 	}
 
 	private boolean isPasswordValid(String password) {
-		return password.length() >= 7 && !password.contains(" ") && password.matches("\\d");
+		return password.length() >= 7 && !password.contains(" ") && password.matches(".*\\d.*");
 	}
 
 	@Override
