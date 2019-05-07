@@ -8,6 +8,9 @@ public class GameProfile {
 	@SerializedName("displayName")
 	private String displayName;
 
+	public GameProfile() {
+	}
+
 	public GameProfile(String id, String displayName) {
 		setId(id);
 		setDisplayName(displayName);

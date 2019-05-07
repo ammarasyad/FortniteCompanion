@@ -17,10 +17,14 @@ public class EpicError {
 	public String intent;
 
 	public static EpicError parse(Response<?> response) {
+		return parse(response, EpicError.class);
+	}
+
+	public static <T extends EpicError> T parse(Response<?> response, Class<T> toErrorClass) {
 		try {
 			String s = response.errorBody().string();
 			Log.e("EpicError", s);
-			return Utils.GSON.fromJson(s, EpicError.class);
+			return Utils.GSON.fromJson(s, toErrorClass);
 		} catch (IOException e) {
 			throw new RuntimeException("Unexpected error whilst parsing error data", e);
 		}

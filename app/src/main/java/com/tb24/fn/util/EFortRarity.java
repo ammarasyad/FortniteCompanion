@@ -1,5 +1,7 @@
 package com.tb24.fn.util;
 
+import com.google.gson.JsonObject;
+
 public enum EFortRarity {
 	HANDMADE("Common"), UNCOMMON("Uncommon"), STURDY("Rare"), QUALITY("Epic"), FINE("Legendary"), ELEGANT("Mythic"), MASTERWORK("T"), LEGENDARY("I");
 
@@ -19,5 +21,15 @@ public enum EFortRarity {
 		}
 
 		return UNCOMMON;
+	}
+
+	public static EFortRarity fromObject(JsonObject jsonObject) {
+		EFortRarity rarity = EFortRarity.UNCOMMON;
+
+		if (jsonObject.has("Rarity")) {
+			rarity = EFortRarity.from(jsonObject.get("Rarity").getAsString());
+		}
+
+		return rarity;
 	}
 }

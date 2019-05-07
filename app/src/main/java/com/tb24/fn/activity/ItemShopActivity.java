@@ -155,24 +155,15 @@ public class ItemShopActivity extends BaseActivity {
 					public int compare(FortCatalogResponse.CatalogEntry o1, FortCatalogResponse.CatalogEntry o2) {
 						JsonElement jsonElement = getThisApplication().itemRegistry.get(o1.itemGrants[0].templateId);
 						JsonElement jsonElement1 = getThisApplication().itemRegistry.get(o2.itemGrants[0].templateId);
-						EFortRarity rarity1 = EFortRarity.HANDMADE, rarity2 = EFortRarity.HANDMADE;
+						EFortRarity rarity1 = EFortRarity.HANDMADE;
+						EFortRarity rarity2 = EFortRarity.HANDMADE;
 
 						if (jsonElement != null) {
-							JsonObject jsonObject = jsonElement.getAsJsonArray().get(0).getAsJsonObject();
-							rarity1 = EFortRarity.UNCOMMON;
-
-							if (jsonObject.has("Rarity")) {
-								rarity1 = EFortRarity.from(jsonObject.get("Rarity").getAsString());
-							}
+							rarity1 = EFortRarity.fromObject(jsonElement.getAsJsonArray().get(0).getAsJsonObject());
 						}
 
 						if (jsonElement1 != null) {
-							JsonObject jsonObject1 = jsonElement1.getAsJsonArray().get(0).getAsJsonObject();
-							rarity2 = EFortRarity.UNCOMMON;
-
-							if (jsonObject1.has("Rarity")) {
-								rarity2 = EFortRarity.from(jsonObject1.get("Rarity").getAsString());
-							}
+							rarity2 = EFortRarity.fromObject(jsonElement1.getAsJsonArray().get(0).getAsJsonObject());
 						}
 
 						return ComparisonChain.start().compare(rarity2, rarity1).compare(o2.prices[0].basePrice, o1.prices[0].basePrice).compare(o1.itemGrants[0].getIdName(), o2.itemGrants[0].getIdName()).result();
@@ -559,7 +550,7 @@ public class ItemShopActivity extends BaseActivity {
 									}
 								}
 							} catch (IOException e) {
-								Utils.networkErrorDialog(activity, e);
+								Utils.throwableDialog(activity, e);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							} finally {

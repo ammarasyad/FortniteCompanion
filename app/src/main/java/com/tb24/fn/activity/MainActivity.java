@@ -84,6 +84,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		loggedIn = prefs.getBoolean("is_logged_in", false);
 		findViewById(R.id.main_screen_btn_stats).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_events).setEnabled(loggedIn);
+		findViewById(R.id.main_screen_btn_locker).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_stw).setEnabled(loggedIn);
 
 		if (loggedIn) {
@@ -93,7 +94,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			callMcpCommonPublic = getThisApplication().requestFullProfileUpdate("common_public");
 			callMcpCommonCore = getThisApplication().requestFullProfileUpdate("common_core");
 			callMcpAthena = getThisApplication().requestFullProfileUpdate("athena");
-			callSelfName = getThisApplication().accountPublicService.getGameProfilesByIds(Collections.singletonList(accountId));
+			callSelfName = getThisApplication().accountPublicService.accountsMultiple(Collections.singletonList(accountId));
 			new Thread() {
 				@Override
 				public void run() {
@@ -110,13 +111,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 							}
 						});
 					} catch (IOException e) {
-						Utils.networkErrorDialog(MainActivity.this, e);
+						Utils.throwableDialog(MainActivity.this, e);
 					}
 				}
 			}.start();
 		} else {
 			updateLogInButtonText(null);
 			profileLc.content();
+			openLogin();
 		}
 	}
 
@@ -260,7 +262,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 											Utils.dialogOkNonMain(MainActivity.this, "Can't Search Name", EpicError.parse(response).getDisplayText());
 										}
 									} catch (IOException e) {
-										Utils.networkErrorDialog(MainActivity.this, e);
+										Utils.throwableDialog(MainActivity.this, e);
 									}
 								}
 							}.start();
@@ -328,7 +330,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 //													Utils.dialogOkNonMain(MainActivity.this, "Can't Log Out", EpicError.parse(response).getDisplayText());
 //												}
 											} catch (IOException e) {
-												Utils.networkErrorDialog(MainActivity.this, e);
+												Utils.throwableDialog(MainActivity.this, e);
 											}
 										}
 									}.start();
@@ -337,10 +339,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 							.setNegativeButton("No", null)
 							.show();
 				} else {
-					startActivityForResult(new Intent(this, LoginActivity.class), UPDATE_IF_OK_REQ_CODE);
+					openLogin();
 				}
 				break;
 		}
+	}
+
+	private void openLogin() {
+		startActivityForResult(new Intent(this, LoginActivity.class), UPDATE_IF_OK_REQ_CODE);
 	}
 
 	@Override

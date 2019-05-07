@@ -250,7 +250,7 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 				failed = false;
 
 				try {
-					final Response<GameProfile[]> response = getThisApplication().accountPublicService.getGameProfilesByIds(request).execute();
+					final Response<GameProfile[]> response = getThisApplication().accountPublicService.accountsMultiple(request).execute();
 
 					if (response.isSuccessful()) {
 						failCount = 0;

@@ -1,11 +1,10 @@
 package com.tb24.fn.activity;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -27,21 +26,25 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.common.collect.ImmutableMap;
 import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.R;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.LoginResponse;
+import com.tb24.fn.model.TwoFactorAuthExtendedError;
+import com.tb24.fn.util.LoadingViewController;
+import com.tb24.fn.util.Utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
-public class LoginActivity extends BaseActivity implements LoaderCallbacks<Cursor> {
+public class LoginActivity extends BaseActivity implements LoaderCallbacks<Cursor>, OnClickListener {
 	private static final int REQUEST_READ_CONTACTS = 0;
 	private AutoCompleteTextView mEmailView;
 	private EditText mPasswordView;
@@ -49,7 +52,11 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 	private View mLoginFormView;
 	private boolean running;
 	private SharedPreferences prefs;
-	private Call<LoginResponse> call;
+	private Call<LoginResponse> loginRequest;
+	private Call<LoginResponse> twoFaRequest;
+	private LoadingViewController lc;
+	private Button mEmailSignInButton;
+	private Button mGetOneTimePasswordButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -72,22 +79,28 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 			}
 		});
 
-		Button mEmailSignInButton = findViewById(R.id.email_sign_in_button);
-		mEmailSignInButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				attemptLogin();
-			}
-		});
+		mEmailSignInButton = findViewById(R.id.email_sign_in_button);
+		mEmailSignInButton.setOnClickListener(this);
+		mGetOneTimePasswordButton = findViewById(R.id.btn_get_one_time_password);
+		mGetOneTimePasswordButton.setOnClickListener(this);
 
 		mLoginFormView = findViewById(R.id.login_form);
 		mProgressView = findViewById(R.id.login_progress);
+		lc = new LoadingViewController(mProgressView, mLoginFormView, (TextView) null);
+		lc.content();
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		if (call != null) call.cancel();
+
+		if (loginRequest != null) {
+			loginRequest.cancel();
+		}
+
+		if (twoFaRequest != null) {
+			twoFaRequest.cancel();
+		}
 	}
 
 	private void populateAutoComplete() {
@@ -115,12 +128,8 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 		return false;
 	}
 
-	/**
-	 * Callback received when a permissions request has been completed.
-	 */
 	@Override
-	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-										   @NonNull int[] grantResults) {
+	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 		if (requestCode == REQUEST_READ_CONTACTS) {
 			if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 				populateAutoComplete();
@@ -128,36 +137,24 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 		}
 	}
 
-
-	/**
-	 * Attempts to sign in or register the account specified by the login form.
-	 * If there are form errors (invalid email, missing fields, etc.), the
-	 * errors are presented and no actual login attempt is made.
-	 */
 	private void attemptLogin() {
 		if (running) {
 			return;
 		}
 
-		// Reset errors.
 		mEmailView.setError(null);
 		mPasswordView.setError(null);
-
-		// Store values at the time of the login attempt.
 		final String email = mEmailView.getText().toString();
 		final String password = mPasswordView.getText().toString();
-
 		boolean cancel = false;
 		View focusView = null;
 
-		// Check for a valid password, if the user entered one.
 		if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
 			mPasswordView.setError(getString(R.string.error_invalid_password));
 			focusView = mPasswordView;
 			cancel = true;
 		}
 
-		// Check for a valid email address.
 		if (TextUtils.isEmpty(email)) {
 			mEmailView.setError(getString(R.string.error_field_required));
 			focusView = mEmailView;
@@ -171,46 +168,99 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 		if (cancel) {
 			focusView.requestFocus();
 		} else {
-			showProgress(true);
+			lc.loading();
 			running = true;
-			call = getThisApplication().accountPublicService.oauthTokenPassword("basic " + FortniteCompanionApp.CLIENT_TOKEN_FORTNITE, "password", email, password, true);
-			call.enqueue(new Callback<LoginResponse>() {
-				@Override
-				public void onResponse(@NonNull Call<LoginResponse> call, @NonNull final Response<LoginResponse> response) {
+			handleLogin(email, password);
+		}
+	}
+
+	private void handleLogin(final String email, String password) {
+		loginRequest = getThisApplication().accountPublicService.oauthToken("basic " + FortniteCompanionApp.CLIENT_TOKEN_FORTNITE, "password", ImmutableMap.of("username", email, "password", password), false);
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					final Response<LoginResponse> response = loginRequest.execute();
+
 					if (response.isSuccessful()) {
-						LoginResponse data = response.body();
-						prefs.edit()
-								.putBoolean("is_logged_in", true)
-								.putString("epic_account_token_type", data.token_type)
-								.putLong("epic_account_expires_at", data.expires_at.getTime())
-								.putString("epic_account_refresh_token", data.refresh_token)
-								.putString("epic_account_access_token", data.access_token)
-								.putString("epic_account_id", data.account_id)
-								.apply();
-						setResult(RESULT_OK);
-						finish();
+						loginSucceded(response);
 					} else {
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
-								String errorMessage = EpicError.parse(response).getDisplayText();
-								new AlertDialog.Builder(LoginActivity.this)
-										.setTitle("Login Failed")
-										.setMessage(errorMessage)
-										.setPositiveButton(android.R.string.ok, null)
-										.show();
+								final TwoFactorAuthExtendedError error = EpicError.parse(response, TwoFactorAuthExtendedError.class);
+
+								if (error.errorCode.equals("errors.com.epicgames.common.two_factor_authentication.required") || error.numericErrorCode == 1042 && error.metadata.twoFactorMethod.equals("email")) {
+									AlertDialog dialog = Utils.createEditTextDialog(LoginActivity.this, "Enter your security code", getString(R.string.action_login), new Utils.EditTextDialogCallback() {
+										@Override
+										public void onResult(String s) {
+											handleTwoFa(s, error);
+										}
+									});
+									dialog.setMessage(String.format("Your account has two-factor security enabled. Enter the security code emailed to you at %s.", email));
+									dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+										@Override
+										public void onCancel(DialogInterface dialog) {
+											unshowAsync();
+										}
+									});
+									dialog.setCanceledOnTouchOutside(false);
+									dialog.show();
+									((EditText) dialog.findViewById(R.id.dialog_edit_text_field)).setHint("Security code");
+								} else {
+									unshowAsync();
+									//The security code you entered was not valid.
+									errored(error.getDisplayText());
+								}
 							}
 						});
 					}
+				} catch (IOException e) {
 					unshowAsync();
+					errored(Utils.userFriendlyNetError(e));
 				}
+			}
+		}.start();
+	}
 
-				@Override
-				public void onFailure(Call<LoginResponse> call, Throwable t) {
+	private void handleTwoFa(String s, TwoFactorAuthExtendedError error) {
+		twoFaRequest = getThisApplication().accountPublicService.oauthToken("basic " + FortniteCompanionApp.CLIENT_TOKEN_FORTNITE, "otp", ImmutableMap.of("otp", s, "challenge", error.challenge), false);
+		new Thread() {
+			@Override
+			public void run() {
+				try {
+					Response<LoginResponse> twoFaResponse = twoFaRequest.execute();
+
+					if (twoFaResponse.isSuccessful()) {
+						loginSucceded(twoFaResponse);
+					} else {
+						unshowAsync();
+						errored(EpicError.parse(twoFaResponse).getDisplayText());
+					}
+				} catch (IOException e) {
 					unshowAsync();
+					errored(Utils.userFriendlyNetError(e));
 				}
-			});
-		}
+			}
+		}.start();
+	}
+
+	private void errored(CharSequence errorMessage) {
+		Utils.dialogOkNonMain(this, "Login Failed", errorMessage);
+	}
+
+	private void loginSucceded(Response<LoginResponse> response) {
+		LoginResponse data = response.body();
+		prefs.edit()
+				.putBoolean("is_logged_in", true)
+				.putString("epic_account_token_type", data.token_type)
+				.putLong("epic_account_expires_at", data.expires_at.getTime())
+				.putString("epic_account_refresh_token", data.refresh_token)
+				.putString("epic_account_access_token", data.access_token)
+				.putString("epic_account_id", data.account_id)
+				.apply();
+		setResult(RESULT_OK);
+		finish();
 	}
 
 	private void unshowAsync() {
@@ -218,44 +268,18 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 			@Override
 			public void run() {
 				running = false;
-				showProgress(false);
+				lc.content();
 			}
 		});
 	}
 
 	private boolean isEmailValid(String email) {
-		return email.contains("@");
+		return email.contains("@") && email.contains(".");
 	}
 
 	private boolean isPasswordValid(String password) {
 //		return password.length() > 4;
-		return true;
-	}
-
-	/**
-	 * Shows the progress UI and hides the login form.
-	 */
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-	private void showProgress(final boolean show) {
-		int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-		mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-		mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-				show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-			@Override
-			public void onAnimationEnd(Animator animation) {
-				mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-			}
-		});
-
-		mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-		mProgressView.animate().setDuration(shortAnimTime).alpha(
-				show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-			@Override
-			public void onAnimationEnd(Animator animation) {
-				mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-			}
-		});
+		return !password.isEmpty();
 	}
 
 	@Override
@@ -299,6 +323,15 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 						android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
 		mEmailView.setAdapter(adapter);
+	}
+
+	@Override
+	public void onClick(View v) {
+		if (v == mEmailSignInButton) {
+			attemptLogin();
+		} else if (v == mGetOneTimePasswordButton) {
+			startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://accounts.epicgames.com/account/oneTimePassword")));
+		}
 	}
 
 

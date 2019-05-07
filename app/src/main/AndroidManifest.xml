@@ -32,7 +32,7 @@
 			android:label="@string/title_profile" />
 		<activity
 			android:name=".activity.LoginActivity"
-			android:label="@string/title_activity_login" />
+			android:label="@string/action_login" />
 		<activity
 			android:name=".activity.NewsActivity"
 			android:label="@string/title_news" />

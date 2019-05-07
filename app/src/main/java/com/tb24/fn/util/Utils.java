@@ -56,6 +56,12 @@ public final class Utils {
 	private static final Joiner JOINER = Joiner.on(' ');
 	public static final String[] STRINGS = {"That wasn't supposed to happen", "There was an error", "We hit a roadblock", "Not the llama you're looking for", "Whoops!"};
 	public static final Random RANDOM = new Random();
+	public static final DialogInterface.OnClickListener LISTENER_TO_CANCEL = new DialogInterface.OnClickListener() {
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+			dialog.cancel();
+		}
+	};
 	private static boolean darkSet;
 	private static int dark;
 
@@ -154,7 +160,7 @@ public final class Utils {
 						callback.onResult(editText.getText().toString());
 					}
 				})
-				.setNegativeButton(android.R.string.cancel, null)
+				.setNegativeButton(android.R.string.cancel, LISTENER_TO_CANCEL)
 				.create();
 		ad.setOnShowListener(new DialogInterface.OnShowListener() {
 			@Override
@@ -234,7 +240,7 @@ public final class Utils {
 		return s;
 	}
 
-	public static void networkErrorDialog(Activity activity, Throwable e) {
+	public static void throwableDialog(Activity activity, Throwable e) {
 		dialogOkNonMain(activity, STRINGS[RANDOM.nextInt(STRINGS.length - 1)], userFriendlyNetError(e));
 	}
 
@@ -304,7 +310,7 @@ public final class Utils {
 	}
 
 	public static CharSequence userFriendlyNetError(Throwable e) {
-		return e.toString();
+		return e instanceof IOException ? "Connection to server failed. (" + e.getLocalizedMessage() + ")" : e.getLocalizedMessage();
 	}
 
 	public static Bitmap bitmapFromTga(Context ctx, String uPath) {

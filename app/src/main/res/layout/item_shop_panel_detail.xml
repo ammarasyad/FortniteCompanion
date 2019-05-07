@@ -93,32 +93,18 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="8dp"
-			android:background="@drawable/btn_primary_shiny"
-			android:fontFamily="@font/burbank_big_condensed"
-			android:foreground="?android:selectableItemBackground"
 			android:minWidth="220dp"
-			android:paddingStart="12dp"
-			android:paddingEnd="12dp"
-			android:textColor="#1C2238"
-			android:textFontWeight="900"
-			android:textSize="28sp"
-			tools:text="Purchase items" />
+			tools:text="Purchase items"
+			style="@style/btn_primary_m_yellow" />
 
 		<Button
 			android:id="@+id/btn_item_shop_gift"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="8dp"
-			android:background="@drawable/btn_primary"
-			android:fontFamily="@font/burbank_big_condensed"
-			android:foreground="?android:selectableItemBackground"
 			android:minWidth="220dp"
-			android:paddingStart="12dp"
-			android:paddingEnd="12dp"
 			android:text="Buy as a gift"
-			android:textColor="#1C2238"
-			android:textFontWeight="900"
-			android:textSize="28sp" />
+			style="@style/btn_primary_m_normal" />
 	</LinearLayout>
 
 	<TextView
