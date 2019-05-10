@@ -25,6 +25,7 @@ import com.tb24.fn.network.FortniteContentWebsiteService;
 import com.tb24.fn.network.FortnitePublicService;
 import com.tb24.fn.network.PersonaPublicService;
 import com.tb24.fn.util.ERegion;
+import com.tb24.fn.util.ItemUtils;
 import com.tb24.fn.util.JsonUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -70,6 +71,7 @@ public class FortniteCompanionApp extends Application {
 		personaService = retrofitBuilder.baseUrl("https://persona-public-service-prod06.ol.epicgames.com").build().create(PersonaPublicService.class);
 		eventsPublicServiceLive = retrofitBuilder.baseUrl("https://events-public-service-live.ol.epicgames.com").build().create(EventsPublicServiceLive.class);
 		itemRegistry = new Registry(this);
+		ItemUtils.setData = itemRegistry.get("AthenaCosmeticMetadata_:cosmeticsets").getAsJsonArray().get(0).getAsJsonObject();
 	}
 
 	public void clearLoginData() {

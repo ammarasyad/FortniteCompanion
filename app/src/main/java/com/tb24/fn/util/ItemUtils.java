@@ -18,6 +18,8 @@ import com.tb24.fn.model.FortItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class ItemUtils {
+	public static JsonObject setData;
+
 	public ItemUtils() {
 	}
 
@@ -110,9 +112,7 @@ public class ItemUtils {
 		if (jsonObject.has("GameplayTags")) {
 			for (JsonElement s : jsonObject.get("GameplayTags").getAsJsonObject().get("gameplay_tags").getAsJsonArray()) {
 				if (s.getAsString().startsWith("Cosmetics.Set.")) {
-					String setId = s.getAsString().substring("Cosmetics.Set.".length());
-					// TODO display set name instead of ID
-					setText = TextUtils.concat('\n' + "Part of the ", Utils.span(setId, new StyleSpan(Typeface.BOLD)), " set.");
+					setText = TextUtils.concat('\n' + "Part of the ", Utils.span(setData.get(s.getAsString()).getAsJsonObject().get("DisplayName").getAsString(), new StyleSpan(Typeface.BOLD)), " set.");
 				}
 			}
 		}

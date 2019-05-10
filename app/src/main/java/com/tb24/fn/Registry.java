@@ -42,6 +42,7 @@ public class Registry {
 		registerPath("AthenaHero_", "Game/Athena/Heroes");
 		registerPath("AthenaWeapon_", "Game/Athena/Items/Weapons");
 		registerPath("DisplayAsset_", "Game/Catalog/DisplayAssets");
+		registerPath("AthenaCosmeticMetadata_", "Game/Athena/Items/Cosmetics/Metadata");
 
 		for (Map.Entry<String, List<String>> entry : paths.entrySet()) {
 			for (String path : entry.getValue()) {
