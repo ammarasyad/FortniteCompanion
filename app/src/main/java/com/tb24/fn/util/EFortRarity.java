@@ -3,7 +3,8 @@ package com.tb24.fn.util;
 import com.google.gson.JsonObject;
 
 public enum EFortRarity {
-	HANDMADE("Common"), UNCOMMON("Uncommon"), STURDY("Rare"), QUALITY("Epic"), FINE("Legendary"), ELEGANT("Mythic"), MASTERWORK("T"), LEGENDARY("I");
+	COMMON("Common"), UNCOMMON("Uncommon"), RARE("Rare"), EPIC("Epic"), LEGENDARY("Legendary"), MYTHIC("Mythic");
+//	8.51 >> HANDMADE("Common"), UNCOMMON("Uncommon"), STURDY("Rare"), QUALITY("Epic"), FINE("Legendary"), ELEGANT("Mythic"), MASTERWORK("T"), LEGENDARY("I");
 
 	public final String name;
 

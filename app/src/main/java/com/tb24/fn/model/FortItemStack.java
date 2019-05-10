@@ -14,4 +14,9 @@ public class FortItemStack {
 	public String getIdName() {
 		return templateId.split(":")[1];
 	}
+
+	@Override
+	public String toString() {
+		return quantity + " x " + templateId;
+	}
 }

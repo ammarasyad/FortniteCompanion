@@ -41,6 +41,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FortniteCompanionApp extends Application {
 	public static final String CLIENT_TOKEN_FORTNITE = "basic MzQ0NmNkNzI2OTRjNGE0NDg1ZDgxYjc3YWRiYjIxNDE6OTIwOWQ0YTVlMjVhNDU3ZmI5YjA3NDg5ZDMxM2I0MWE=";
+	public static final int MIN_DP_FOR_TWOCOLUMN = 600;
+	public final LruCache<String, Bitmap> bitmapCache = new LruCache<>(512);
 	public FortniteContentWebsiteService fortniteContentWebsiteService;
 	public FortnitePublicService fortnitePublicService;
 	public AccountPublicService accountPublicService;
@@ -54,7 +56,6 @@ public class FortniteCompanionApp extends Application {
 	public Registry itemRegistry;
 	public EventBus eventBus = new EventBus();
 	public XGameProfile currentLoggedIn;
-	public final LruCache<String, Bitmap> bitmapCache = new LruCache<>(512);
 
 	@Override
 	public void onCreate() {

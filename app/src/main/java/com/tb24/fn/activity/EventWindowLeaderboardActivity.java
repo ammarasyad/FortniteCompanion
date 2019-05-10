@@ -42,6 +42,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.R;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.GameProfile;
@@ -119,7 +120,7 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 		getActionBar().setSubtitle(intent.getStringExtra(ARG_SUBTITLE));
 		color = (int) Long.parseLong(intent.getStringExtra(ARG_COLOR), 16);
 		DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
-		sideBySide = (displayMetrics.widthPixels / displayMetrics.density) >= 600;
+		sideBySide = (displayMetrics.widthPixels / displayMetrics.density) >= FortniteCompanionApp.MIN_DP_FOR_TWOCOLUMN;
 		rightSide = findViewById(R.id.lb_right_side);
 		rightSide.setVisibility(sideBySide ? View.VISIBLE : View.GONE);
 		list = findViewById(R.id.main_recycler_view);
@@ -195,10 +196,10 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 							});
 
 							for (LeaderboardsResponse.LeaderboardEntry entry : body.entries) {
-								if (entry._modifiedTeamAccountIds_ == null) {
-									entry._modifiedTeamAccountIds_ = Lists.transform(Arrays.asList(entry.teamAccountIds), new Function<String, GameProfile>() {
+								if (entry.modifiedTeamAccountIds == null) {
+									entry.modifiedTeamAccountIds = Lists.transform(Arrays.asList(entry.teamAccountIds), new Function<String, GameProfile>() {
 										@Override
-										public GameProfile apply(@NonNull String input) {
+										public GameProfile apply(String input) {
 											if (!map.containsKey(input)) {
 												return new GameProfile(input, null);
 											}
@@ -317,6 +318,7 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 		Map<String, Integer> map = new HashMap<>();
 		int matchesPlayed = entry.sessionHistory.length, wins = 0, placementPoints = 0, elimPoints = 0;
 
+		// TODO this algorithm isn't correct
 		for (LeaderboardsResponse.SessionHistory session : entry.sessionHistory) {
 			int placementStatIndex = session.trackedStats.get("PLACEMENT_STAT_INDEX");
 			int teamElimsStatIndex = session.trackedStats.get("TEAM_ELIMS_STAT_INDEX");
@@ -366,10 +368,10 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 	private AlertDialog showPlayerProfilesDialog(final Context ctx, final LeaderboardsResponse.LeaderboardEntry entry) {
 		return new AlertDialog.Builder(ctx)
 				.setTitle("Player Profiles")
-				.setItems(Iterables.toArray(Iterables.transform(entry._modifiedTeamAccountIds_, GAME_PROFILE_TO_DISPLAY_NAME), String.class), new DialogInterface.OnClickListener() {
+				.setItems(Iterables.toArray(Iterables.transform(entry.modifiedTeamAccountIds, GAME_PROFILE_TO_DISPLAY_NAME), String.class), new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
-						BRStatsActivity.openStats(ctx, entry._modifiedTeamAccountIds_.get(which));
+						BRStatsActivity.openStats(ctx, entry.modifiedTeamAccountIds.get(which));
 					}
 				})
 				.setNegativeButton(android.R.string.cancel, null)
@@ -379,7 +381,7 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 	private AlertDialog showMatchHistoryDialog(final Context ctx, final LeaderboardsResponse.LeaderboardEntry entry) {
 		View view = LayoutInflater.from(ctx).inflate(R.layout.dialog_match_history, null);
 		((TextView) view.findViewById(R.id.lb_mh_event)).setText(getIntent().getStringExtra(ARG_SUBTITLE));
-		((TextView) view.findViewById(R.id.lb_mh_team)).setText(AMP_JOINER.join(Iterables.transform(entry._modifiedTeamAccountIds_, GAME_PROFILE_TO_DISPLAY_NAME)));
+		((TextView) view.findViewById(R.id.lb_mh_team)).setText(AMP_JOINER.join(Iterables.transform(entry.modifiedTeamAccountIds, GAME_PROFILE_TO_DISPLAY_NAME)));
 		TableLayout table = view.findViewById(R.id.lb_s_table);
 		int size = (int) Utils.dp(getResources(), 24);
 		Drawable drawableElim = getDrawable(R.drawable.t_icon_broadcasteliminations);
@@ -589,8 +591,8 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 			}
 
 			holder1.place.setText("#" + entry.rank);
-			holder1.title.setText(AMP_JOINER.join(Iterables.transform(entry._modifiedTeamAccountIds_, GAME_PROFILE_TO_DISPLAY_NAME)));
-			holder1.points.setText("" + entry.pointsEarned);
+			holder1.title.setText(AMP_JOINER.join(Iterables.transform(entry.modifiedTeamAccountIds, GAME_PROFILE_TO_DISPLAY_NAME)));
+			holder1.points.setText(String.valueOf(entry.pointsEarned));
 		}
 
 		@Override
@@ -665,11 +667,11 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 		}
 	}
 
-	private class HeaderVH extends RecyclerView.ViewHolder {
-		public HeaderVH(View itemView) {
-			super(itemView);
-		}
-	}
+//	private class HeaderVH extends RecyclerView.ViewHolder {
+//		public HeaderVH(View itemView) {
+//			super(itemView);
+//		}
+//	}
 
 	private static class ParallelogramShape extends RectShape {
 		private final int indent;

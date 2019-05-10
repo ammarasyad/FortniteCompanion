@@ -20,6 +20,7 @@ import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.util.EFortRarity;
+import com.tb24.fn.util.ItemUtils;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
@@ -83,8 +84,8 @@ public class LockerActivity extends BaseActivity {
 			public int compare(FortItemStack o1, FortItemStack o2) {
 				JsonElement jsonElement = getThisApplication().itemRegistry.get(o1.templateId);
 				JsonElement jsonElement1 = getThisApplication().itemRegistry.get(o2.templateId);
-				EFortRarity rarity1 = EFortRarity.HANDMADE;
-				EFortRarity rarity2 = EFortRarity.HANDMADE;
+				EFortRarity rarity1 = EFortRarity.COMMON;
+				EFortRarity rarity2 = EFortRarity.COMMON;
 
 				if (jsonElement != null) {
 					rarity1 = EFortRarity.fromObject(jsonElement.getAsJsonArray().get(0).getAsJsonObject());
@@ -132,11 +133,14 @@ public class LockerActivity extends BaseActivity {
 
 			if (json != null) {
 				JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
-				bitmap = getBitmapImageFromItemStackData(activity, item, jsonObject);
-				holder.rarityBackground.setBackgroundResource(rarityBackground(jsonObject));
+				bitmap = ItemUtils.getBitmapImageFromItemStackData(activity, item, jsonObject);
+				holder.rarityBackground.setBackgroundResource(ItemUtils.rarityBackground(jsonObject));
 			}
 
+//			Log.d("LockerActivity", "Bitmap of " + item + " is null");
 			holder.displayImage.setImageBitmap(bitmap);
+
+
 			holder.itemName.setText(bitmap == null ? item.templateId : null);
 			holder.quantity.setVisibility(item.quantity > 1 ? View.VISIBLE : View.GONE);
 			holder.quantity.setText(String.valueOf(item.quantity));
@@ -148,7 +152,7 @@ public class LockerActivity extends BaseActivity {
 					}
 
 					ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.fort_item_detail_box, null);
-					populateItemDetailBox(viewGroup, item, json);
+					ItemUtils.populateItemDetailBox(viewGroup, item, json);
 					Toast toast = new Toast(activity);
 					toast.setView(viewGroup);
 					toast.setDuration(Toast.LENGTH_LONG);
@@ -163,8 +167,10 @@ public class LockerActivity extends BaseActivity {
 		}
 
 		static class LockerViewHolder extends RecyclerView.ViewHolder {
-			ImageView displayImage, favorite;
-			TextView itemName, quantity;
+			ImageView displayImage;
+			TextView itemName;
+			TextView quantity;
+			ImageView favorite;
 			View rarityBackground;
 
 			LockerViewHolder(View itemView) {

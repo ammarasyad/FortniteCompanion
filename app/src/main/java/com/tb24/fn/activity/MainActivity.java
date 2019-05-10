@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,9 +16,11 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.R;
 import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
@@ -70,6 +73,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		loginBtn.setOnClickListener(this);
 		profileFrame = findViewById(R.id.profile_frame);
 		profileContent = findViewById(R.id.p_root);
+		DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+		boolean sideBySide = (displayMetrics.widthPixels / displayMetrics.density) >= FortniteCompanionApp.MIN_DP_FOR_TWOCOLUMN;
+		((LinearLayout) findViewById(R.id.activity_main_root)).setOrientation(sideBySide ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
+
+		if (sideBySide) {
+			profileFrame.getLayoutParams().width = (int) Utils.dp(getResources(), 300);
+		}
+
 		profileLc = new LoadingViewController(profileFrame, profileContent, "No profile data") {
 			@Override
 			public boolean shouldShowEmpty() {

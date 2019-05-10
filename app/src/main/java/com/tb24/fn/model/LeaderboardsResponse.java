@@ -1,5 +1,7 @@
 package com.tb24.fn.model;
 
+import com.google.gson.annotations.Expose;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +28,8 @@ public class LeaderboardsResponse {
 		public Map<String, PointBreakdown> pointBreakdown;
 		public SessionHistory[] sessionHistory;
 		public String[] tokens;
-		public List<GameProfile> _modifiedTeamAccountIds_;
+		@Expose(serialize = false, deserialize = false)
+		public List<GameProfile> modifiedTeamAccountIds;
 	}
 
 	public static class SessionHistory {

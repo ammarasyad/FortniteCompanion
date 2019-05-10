@@ -43,6 +43,7 @@ import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.PurchaseCatalogEntry;
 import com.tb24.fn.util.EFortRarity;
+import com.tb24.fn.util.ItemUtils;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
@@ -137,6 +138,8 @@ public class ItemShopActivity extends BaseActivity {
 	public void display(FortCatalogResponse data) {
 //		Toast.makeText(this, "Expiration: " + Utils.formatDateSimple(data.expiration), Toast.LENGTH_LONG).show();
 		List<FortCatalogResponse.CatalogEntry> entries = new ArrayList<>();
+		List<FortCatalogResponse.CatalogEntry> weekly = new ArrayList<>();
+		List<FortCatalogResponse.CatalogEntry> daily = new ArrayList<>();
 
 		for (FortCatalogResponse.Storefront storefront : data.storefronts) {
 			List<FortCatalogResponse.CatalogEntry> c = Arrays.asList(storefront.catalogEntries);
@@ -148,15 +151,15 @@ public class ItemShopActivity extends BaseActivity {
 						return ComparisonChain.start().compare(o1.categories[0], o2.categories[0]).compare(o2.sortPriority, o1.sortPriority).result();
 					}
 				});
-				entries.addAll(c);
+				weekly = c;
 			} else if (storefront.name.equals("BRDailyStorefront")) {
 				Collections.sort(c, new Comparator<FortCatalogResponse.CatalogEntry>() {
 					@Override
 					public int compare(FortCatalogResponse.CatalogEntry o1, FortCatalogResponse.CatalogEntry o2) {
 						JsonElement jsonElement = getThisApplication().itemRegistry.get(o1.itemGrants[0].templateId);
 						JsonElement jsonElement1 = getThisApplication().itemRegistry.get(o2.itemGrants[0].templateId);
-						EFortRarity rarity1 = EFortRarity.HANDMADE;
-						EFortRarity rarity2 = EFortRarity.HANDMADE;
+						EFortRarity rarity1 = EFortRarity.COMMON;
+						EFortRarity rarity2 = EFortRarity.COMMON;
 
 						if (jsonElement != null) {
 							rarity1 = EFortRarity.fromObject(jsonElement.getAsJsonArray().get(0).getAsJsonObject());
@@ -169,10 +172,12 @@ public class ItemShopActivity extends BaseActivity {
 						return ComparisonChain.start().compare(rarity2, rarity1).compare(o2.prices[0].basePrice, o1.prices[0].basePrice).compare(o1.itemGrants[0].getIdName(), o2.itemGrants[0].getIdName()).result();
 					}
 				});
-				entries.addAll(c);
+				daily = c;
 			}
 		}
 
+		entries.addAll(weekly);
+		entries.addAll(daily);
 		list.setAdapter(adapter = new ItemShopAdapter(this, entries));
 		lc.content();
 	}
@@ -251,7 +256,7 @@ public class ItemShopActivity extends BaseActivity {
 		soundPool.release();
 	}
 
-	//	private void executeSetAffiliate(String s) {
+//	private void executeSetAffiliate(String s) {
 //		new Thread() {
 //			@Override
 //			public void run() {
@@ -300,7 +305,7 @@ public class ItemShopActivity extends BaseActivity {
 
 					if (i == 0) {
 						holder.itemName.setText(fromDevName[i]);
-						holder.shortDescription.setText(shortDescriptionFromCtg(itemStack.getIdCategory()));
+						holder.shortDescription.setText(ItemUtils.shortDescriptionFromCtg(itemStack.getIdCategory()));
 					}
 
 					continue;
@@ -312,12 +317,12 @@ public class ItemShopActivity extends BaseActivity {
 
 				if (i == 0) {
 					jsonFirst = json;
-					bitmap = getBitmapImageFromItemStackData(activity, itemStack, jsonObject);
+					bitmap = ItemUtils.getBitmapImageFromItemStackData(activity, itemStack, jsonObject);
 
 					try {
 						holder.itemName.setText(displayName);
-						holder.shortDescription.setText(shortDescription(itemStack, jsonObject));
-						holder.backgroundable.setBackgroundResource(rarityBackground(jsonObject));
+						holder.shortDescription.setText(ItemUtils.shortDescription(itemStack, jsonObject));
+						holder.backgroundable.setBackgroundResource(ItemUtils.rarityBackground(jsonObject));
 					} catch (NullPointerException e) {
 						Log.w("ItemShopActivity", "Failed setting short description or rarity background for " + itemStack.templateId, e);
 					}
@@ -496,9 +501,9 @@ public class ItemShopActivity extends BaseActivity {
 					JsonElement json = jsons.get(previewingIndex);
 
 					if (json != null) {
-						BaseActivity.populateItemDetailBox(view, itemStack, json);
+						ItemUtils.populateItemDetailBox(view, itemStack, json);
 					} else {
-						((TextView) view.findViewById(R.id.item_text1)).setText("Unknown | " + shortDescriptionFromCtg(itemStack.getIdCategory()));
+						((TextView) view.findViewById(R.id.item_text1)).setText("Unknown | " + ItemUtils.shortDescriptionFromCtg(itemStack.getIdCategory()));
 						((TextView) view.findViewById(R.id.item_text2)).setText(compiledNames.get(previewingIndex));
 					}
 				}
@@ -509,14 +514,15 @@ public class ItemShopActivity extends BaseActivity {
 					btnPurchase.setText(purchasePending ? "Purchase pending" : item.itemGrants.length == 1 ? "Purchase" : "Purchase items");
 					btnPurchase.setEnabled(!purchasePending);
 					btnPurchase.setVisibility(finallyOwned ? View.GONE : View.VISIBLE);
+					boolean notEnough = activity.vBucksQty < price.basePrice;
 
-					if (!finallyOwned && activity.vBucksQty < price.basePrice) {
+					if (notEnough) {
 						btnPurchase.setEnabled(false);
 						// TODO "Get V-Bucks"
 						btnPurchase.setText("Not enough V-Bucks");
 					}
 
-					btnGift.setVisibility(activity.attributes.allowed_to_send_gifts && item.giftInfo != null && item.giftInfo.bIsEnabled ? View.VISIBLE : View.GONE);
+					btnGift.setVisibility(activity.attributes.allowed_to_send_gifts && item.giftInfo != null && item.giftInfo.bIsEnabled && !notEnough ? View.VISIBLE : View.GONE);
 				}
 
 				private void doPurchase(final FortCatalogResponse.CatalogEntry item) {
@@ -629,8 +635,8 @@ public class ItemShopActivity extends BaseActivity {
 
 			if (json != null) {
 				JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
-				bitmap = getBitmapImageFromItemStackData(activity, item, jsonObject);
-				rarityBackground.setBackgroundResource(rarityBackground(jsonObject));
+				bitmap = ItemUtils.getBitmapImageFromItemStackData(activity, item, jsonObject);
+				rarityBackground.setBackgroundResource(ItemUtils.rarityBackground(jsonObject));
 			}
 
 			((ImageView) slotView.findViewById(R.id.item_img)).setImageBitmap(bitmap);
@@ -647,8 +653,14 @@ public class ItemShopActivity extends BaseActivity {
 
 		static class ItemShopViewHolder extends RecyclerView.ViewHolder {
 			ImageView displayImage;//, blur;
-			TextView itemName, itemPrice, itemSale, shortDescription, banner;
-			ViewGroup backgroundable, owned, priceGroup;
+			TextView itemName;
+			TextView itemPrice;
+			TextView itemSale;
+			TextView shortDescription;
+			TextView banner;
+			ViewGroup backgroundable;
+			ViewGroup owned;
+			ViewGroup priceGroup;
 
 			ItemShopViewHolder(View itemView) {
 				super(itemView);
