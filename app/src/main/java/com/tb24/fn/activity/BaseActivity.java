@@ -14,14 +14,14 @@ import java.util.Map;
 
 public abstract class BaseActivity extends Activity {
 	public static int countAndSetVbucks(BaseActivity activity, ViewGroup vbxView) {
-		if (!activity.getThisApplication().profileData.containsKey("common_core")) {
+		if (!activity.getThisApplication().profileManager.profileData.containsKey("common_core")) {
 			vbxView.setVisibility(View.GONE);
 			return 0;
 		}
 
 		int vBucksQty = 0;
 
-		for (Map.Entry<String, FortItemStack> entry : activity.getThisApplication().profileData.get("common_core").items.entrySet()) {
+		for (Map.Entry<String, FortItemStack> entry : activity.getThisApplication().profileManager.profileData.get("common_core").items.entrySet()) {
 			if (entry.getValue().templateId.equals("Currency:MtxGiveaway")) {
 				vBucksQty += entry.getValue().quantity;
 			}

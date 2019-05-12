@@ -50,10 +50,6 @@ import java.util.Random;
 
 public final class Utils {
 	public static final Gson GSON = new Gson();
-	private static final int SECONDS_PER_MINUTE = 60;
-	private static final int SECONDS_PER_HOUR = 60 * 60;
-	private static final int SECONDS_PER_DAY = 24 * 60 * 60;
-	private static final Joiner JOINER = Joiner.on(' ');
 	public static final String[] STRINGS = {"That wasn't supposed to happen", "There was an error", "We hit a roadblock", "Not the llama you're looking for", "Whoops!"};
 	public static final Random RANDOM = new Random();
 	public static final DialogInterface.OnClickListener LISTENER_TO_CANCEL = new DialogInterface.OnClickListener() {
@@ -62,6 +58,10 @@ public final class Utils {
 			dialog.cancel();
 		}
 	};
+	private static final int SECONDS_PER_MINUTE = 60;
+	private static final int SECONDS_PER_HOUR = 60 * 60;
+	private static final int SECONDS_PER_DAY = 24 * 60 * 60;
+	private static final Joiner JOINER = Joiner.on(' ');
 	private static boolean darkSet;
 	private static int dark;
 
@@ -166,19 +166,19 @@ public final class Utils {
 			@Override
 			public void onShow(DialogInterface dialog) {
 				final Button button = ad.getButton(DialogInterface.BUTTON_POSITIVE);
-				button.setEnabled(false);
+				button.setEnabled(editText.getText().length() != 0);
 				editText.addTextChangedListener(new TextWatcher() {
 					@Override
-					public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+					public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 					}
 
 					@Override
-					public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+					public void onTextChanged(CharSequence s, int start, int before, int count) {
 					}
 
 					@Override
-					public void afterTextChanged(Editable editable) {
-						button.setEnabled(editable.toString().trim().length() > 0);
+					public void afterTextChanged(Editable s) {
+						button.setEnabled(s.toString().trim().length() > 0);
 					}
 				});
 				editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {

@@ -26,17 +26,17 @@ public class FortBasicDataResponse extends FortBasicDataResponseBase {
 	public static class CommonUISimpleMessageBase {
 		public String layout;
 		public String image;
-		public boolean hidden;
+		public Boolean hidden;
 		public String messagetype;
 		public String _type;
 		public String adspace;
 		public String title;
 		public String body;
-		public boolean spotlight;
+		public Boolean spotlight;
 	}
 
 	public static class CommonUISimpleMessagePlatform {
-		public boolean hidden;
+		public Boolean hidden;
 		public String _type;
 		public CommonUISimpleMessageBase message;
 		public String platform;
@@ -134,7 +134,7 @@ public class FortBasicDataResponse extends FortBasicDataResponseBase {
 	public static class CreativeAdDisplayInfo {
 		public String sub_header;
 		public String image;
-		public boolean hidden;
+		public Boolean hidden;
 		public String _type;
 		public String description;
 		public String header;

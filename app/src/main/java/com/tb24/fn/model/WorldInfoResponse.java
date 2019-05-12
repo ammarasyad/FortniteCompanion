@@ -14,8 +14,8 @@ public class WorldInfoResponse {
 		public String displayName;
 		public String uniqueId;
 		public Integer theaterSlot;
-		public boolean bIsTestTheater;
-		public boolean bHideLikeTestTheater;
+		public Boolean bIsTestTheater;
+		public Boolean bHideLikeTestTheater;
 		public String requiredEventFlag;
 		public String missionRewardNamedWeightsRowName;
 		public String description;
@@ -73,7 +73,7 @@ public class WorldInfoResponse {
 
 	public static class WorldInfoItemStack {
 		public String itemType;
-		public int quantity;
+		public Integer quantity;
 
 		public String getIdCategory() {
 			return itemType.split(":")[0];

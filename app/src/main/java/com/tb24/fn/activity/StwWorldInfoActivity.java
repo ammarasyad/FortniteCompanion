@@ -1,7 +1,6 @@
 package com.tb24.fn.activity;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.view.ViewGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -25,7 +24,7 @@ public class StwWorldInfoActivity extends BaseActivity {
 	public static final Joiner NEWLINE = Joiner.on('\n');
 	public static final Function<WorldInfoResponse.WorldInfoItemStack, String> ITEM_STACK_STRING_FUNCTION = new Function<WorldInfoResponse.WorldInfoItemStack, String>() {
 		@Override
-		public String apply(@NonNull WorldInfoResponse.WorldInfoItemStack input) {
+		public String apply(WorldInfoResponse.WorldInfoItemStack input) {
 			return "  " + (input.itemType == null ? "" : input.itemType);
 		}
 	};
@@ -39,7 +38,6 @@ public class StwWorldInfoActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.common_loadable_framed);
 		setupActionBar();
-		//TODO display past season data
 		ViewGroup frame = findViewById(R.id.main_content);
 		ScrollView scrollView = new ScrollView(this);
 		this.v = new TextView(this);
@@ -100,7 +98,7 @@ public class StwWorldInfoActivity extends BaseActivity {
 			final int finalI = i;
 			sb.append(NEWLINE.join(Lists.transform(Arrays.asList(data.missions[i].availableMissions), new Function<WorldInfoResponse.Mission, String>() {
 				@Override
-				public String apply(@NonNull WorldInfoResponse.Mission input) {
+				public String apply(WorldInfoResponse.Mission input) {
 					StringBuilder text = new StringBuilder("Mission:\n  " + input.missionGenerator + "\n  (" + input.missionGuid + ")\n");
 
 					for (WorldInfoResponse.MissionAlert entry : data.missionAlerts[finalI].availableMissionAlerts) {

@@ -16,15 +16,15 @@ public class FortMcpProfile {
 	public String _id;
 	public Date created;
 	public Date updated;
-	public int rvn;
-	public int wipeNumber;
+	public Integer rvn;
+	public Integer wipeNumber;
 	public String accountId;
 	public String profileId;
 	public String version;
 	public Map<String, FortItemStack> items;
 	@Expose(deserialize = false, serialize = false)
 	public FortMcpProfile.Stats stats;
-	public int commandRevision;
+	public Integer commandRevision;
 
 	public static class Stats {
 		public JsonObject attributes;

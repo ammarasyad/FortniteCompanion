@@ -15,10 +15,9 @@ import com.tb24.fn.R;
 import com.tb24.fn.activity.BaseActivity;
 import com.tb24.fn.model.FortItemStack;
 
-import org.jetbrains.annotations.NotNull;
-
 public class ItemUtils {
 	public static JsonObject setData;
+	public static JsonObject userFacingTagsData;
 
 	public ItemUtils() {
 	}
@@ -86,19 +85,26 @@ public class ItemUtils {
 		return s;
 	}
 
-	@NotNull
 	public static String shortDescriptionFromCtg(String idCategory) {
-		return idCategory.equals("AthenaCharacter") ? "Outfit" : idCategory.equals("AthenaPickaxe") ? "Harvesting Tool" : idCategory.equals("AthenaDance") ? "Emote" : idCategory.equals("AthenaItemWrap") ? "Wrap" : "";
+		switch (idCategory) {
+			case "AthenaCharacter":
+				return "Outfit";
+			case "AthenaDance":
+				return "Emote";
+			case "AthenaGlider":
+				return "Glider";
+			case "AthenaItemWrap":
+				return "Wrap";
+			case "AthenaPickaxe":
+				return "Harvesting Tool";
+			default:
+				return "Unknown";
+		}
 	}
 
 	public static void populateItemDetailBox(ViewGroup viewGroup, FortItemStack item, JsonElement json) {
 		JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
-		EFortRarity rarity = EFortRarity.UNCOMMON;
-
-		if (jsonObject.has("Rarity")) {
-			rarity = EFortRarity.from(jsonObject.get("Rarity").getAsString());
-		}
-
+		EFortRarity rarity = EFortRarity.fromObject(jsonObject);
 		View viewById = viewGroup.findViewById(R.id.to_set_background);
 		viewById.setBackgroundResource(rarityBackground2(jsonObject));
 		int twelve = (int) Utils.dp(viewGroup.getResources(), 12);
@@ -106,18 +112,18 @@ public class ItemUtils {
 		viewById.setPadding(twelve, eight, twelve, eight);
 		((TextView) viewGroup.findViewById(R.id.item_text1)).setText(rarity.name + " | " + shortDescription(item, jsonObject));
 		((TextView) viewGroup.findViewById(R.id.item_text2)).setText((item.attributes != null && item.attributes.has("DUMMY") ? "[Dummy] " : "") + JsonUtils.getStringOr("DisplayName", jsonObject, "??"));
-		String description = JsonUtils.getStringOr("Description", jsonObject, "");
-		CharSequence setText = "";
+		CharSequence concat = JsonUtils.getStringOr("Description", jsonObject, "");
 
 		if (jsonObject.has("GameplayTags")) {
 			for (JsonElement s : jsonObject.get("GameplayTags").getAsJsonObject().get("gameplay_tags").getAsJsonArray()) {
 				if (s.getAsString().startsWith("Cosmetics.Set.")) {
-					setText = TextUtils.concat('\n' + "Part of the ", Utils.span(setData.get(s.getAsString()).getAsJsonObject().get("DisplayName").getAsString(), new StyleSpan(Typeface.BOLD)), " set.");
+					concat = TextUtils.concat(concat, '\n' + "Part of the ", Utils.span(setData.get(s.getAsString()).getAsJsonObject().get("DisplayName").getAsString(), new StyleSpan(Typeface.BOLD)), " set.");
+				} else if (s.getAsString().startsWith("Cosmetics.UserFacingFlags.")) {
+					concat = TextUtils.concat(concat, "\n[", Utils.span(userFacingTagsData.get(s.getAsString()).getAsJsonObject().get("DisplayName").getAsString(), new StyleSpan(Typeface.ITALIC)), "]");
 				}
 			}
 		}
 
-		CharSequence concat = TextUtils.concat(description, setText);
 		TextView textItemDescription = viewGroup.findViewById(R.id.item_text3);
 
 		if (concat.length() == 0) {

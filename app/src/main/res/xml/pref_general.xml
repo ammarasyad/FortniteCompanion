@@ -4,6 +4,13 @@
 		app:key="matchmaking_region"
 		app:title="Events Region" />
 
+	<!--Leaderboard Privacy-->
+	<android.support.v7.preference.CheckBoxPreference
+		app:defaultValue="false"
+		app:key="leaderboard_privacy"
+		app:persistent="false"
+		app:title="Opt out of public leaderboards" />
+
 	<android.support.v7.preference.CheckBoxPreference
 		app:defaultValue="false"
 		app:key="fake_purchases"

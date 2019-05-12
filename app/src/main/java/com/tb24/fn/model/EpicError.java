@@ -12,7 +12,7 @@ public class EpicError {
 	public String errorCode;
 	public String errorMessage;
 	public String[] messageVars;
-	public int numericErrorCode;
+	public Integer numericErrorCode;
 	public String originatingService;
 	public String intent;
 

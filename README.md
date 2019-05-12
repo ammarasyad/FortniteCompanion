@@ -8,6 +8,7 @@ Extremely experimantal Mini Fortnite Client Android app.
 * View BR cosmetics
 * View Item Shop, full display for unencrypted items
 * Make Battle Royale Item Shop purchases
+* Change leaderboard privacy setting
 
 ## To-do
 * Add creative map code

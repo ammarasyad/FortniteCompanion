@@ -10,8 +10,8 @@ public class LeaderboardsResponse {
 	public String gameId;
 	public String eventId;
 	public String eventWindowId;
-	public int page;
-	public int totalPages;
+	public Integer page;
+	public Integer totalPages;
 	public List<LeaderboardEntry> entries;
 
 	public static class LeaderboardEntry {
@@ -21,10 +21,10 @@ public class LeaderboardsResponse {
 		public String teamId;
 		public String[] teamAccountIds;
 		public String liveSessionId;
-		public int pointsEarned;
-		public float score;
-		public int rank;
-		public float percentile;
+		public Integer pointsEarned;
+		public Float score;
+		public Integer rank;
+		public Float percentile;
 		public Map<String, PointBreakdown> pointBreakdown;
 		public SessionHistory[] sessionHistory;
 		public String[] tokens;
@@ -39,7 +39,7 @@ public class LeaderboardsResponse {
 	}
 
 	public static class PointBreakdown {
-		public int timesAchieved;
-		public int pointsEarned;
+		public Integer timesAchieved;
+		public Integer pointsEarned;
 	}
 }

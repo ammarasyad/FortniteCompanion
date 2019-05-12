@@ -13,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.common.collect.ComparisonChain;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.R;
@@ -55,7 +56,7 @@ public class LockerActivity extends BaseActivity {
 			}
 		});
 		lc = new LoadingViewController(this, list, "");
-		displayData(getThisApplication().profileData.get("athena"));
+		displayData(getThisApplication().profileManager.profileData.get("athena"));
 		getThisApplication().eventBus.register(this);
 	}
 
@@ -137,10 +138,7 @@ public class LockerActivity extends BaseActivity {
 				holder.rarityBackground.setBackgroundResource(ItemUtils.rarityBackground(jsonObject));
 			}
 
-//			Log.d("LockerActivity", "Bitmap of " + item + " is null");
 			holder.displayImage.setImageBitmap(bitmap);
-
-
 			holder.itemName.setText(bitmap == null ? item.templateId : null);
 			holder.quantity.setVisibility(item.quantity > 1 ? View.VISIBLE : View.GONE);
 			holder.quantity.setText(String.valueOf(item.quantity));
@@ -152,11 +150,22 @@ public class LockerActivity extends BaseActivity {
 					}
 
 					ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.fort_item_detail_box, null);
+//					viewGroup.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 					ItemUtils.populateItemDetailBox(viewGroup, item, json);
 					Toast toast = new Toast(activity);
 					toast.setView(viewGroup);
 					toast.setDuration(Toast.LENGTH_LONG);
 					toast.show();
+				}
+			});
+			holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+				@Override
+				public boolean onLongClick(View v) {
+					if (item.attributes != null) {
+						Utils.dialogOkNonMain(activity, "Attributes", new GsonBuilder().setPrettyPrinting().create().toJson(item.attributes));
+						return true;
+					}
+					return false;
 				}
 			});
 		}

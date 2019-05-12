@@ -1,11 +1,11 @@
 package com.tb24.fn.network;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 
+import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.util.Utils;
 
 import java.io.IOException;
@@ -19,13 +19,15 @@ import okhttp3.Response;
 
 public class DefaultInterceptor implements okhttp3.Interceptor {
 	private final SharedPreferences defaultSharedPreferences;
+	private final FortniteCompanionApp app;
 	private String deviceId;
 
-	public DefaultInterceptor(Context ctx) {
-		defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+	public DefaultInterceptor(FortniteCompanionApp app) {
+		this.app = app;
+		defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(app);
 
 		try {
-			deviceId = Utils.toHexString(MessageDigest.getInstance("MD5").digest(Settings.Secure.getString(ctx.getContentResolver(), Settings.Secure.ANDROID_ID).getBytes()));
+			deviceId = Utils.toHexString(MessageDigest.getInstance("MD5").digest(Settings.Secure.getString(app.getContentResolver(), Settings.Secure.ANDROID_ID).getBytes()));
 		} catch (NoSuchAlgorithmException e) {
 			deviceId = UUID.randomUUID().toString().replace("-", "");
 		}

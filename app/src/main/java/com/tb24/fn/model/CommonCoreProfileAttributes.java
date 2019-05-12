@@ -7,8 +7,8 @@ public class CommonCoreProfileAttributes extends ProfileAttributes {
 	public Integer inventory_limit_bonus;
 	public String current_mtx_platform;
 	public String mtx_affiliate;
-	public boolean allowed_to_send_gifts;
-	public boolean mfa_enabled;
-	public boolean allowed_to_receive_gifts;
+	public Boolean allowed_to_send_gifts;
+	public Boolean mfa_enabled;
+	public Boolean allowed_to_receive_gifts;
 	public String quickreturn_cooldown;
 }

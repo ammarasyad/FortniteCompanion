@@ -48,9 +48,9 @@ public class FortCatalogResponse {
 		//}
 		public JsonObject meta;
 		public String matchFilter;
-		public float filterWeight;
+		public Float filterWeight;
 		public GiftInfo giftInfo;
-		public boolean refundable;
+		public Boolean refundable;
 		// com.epicgames.fortnite.core.game.fulfillments.BattlePassTierFulfillment
 		public String fulfillmentClass;
 	}
@@ -79,7 +79,7 @@ public class FortCatalogResponse {
 	}
 
 	public static class GiftInfo {
-		public boolean bIsEnabled;
+		public Boolean bIsEnabled;
 		public String forcedGiftBoxTemplateId;
 		public JsonElement[] purchaseRequirements;
 		public JsonElement[] giftRecordIds;

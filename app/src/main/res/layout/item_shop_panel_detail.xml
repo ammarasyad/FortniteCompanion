@@ -51,7 +51,7 @@
 				android:textStyle="bold"
 				tools:text="1,800" />
 
-			<com.tb24.fn.util.StrikeTextView
+			<com.tb24.fn.view.StrikeTextView
 				android:id="@+id/item_sale_from"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"

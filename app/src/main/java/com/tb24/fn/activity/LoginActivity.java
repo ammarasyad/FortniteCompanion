@@ -57,6 +57,8 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 	private LoadingViewController lc;
 	private Button mEmailSignInButton;
 	private Button mGetOneTimePasswordButton;
+	private AlertDialog twoFaDialog;
+	private TwoFactorAuthExtendedError twoFaError;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -188,29 +190,16 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
-								final TwoFactorAuthExtendedError error = EpicError.parse(response, TwoFactorAuthExtendedError.class);
+								twoFaError = EpicError.parse(response, TwoFactorAuthExtendedError.class);
 
-								if (error.errorCode.equals("errors.com.epicgames.common.two_factor_authentication.required") || error.numericErrorCode == 1042) {
-									AlertDialog dialog = Utils.createEditTextDialog(LoginActivity.this, "Enter your security code", getString(R.string.action_login), new Utils.EditTextDialogCallback() {
-										@Override
-										public void onResult(String s) {
-											handleTwoFa(s, error);
-										}
-									});
-									dialog.setMessage(error.metadata.twoFactorMethod.equals("email") ? String.format("Your account has two-factor security enabled. Enter the security code emailed to you at %s.", email) : error.metadata.twoFactorMethod.equals("authenticator") ? "Your account has two-factor security enabled. Enter the security code from your authenticator app." : null);
-									dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-										@Override
-										public void onCancel(DialogInterface dialog) {
-											unshowAsync();
-										}
-									});
-									dialog.setCanceledOnTouchOutside(false);
-									dialog.show();
-									((EditText) dialog.findViewById(R.id.dialog_edit_text_field)).setHint("Security code");
+								if (twoFaError.errorCode.equals("errors.com.epicgames.common.two_factor_authentication.required") || twoFaError.numericErrorCode == 1042) {
+									init2FaDialog();
+									twoFaDialog.setMessage(twoFaError.metadata.twoFactorMethod.equals("email") ? String.format("Your account has two-factor security enabled. Enter the security code emailed to you at %s.", email) : twoFaError.metadata.twoFactorMethod.equals("authenticator") ? "Your account has two-factor security enabled. Enter the security code from your authenticator app." : null);
+									twoFaDialog.show();
+									((EditText) twoFaDialog.findViewById(R.id.dialog_edit_text_field)).setHint("Security code");
 								} else {
 									unshowAsync();
-									//The security code you entered was not valid.
-									errored(error.getDisplayText());
+									errored(twoFaError.getDisplayText());
 								}
 							}
 						});
@@ -234,7 +223,13 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 					if (twoFaResponse.isSuccessful()) {
 						loginSucceded(twoFaResponse);
 					} else {
-						unshowAsync();
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								twoFaDialog.show();
+							}
+						});
+						//The security code you entered was not valid.
 						errored(EpicError.parse(twoFaResponse).getDisplayText());
 					}
 				} catch (IOException e) {
@@ -243,6 +238,26 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 				}
 			}
 		}.start();
+	}
+
+	private void init2FaDialog() {
+		if (twoFaDialog != null) {
+			return;
+		}
+
+		twoFaDialog = Utils.createEditTextDialog(LoginActivity.this, "Enter your security code", getString(R.string.action_login), new Utils.EditTextDialogCallback() {
+			@Override
+			public void onResult(String s) {
+				handleTwoFa(s, twoFaError);
+			}
+		});
+		twoFaDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				unshowAsync();
+			}
+		});
+		twoFaDialog.setCanceledOnTouchOutside(false);
 	}
 
 	private void errored(CharSequence errorMessage) {

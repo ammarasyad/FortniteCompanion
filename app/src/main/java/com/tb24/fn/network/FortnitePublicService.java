@@ -1,6 +1,8 @@
 package com.tb24.fn.network;
 
 import com.google.gson.JsonObject;
+import com.tb24.fn.model.AccountPrivacyResponse;
+import com.tb24.fn.model.CalendarTimelineResponse;
 import com.tb24.fn.model.FortCatalogResponse;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.FortStatsV2Response;
@@ -20,6 +22,12 @@ public interface FortnitePublicService {
 	@GET("/fortnite/api/game/v2/world/info")
 	Call<WorldInfoResponse> pveWorldInfo();
 
+	@GET("/fortnite/api/game/v2/privacy/account/{id}")
+	Call<AccountPrivacyResponse> getAccountPrivacy(@Path("id") String id);
+
+	@POST("/fortnite/api/game/v2/privacy/account/{id}")
+	Call<AccountPrivacyResponse> setAccountPrivacy(@Path("id") String id, @Body AccountPrivacyResponse payload);
+
 	@GET("/fortnite/api/storefront/v2/catalog")
 	Call<FortCatalogResponse> storefrontCatalog();
 
@@ -27,7 +35,7 @@ public interface FortnitePublicService {
 	Call<String[]> storefrontKeychain();
 
 	@GET("/fortnite/api/calendar/v1/timeline")
-	Call<JsonObject> calendarTimeline();
+	Call<CalendarTimelineResponse> calendarTimeline();
 
 	@GET("/fortnite/api/statsv2/account/{id}")
 	Call<FortStatsV2Response> statsV2(@Path("id") String id);

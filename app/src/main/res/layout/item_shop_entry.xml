@@ -24,16 +24,6 @@
 			app:layout_constraintBottom_toBottomOf="@id/with_bg_blur"
 			app:layout_constraintTop_toTopOf="parent" />
 
-		<!--<com.tb24.fn.util.FitWidthAtBottomImageView-->
-		<!--android:id="@+id/bg_blur"-->
-		<!--android:layout_width="0dp"-->
-		<!--android:layout_height="0dp"-->
-		<!--android:scaleType="matrix"-->
-		<!--app:layout_constraintBottom_toBottomOf="@id/with_bg_blur"-->
-		<!--app:layout_constraintEnd_toEndOf="@id/with_bg_blur"-->
-		<!--app:layout_constraintStart_toStartOf="@id/with_bg_blur"-->
-		<!--app:layout_constraintTop_toTopOf="@id/with_bg_blur" />-->
-
 		<LinearLayout
 			android:id="@+id/with_bg_blur"
 			android:layout_width="match_parent"
@@ -44,7 +34,7 @@
 			android:padding="6dp"
 			app:layout_constraintBottom_toTopOf="@id/frameLayout">
 
-			<com.tb24.fn.util.ForcedMarqueeTextView
+			<com.tb24.fn.view.ForcedMarqueeTextView
 				android:id="@+id/item_text1"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
@@ -102,7 +92,7 @@
 					android:textStyle="bold"
 					tools:text="1,800" />
 
-				<com.tb24.fn.util.StrikeTextView
+				<com.tb24.fn.view.StrikeTextView
 					android:id="@+id/item_sale_from"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"

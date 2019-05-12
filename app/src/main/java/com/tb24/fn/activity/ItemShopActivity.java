@@ -1,5 +1,6 @@
 package com.tb24.fn.activity;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -9,6 +10,7 @@ import android.media.AudioAttributes;
 import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
@@ -32,10 +34,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.common.base.Supplier;
 import com.google.common.collect.ComparisonChain;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.R;
+import com.tb24.fn.model.CalendarTimelineResponse;
 import com.tb24.fn.model.CommonCoreProfileAttributes;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortCatalogResponse;
@@ -46,6 +50,7 @@ import com.tb24.fn.util.EFortRarity;
 import com.tb24.fn.util.ItemUtils;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
+import com.tb24.fn.view.UpdateEverySecondTextView;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,9 +66,11 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 public class ItemShopActivity extends BaseActivity {
-	public static final String CONFIRM_PHRASE = "CONFIRM";
-	private boolean fakePurchases = false;
+	private static final String CONFIRM_PHRASE = "CONFIRM";
+	private static CalendarTimelineResponse.ClientEventState calendarData;
+	private boolean fakePurchases;
 	private SoundPool soundPool;
+	private int[] sounds;
 	private RecyclerView list;
 	private ItemShopAdapter adapter;
 	private LoadingViewController lc;
@@ -71,14 +78,19 @@ public class ItemShopActivity extends BaseActivity {
 	private ViewGroup vBucksView;
 	private CommonCoreProfileAttributes attributes;
 	private int vBucksQty;
-	private int[] sounds;
+	private List<FortCatalogResponse.CatalogEntry> weekly;
+	private List<FortCatalogResponse.CatalogEntry> daily;
+	private Call<FortCatalogResponse> catalogCall;
+	private Call<CalendarTimelineResponse> calendarCall;
+	private Handler handler = new Handler();
+	private Runnable scheduleRunnable;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.common_loadable_recycler_view);
 		setupActionBar();
 		fakePurchases = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fake_purchases", false);
-		attributes = (CommonCoreProfileAttributes) getThisApplication().profileData.get("common_core").stats.attributesObj;
+		attributes = (CommonCoreProfileAttributes) getThisApplication().profileManager.profileData.get("common_core").stats.attributesObj;
 		soundPool = new SoundPool.Builder().setMaxStreams(4).setAudioAttributes(new AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()).build();
 		int purchasedSound1 = soundPool.load(this, R.raw.store_purchaseitem_athena_01, 1);
 		int purchasedSound2 = soundPool.load(this, R.raw.store_purchaseitem_athena_02, 1);
@@ -90,7 +102,13 @@ public class ItemShopActivity extends BaseActivity {
 		list.post(new Runnable() {
 			@Override
 			public void run() {
-				layout = new GridLayoutManager(ItemShopActivity.this, (int) (list.getWidth() / Utils.dp(getResources(), 200)));
+				layout = new GridLayoutManager(ItemShopActivity.this, (int) (list.getWidth() / Utils.dp(getResources(), 160)));
+				layout.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+					@Override
+					public int getSpanSize(int i) {
+						return adapter.getItemViewType(i) == 1 ? layout.getSpanCount() : 1;
+					}
+				});
 				list.setLayoutManager(layout);
 			}
 		});
@@ -99,14 +117,14 @@ public class ItemShopActivity extends BaseActivity {
 	}
 
 	private void load() {
-		final Call<FortCatalogResponse> call = getThisApplication().fortnitePublicService.storefrontCatalog();
+		catalogCall = getThisApplication().fortnitePublicService.storefrontCatalog();
 		lc.loading();
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
 				String errorText = "";
 				try {
-					final Response<FortCatalogResponse> response = call.execute();
+					final Response<FortCatalogResponse> response = catalogCall.execute();
 
 					if (response.isSuccessful()) {
 						runOnUiThread(new Runnable() {
@@ -133,13 +151,41 @@ public class ItemShopActivity extends BaseActivity {
 				});
 			}
 		}).start();
+
+		if (calendarData == null) {
+			calendarCall = getThisApplication().fortnitePublicService.calendarTimeline();
+			new Thread() {
+				@Override
+				public void run() {
+					try {
+						final Response<CalendarTimelineResponse> response = calendarCall.execute();
+
+						if (response.isSuccessful()) {
+							calendarData = getThisApplication().gson.fromJson(response.body().channels.clientEvents.states[0].state, CalendarTimelineResponse.ClientEventState.class);
+							scheduleRefresh();
+						}
+					} catch (IOException ignored) {
+					}
+				}
+			}.start();
+		} else {
+			scheduleRefresh();
+		}
+	}
+
+	private void scheduleRefresh() {
+		handler.postDelayed(scheduleRunnable = new Runnable() {
+			@Override
+			public void run() {
+				calendarData = null;
+				load();
+			}
+		}, calendarData.dailyStoreEnd.getTime() - System.currentTimeMillis());
 	}
 
 	public void display(FortCatalogResponse data) {
-//		Toast.makeText(this, "Expiration: " + Utils.formatDateSimple(data.expiration), Toast.LENGTH_LONG).show();
-		List<FortCatalogResponse.CatalogEntry> entries = new ArrayList<>();
-		List<FortCatalogResponse.CatalogEntry> weekly = new ArrayList<>();
-		List<FortCatalogResponse.CatalogEntry> daily = new ArrayList<>();
+		weekly = new ArrayList<>();
+		daily = new ArrayList<>();
 
 		for (FortCatalogResponse.Storefront storefront : data.storefronts) {
 			List<FortCatalogResponse.CatalogEntry> c = Arrays.asList(storefront.catalogEntries);
@@ -176,18 +222,8 @@ public class ItemShopActivity extends BaseActivity {
 			}
 		}
 
-		entries.addAll(weekly);
-		entries.addAll(daily);
-		list.setAdapter(adapter = new ItemShopAdapter(this, entries));
+		list.setAdapter(adapter = new ItemShopAdapter(this));
 		lc.content();
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
-		updateFromProfile();
-		menu.add(0, 1, 0, "Support a Creator");
-		return super.onCreateOptionsMenu(menu);
 	}
 
 	private void updateFromProfile() {
@@ -196,6 +232,14 @@ public class ItemShopActivity extends BaseActivity {
 		if (adapter != null) {
 			adapter.notifyDataSetChanged();
 		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		updateFromProfile();
+		menu.add(0, 1, 0, "Support a Creator");
+		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
@@ -254,6 +298,15 @@ public class ItemShopActivity extends BaseActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		soundPool.release();
+		handler.removeCallbacks(scheduleRunnable);
+
+		if (catalogCall != null) {
+			catalogCall.cancel();
+		}
+
+		if (calendarCall != null) {
+			calendarCall.cancel();
+		}
 	}
 
 //	private void executeSetAffiliate(String s) {
@@ -267,29 +320,53 @@ public class ItemShopActivity extends BaseActivity {
 
 	private static class ItemShopAdapter extends RecyclerView.Adapter<ItemShopAdapter.ItemShopViewHolder> {
 		private final ItemShopActivity activity;
-		private final List<FortCatalogResponse.CatalogEntry> data;
 
-		public ItemShopAdapter(ItemShopActivity activity, List<FortCatalogResponse.CatalogEntry> data) {
+		public ItemShopAdapter(ItemShopActivity activity) {
 			this.activity = activity;
-			this.data = data;
 		}
 
 		@NonNull
 		@Override
 		public ItemShopViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-			ViewGroup itemView = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_entry, parent, false);
-			ViewGroup.LayoutParams layoutParams = itemView.getLayoutParams();
-//			layoutParams.width = (int) Utils.dp(activity.getResources(), (int) ((float) activity.list.getWidth() / activity.layout.getSpanCount()));
-			return new ItemShopViewHolder(itemView);
+			if (viewType == 0) {
+				ViewGroup itemView = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_entry, parent, false);
+//				ViewGroup.LayoutParams layoutParams = itemView.getLayoutParams();
+//				layoutParams.width = (int) Utils.dp(activity.getResources(), (int) ((float) activity.list.getWidth() / activity.layout.getSpanCount()));
+				return new ItemShopViewHolder(itemView);
+			} else if (viewType == 1) {
+				return new ItemShopViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_entry_header, parent, false));
+			} else {
+				return null;
+			}
 		}
 
 		@Override
-		public void onBindViewHolder(@NonNull final ItemShopViewHolder holder, final int position) {
-			final FortCatalogResponse.CatalogEntry item = data.get(position);
+		public void onBindViewHolder(@NonNull final ItemShopViewHolder holder, final int positionWithHeader) {
+			final boolean isDaily = positionWithHeader - 1 >= activity.weekly.size();
+
+			if (getItemViewType(positionWithHeader) == 1) {
+				holder.itemName.setText(isDaily ? "Daily Items" : "Featured Items");
+				((UpdateEverySecondTextView) holder.itemPrice).setTextSupplier(new Supplier<CharSequence>() {
+					@SuppressLint("NewApi")
+					@Override
+					public CharSequence get() {
+						return calendarData == null ? "" : Utils.formatElapsedTime(activity, (isDaily ? calendarData.dailyStoreEnd : calendarData.weeklyStoreEnd).getTime() - System.currentTimeMillis(), true);
+					}
+				});
+				return;
+			}
+
+			final FortCatalogResponse.CatalogEntry item;
+
+			if (isDaily) {
+				item = activity.daily.get(positionWithHeader - 2 - activity.weekly.size());
+			} else {
+				item = activity.weekly.get(positionWithHeader - 1);
+			}
+
 			holder.backgroundable.setBackgroundResource(R.drawable.bg_common);
 			holder.shortDescription.setText(null);
 			Bitmap bitmap = null;
-			JsonElement jsonFirst = null;
 			String[] fromDevName = item.devName.substring("[VIRTUAL]".length(), item.devName.lastIndexOf(" for ")).replaceAll("1 x ", "").split(", ");
 			final List<String> compiledNames = new ArrayList<>();
 			final List<JsonElement> jsons = new ArrayList<>();
@@ -316,7 +393,6 @@ public class ItemShopActivity extends BaseActivity {
 				compiledNames.add(displayName);
 
 				if (i == 0) {
-					jsonFirst = json;
 					bitmap = ItemUtils.getBitmapImageFromItemStackData(activity, itemStack, jsonObject);
 
 					try {
@@ -332,10 +408,10 @@ public class ItemShopActivity extends BaseActivity {
 			holder.displayImage.setImageBitmap(bitmap);
 			boolean owned = false;
 
-			if (activity.getThisApplication().profileData.containsKey("athena")) {
+			if (activity.getThisApplication().profileManager.profileData.containsKey("athena")) {
 				for (FortCatalogResponse.Requirement requirement : item.requirements) {
 					if (requirement.requirementType.equals("DenyOnItemOwnership")) {
-						for (Map.Entry<String, FortItemStack> inventoryItem : activity.getThisApplication().profileData.get("athena").items.entrySet()) {
+						for (Map.Entry<String, FortItemStack> inventoryItem : activity.getThisApplication().profileManager.profileData.get("athena").items.entrySet()) {
 							if (inventoryItem.getValue().templateId.equals(requirement.requiredId) && inventoryItem.getValue().quantity >= requirement.minQuantity) {
 								owned = true;
 								break;
@@ -365,12 +441,22 @@ public class ItemShopActivity extends BaseActivity {
 			}
 
 			if (banner != null) {
-				if (banner.equals("CollectTheSet")) {
-					banner = "Collect the set!";
-				} else if (banner.equals("New")) {
-					banner = "New!";
-				} else if (banner.equals("SelectableStyles")) {
-					banner = "Selectable styles!";
+				switch (banner) {
+					case "Animated":
+						banner = "Animated!";
+						break;
+					case "Back":
+						banner = "It's back!";
+						break;
+					case "CollectTheSet":
+						banner = "Collect the set!";
+						break;
+					case "New":
+						banner = "New!";
+						break;
+					case "SelectableStyles":
+						banner = "Selectable styles!";
+						break;
 				}
 			}
 
@@ -386,7 +472,6 @@ public class ItemShopActivity extends BaseActivity {
 //			}
 
 			final boolean finalOwned = owned;
-			final JsonElement finalJsonFirst = jsonFirst;
 			holder.itemView.setOnClickListener(new View.OnClickListener() {
 				private ViewGroup view;
 				private ViewGroup group;
@@ -402,7 +487,7 @@ public class ItemShopActivity extends BaseActivity {
 					populateView();
 					AlertDialog alertDialog = new AlertDialog.Builder(activity).setView(view).create();
 					alertDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-					alertDialog.getWindow().setWindowAnimations(R.style.ItemShopAnim);
+//					alertDialog.getWindow().setWindowAnimations(R.style.ItemShopAnim);
 					alertDialog.show();
 				}
 
@@ -505,6 +590,7 @@ public class ItemShopActivity extends BaseActivity {
 					} else {
 						((TextView) view.findViewById(R.id.item_text1)).setText("Unknown | " + ItemUtils.shortDescriptionFromCtg(itemStack.getIdCategory()));
 						((TextView) view.findViewById(R.id.item_text2)).setText(compiledNames.get(previewingIndex));
+						view.findViewById(R.id.item_text3).setVisibility(View.GONE);
 					}
 				}
 
@@ -541,14 +627,14 @@ public class ItemShopActivity extends BaseActivity {
 								if (activity.fakePurchases) {
 									// fake it
 									Thread.sleep(2000);
-									activity.getThisApplication().executeProfileChanges(activity.getThisApplication().gson.fromJson("{\"multiUpdate\":[{\"profileRevision\":7045,\"profileId\":\"athena\",\"profileChangesBaseRevision\":7043,\"profileChanges\":[{\"changeType\":\"itemAdded\",\"itemId\":\"" + UUID.randomUUID() + "\",\"item\":{\"templateId\":\"" + item.itemGrants[0].templateId + "\",\"attributes\":{\"max_level_bonus\":0,\"level\":1,\"item_seen\":false,\"xp\":0,\"variants\":[],\"favorite\":false,\"DUMMY\":true},\"quantity\":1}}],\"profileCommandRevision\":6412}]}", FortMcpResponse.class));
+									activity.getThisApplication().profileManager.executeProfileChanges(activity.getThisApplication().gson.fromJson("{\"multiUpdate\":[{\"profileRevision\":7045,\"profileId\":\"athena\",\"profileChangesBaseRevision\":7043,\"profileChanges\":[{\"changeType\":\"itemAdded\",\"itemId\":\"" + UUID.randomUUID() + "\",\"item\":{\"templateId\":\"" + item.itemGrants[0].templateId + "\",\"attributes\":{\"max_level_bonus\":0,\"level\":1,\"item_seen\":false,\"xp\":0,\"variants\":[],\"favorite\":false,\"DUMMY\":true},\"quantity\":1}}],\"profileCommandRevision\":6412}]}", FortMcpResponse.class));
 									purchaseSuccess();
 								} else {
 									// here we're going for real
 									Response<FortMcpResponse> mcpResponse = call.execute();
 
 									if (mcpResponse.isSuccessful()) {
-										activity.getThisApplication().executeProfileChanges(mcpResponse.body());
+										activity.getThisApplication().profileManager.executeProfileChanges(mcpResponse.body());
 										// hooray
 										purchaseSuccess();
 									} else {
@@ -596,7 +682,7 @@ public class ItemShopActivity extends BaseActivity {
 							dialog.setContentView(purchasedDialogView);
 							dialog.show();
 							dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
-							int duration = 250;
+							long duration = 250;
 							Interpolator samsungBounceInterpolator = AnimationUtils.loadInterpolator(activity, R.anim.elastic_50_menu_popup);
 							slotView.setScaleX(2.75F);
 							slotView.setScaleY(2.75F);
@@ -645,10 +731,14 @@ public class ItemShopActivity extends BaseActivity {
 			quantity.setText(String.valueOf(item.quantity));
 		}
 
+		@Override
+		public int getItemViewType(int position) {
+			return position == 0 || position - 1 == activity.weekly.size() ? 1 : 0;
+		}
 
 		@Override
 		public int getItemCount() {
-			return data.size();
+			return activity.weekly.size() + activity.daily.size() + 2;
 		}
 
 		static class ItemShopViewHolder extends RecyclerView.ViewHolder {

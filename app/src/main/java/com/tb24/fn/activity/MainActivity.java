@@ -84,7 +84,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		profileLc = new LoadingViewController(profileFrame, profileContent, "No profile data") {
 			@Override
 			public boolean shouldShowEmpty() {
-				return !getThisApplication().profileData.containsKey("athena");
+				return !getThisApplication().profileManager.profileData.containsKey("athena");
 			}
 		};
 		checkLogin();
@@ -102,9 +102,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			updateLogInButtonText("...");
 			profileLc.loading();
 			String accountId = prefs.getString("epic_account_id", "");
-			callMcpCommonPublic = getThisApplication().requestFullProfileUpdate("common_public");
-			callMcpCommonCore = getThisApplication().requestFullProfileUpdate("common_core");
-			callMcpAthena = getThisApplication().requestFullProfileUpdate("athena");
+			callMcpCommonPublic = getThisApplication().profileManager.requestFullProfileUpdate("common_public");
+			callMcpCommonCore = getThisApplication().profileManager.requestFullProfileUpdate("common_core");
+			callMcpAthena = getThisApplication().profileManager.requestFullProfileUpdate("athena");
 			callSelfName = getThisApplication().accountPublicService.account(accountId);
 			new Thread() {
 				@Override
@@ -149,7 +149,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onProfileUpdateFailed(ProfileUpdatedEvent event) {
-		if (event.profileId.equals("athena") && !getThisApplication().profileData.containsKey("athena")) {
+		if (event.profileId.equals("athena") && !getThisApplication().profileManager.profileData.containsKey("athena")) {
 			profileLc.content();
 		}
 	}
@@ -203,12 +203,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	private void displayAthenaLevelAndBattlePass() {
 		profileLc.content();
 
-		if (!getThisApplication().profileData.containsKey("athena")) {
+		if (!getThisApplication().profileManager.profileData.containsKey("athena")) {
 			return;
 		}
 
 		//TODO animate
-		AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileData.get("athena").stats.attributesObj;
+		AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileManager.profileData.get("athena").stats.attributesObj;
 		((TextView) findViewById(R.id.p_season)).setText("Season " + attributes.season_num);
 		((TextView) findViewById(R.id.p_level)).setText(String.valueOf(attributes.level));
 		int i = MAX_XPS[attributes.level - 1];

@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?><!-- this is unused, still wanna keep using RecyclerView -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent">
 
@@ -9,37 +8,7 @@
 		android:layout_height="wrap_content"
 		android:orientation="vertical">
 
-		<LinearLayout
-			android:id="@+id/item_shop_featured_items_title"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_margin="8dp"
-			android:background="?android:colorPrimary"
-			android:gravity="center_vertical">
-
-			<TextView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:fontFamily="@font/burbank_big_condensed"
-				android:paddingStart="8dp"
-				android:paddingTop="4dp"
-				android:paddingEnd="8dp"
-				android:paddingBottom="4dp"
-				android:text="Featured Items"
-				android:textAllCaps="true"
-				android:textFontWeight="900"
-				android:textSize="22sp" />
-
-			<TextView
-				android:layout_width="0dp"
-				android:layout_height="wrap_content"
-				android:layout_marginRight="8dp"
-				android:layout_weight="1"
-				android:gravity="end"
-				android:textAllCaps="false"
-				android:textStyle="bold"
-				tools:text="0:00:00" />
-		</LinearLayout>
+		<include layout="@layout/item_shop_entry_header" />
 
 		<GridLayout
 			android:id="@+id/item_shop_featured_items_grid"
@@ -47,37 +16,7 @@
 			android:layout_height="wrap_content"
 			android:padding="4dp" />
 
-		<LinearLayout
-			android:id="@+id/item_shop_daily_items_title"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_margin="8dp"
-			android:background="?android:colorPrimary"
-			android:gravity="center_vertical">
-
-			<TextView
-				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:fontFamily="@font/burbank_big_condensed"
-				android:paddingStart="8dp"
-				android:paddingTop="4dp"
-				android:paddingEnd="8dp"
-				android:paddingBottom="4dp"
-				android:text="Featured Items"
-				android:textAllCaps="true"
-				android:textFontWeight="900"
-				android:textSize="22sp" />
-
-			<TextView
-				android:layout_width="0dp"
-				android:layout_height="wrap_content"
-				android:layout_marginRight="8dp"
-				android:layout_weight="1"
-				android:gravity="end"
-				android:textAllCaps="false"
-				android:textStyle="bold"
-				tools:text="0:00:00" />
-		</LinearLayout>
+		<include layout="@layout/item_shop_entry_header" />
 
 		<GridLayout
 			android:id="@+id/item_shop_daily_items_grid"

@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 public class FortItemStack {
 	public String templateId;
 	public JsonObject attributes;
-	public int quantity;
+	public Integer quantity;
 
 	public String getIdCategory() {
 		return templateId.split(":")[0];

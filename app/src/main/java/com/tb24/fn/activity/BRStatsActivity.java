@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,7 +54,7 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 	private ArrayList<String> allNormal;
 	private Predicate<String> shouldGoIn = new Predicate<String>() {
 		@Override
-		public boolean apply(@NonNull String input) {
+		public boolean apply(String input) {
 			if (selectedGameMode == GameMode.LTM) {
 				if (allNormal == null) {
 					allNormal = new ArrayList<>();
@@ -100,7 +99,7 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 		lc = new LoadingViewController(this, frame, "There are no stats to display.") {
 			@Override
 			public boolean shouldShowEmpty() {
-				return statsData == null;
+				return statsData == null || statsData.stats.isEmpty();
 			}
 		};
 		fetchStatsIdReady(id);
@@ -116,6 +115,7 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 		} else {
 			btn1.setCompoundDrawables(null, null, null, null);
 		}
+
 		btn1.setText("Input: " + selectedInput);
 	}
 
@@ -235,6 +235,7 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 			int placeTopSecond = !statNameAndSums.containsKey("placetop" + n) ? 0 : (int) statNameAndSums.get("placetop" + n);
 			statNameAndSums.put("__top" + n + "rate", matches == 0 ? 0 : (placeTopSecond == 0 ? 0 : ((float) placeTopSecond / (float) matches)));
 		}
+
 		List<StatName> displays = selectedGameMode.displays;
 		extrasGroup.removeAllViews();
 
@@ -276,7 +277,9 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 	}
 
 	private void attachMoreStatDetails(ViewGroup view, final StatName statName) {
-		if (statName.custom) return;
+		if (statName.custom) {
+			return;
+		}
 
 		view.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -339,15 +342,16 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 		__top5rate("__top5rate", "Top 5 %", true),
 		__top10rate("__top10rate", "Top 10 %", true);
 
-		public final String asString;
-		public final String friendlyName;
-		public final boolean custom;
 		private static final NumberFormat PERCENT_INSTANCE;
 
 		static {
 			PERCENT_INSTANCE = NumberFormat.getPercentInstance();
 			PERCENT_INSTANCE.setMinimumFractionDigits(2);
 		}
+
+		public final String asString;
+		public final String friendlyName;
+		public final boolean custom;
 
 		StatName(String asString, String friendlyName) {
 			this(asString, friendlyName, false);

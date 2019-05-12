@@ -44,10 +44,10 @@ public class EventDownloadResponse {
 		public Date beginTime;
 		public Date endTime;
 		public JsonElement[] blackoutPeriods;
-		public int round;
+		public Integer round;
 		public String leaderboardId;
-		public int payoutDelay;
-		public boolean isTBD;
+		public Integer payoutDelay;
+		public Boolean isTBD;
 		// locked, public
 		public String visibility;
 		public String[] requireAllTokens;
@@ -75,8 +75,8 @@ public class EventDownloadResponse {
 		public String gameId;
 		public String eventTemplateId;
 		public String playlistId;
-		public int matchCap;
-		public boolean useIndividualScores;
+		public Integer matchCap;
+		public Boolean useIndividualScores;
 		// null, Hype
 		public String persistentScoreId;
 		public ScoringRule[] scoringRules;
@@ -93,21 +93,21 @@ public class EventDownloadResponse {
 	}
 
 	public static class RewardTier {
-		public int keyValue;
-		public int pointsEarned;
-		public boolean multiplicative;
+		public Integer keyValue;
+		public Integer pointsEarned;
+		public Boolean multiplicative;
 	}
 
 	public static class TiebreakerFormula {
-		public int basePointBits;
+		public Integer basePointBits;
 		public TiebreakerFormulaComponent[] components;
 	}
 
 	public static class TiebreakerFormulaComponent {
 		// VICTORY_ROYALE_STAT, TEAM_ELIMS_STAT_INDEX, PLACEMENT_TIEBREAKER_STAT
 		public String trackedStat;
-		public int bits;
-		public float multiplier;
+		public Integer bits;
+		public Float multiplier;
 		// sum, avg
 		public String aggregation;
 	}
@@ -121,7 +121,7 @@ public class EventDownloadResponse {
 	}
 
 	public static class PayoutRank {
-		public float threshold;
+		public Float threshold;
 		public Payout[] payouts;
 	}
 
@@ -129,6 +129,6 @@ public class EventDownloadResponse {
 		public String rewardType;
 		public String rewardMode;
 		public String value;
-		public int quantity;
+		public Integer quantity;
 	}
 }
