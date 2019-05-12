@@ -38,6 +38,7 @@
 			<ImageView
 				android:layout_width="28dp"
 				android:layout_height="28dp"
+				android:contentDescription="V-Bucks"
 				android:src="@drawable/t_items_mtx_l" />
 
 			<TextView
@@ -90,21 +91,21 @@
 
 		<Button
 			android:id="@+id/btn_item_shop_purchase"
+			style="@style/btn_primary_m_yellow"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="8dp"
 			android:minWidth="220dp"
-			tools:text="Purchase items"
-			style="@style/btn_primary_m_yellow" />
+			tools:text="Purchase items" />
 
 		<Button
 			android:id="@+id/btn_item_shop_gift"
+			style="@style/btn_primary_m_normal"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="8dp"
 			android:minWidth="220dp"
-			android:text="Buy as a gift"
-			style="@style/btn_primary_m_normal" />
+			android:text="Buy as a gift" />
 	</LinearLayout>
 
 	<TextView

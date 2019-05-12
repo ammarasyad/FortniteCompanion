@@ -1,5 +1,8 @@
 package com.tb24.fn.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -145,27 +148,52 @@ public class LockerActivity extends BaseActivity {
 			holder.itemView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					if (json == null) {
-						return;
+					String attributesDbgString = new GsonBuilder().setPrettyPrinting().create().toJson(item.attributes);
+					ViewGroup viewGroup = null;
+
+					if (json != null) {
+						viewGroup = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.fort_item_detail_box, null);
+						ItemUtils.populateItemDetailBox(viewGroup, item, json);
 					}
 
-					ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.fort_item_detail_box, null);
-//					viewGroup.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-					ItemUtils.populateItemDetailBox(viewGroup, item, json);
-					Toast toast = new Toast(activity);
-					toast.setView(viewGroup);
-					toast.setDuration(Toast.LENGTH_LONG);
-					toast.show();
+					AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+							.setCustomTitle(viewGroup)
+							.setMessage(attributesDbgString)
+							.setPositiveButton(android.R.string.ok, null);
+
+					// TODO dedicated challenges tab instead of deeply buried like this
+					if (json != null && item.getIdCategory().equals("Quest")) {
+						View inflate = LayoutInflater.from(activity).inflate(R.layout.test_quest, null);
+						ChallengeBundleActivity.populateQuestView(activity, inflate, item);
+						builder.setView(inflate);
+					} else if (json != null && item.getIdCategory().equals("ChallengeBundle")) {
+						builder.setNeutralButton("More Details", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								Intent intent = new Intent(activity, ChallengeBundleActivity.class);
+								intent.putExtra("a", item.templateId);
+								activity.startActivity(intent);
+							}
+						});
+					}
+
+					builder.show();
 				}
 			});
 			holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
 				@Override
 				public boolean onLongClick(View v) {
-					if (item.attributes != null) {
-						Utils.dialogOkNonMain(activity, "Attributes", new GsonBuilder().setPrettyPrinting().create().toJson(item.attributes));
-						return true;
+					if (json == null) {
+						return false;
 					}
-					return false;
+
+					ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.fort_item_detail_box, null);
+					ItemUtils.populateItemDetailBox(viewGroup, item, json);
+					Toast toast = new Toast(activity);
+					toast.setView(viewGroup);
+					toast.setDuration(Toast.LENGTH_LONG);
+					toast.show();
+					return true;
 				}
 			});
 		}

@@ -98,7 +98,7 @@ public class ItemUtils {
 			case "AthenaPickaxe":
 				return "Harvesting Tool";
 			default:
-				return "Unknown";
+				return idCategory;
 		}
 	}
 

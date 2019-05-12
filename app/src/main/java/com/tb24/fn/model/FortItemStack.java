@@ -7,6 +7,14 @@ public class FortItemStack {
 	public JsonObject attributes;
 	public Integer quantity;
 
+	public FortItemStack() {
+	}
+
+	public FortItemStack(String idCategory, String idName, int quantity) {
+		templateId = idCategory + ':' + idName;
+		this.quantity = quantity;
+	}
+
 	public String getIdCategory() {
 		return templateId.split(":")[0];
 	}

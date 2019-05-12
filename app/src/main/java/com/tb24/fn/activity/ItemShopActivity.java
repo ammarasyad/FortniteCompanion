@@ -1,6 +1,5 @@
 package com.tb24.fn.activity;
 
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -328,15 +327,13 @@ public class ItemShopActivity extends BaseActivity {
 		@NonNull
 		@Override
 		public ItemShopViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-			if (viewType == 0) {
+			if (viewType == 1) {
+				return new ItemShopViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_entry_header, parent, false));
+			} else {
 				ViewGroup itemView = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_entry, parent, false);
 //				ViewGroup.LayoutParams layoutParams = itemView.getLayoutParams();
 //				layoutParams.width = (int) Utils.dp(activity.getResources(), (int) ((float) activity.list.getWidth() / activity.layout.getSpanCount()));
 				return new ItemShopViewHolder(itemView);
-			} else if (viewType == 1) {
-				return new ItemShopViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_entry_header, parent, false));
-			} else {
-				return null;
 			}
 		}
 
@@ -347,7 +344,6 @@ public class ItemShopActivity extends BaseActivity {
 			if (getItemViewType(positionWithHeader) == 1) {
 				holder.itemName.setText(isDaily ? "Daily Items" : "Featured Items");
 				((UpdateEverySecondTextView) holder.itemPrice).setTextSupplier(new Supplier<CharSequence>() {
-					@SuppressLint("NewApi")
 					@Override
 					public CharSequence get() {
 						return calendarData == null ? "" : Utils.formatElapsedTime(activity, (isDaily ? calendarData.dailyStoreEnd : calendarData.weeklyStoreEnd).getTime() - System.currentTimeMillis(), true);

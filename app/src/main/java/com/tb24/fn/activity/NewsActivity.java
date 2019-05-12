@@ -1,6 +1,7 @@
 package com.tb24.fn.activity;
 
 import android.os.Bundle;
+import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,7 +54,9 @@ public class NewsActivity extends WithBasicDataActivity {
 			ImageView img = view.findViewById(R.id.news_entry_image);
 			picasso.load(entry.image).into(img);
 			((TextView) view.findViewById(R.id.news_entry_title)).setText(entry.title);
-			((TextView) view.findViewById(R.id.news_entry_body)).setText(entry.body);
+			TextView bodyText = view.findViewById(R.id.news_entry_body);
+			bodyText.setText(entry.body);
+			Linkify.addLinks(bodyText, Linkify.WEB_URLS);
 			mainLayout.addView(view);
 		}
 	}

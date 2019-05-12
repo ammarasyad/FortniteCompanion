@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
 	package="com.tb24.fn">
-
 	<!-- To auto-complete the email text field in the login form with the user's emails -->
 	<uses-permission android:name="android.permission.GET_ACCOUNTS" />
 	<uses-permission android:name="android.permission.READ_PROFILE" />
@@ -19,6 +18,7 @@
 		android:supportsRtl="true"
 		android:theme="@style/AppTheme"
 		tools:ignore="GoogleAppIndexingWarning">
+		<activity android:name=".activity.ChallengeBundleActivity"></activity>
 		<activity android:name=".activity.MainActivity">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />

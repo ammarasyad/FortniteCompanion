@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.R;
+import com.tb24.fn.event.ProfileUpdateFailedEvent;
 import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.EpicError;
@@ -148,7 +149,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onProfileUpdateFailed(ProfileUpdatedEvent event) {
+	public void onProfileUpdateFailed(ProfileUpdateFailedEvent event) {
 		if (event.profileId.equals("athena") && !getThisApplication().profileManager.profileData.containsKey("athena")) {
 			profileLc.content();
 		}

@@ -18,7 +18,7 @@
 
 		<TextView
 			android:id="@+id/item_text1"
-			android:layout_width="wrap_content"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:singleLine="true"
 			android:textAllCaps="true"
@@ -28,7 +28,7 @@
 
 		<com.tb24.fn.view.ForcedMarqueeTextView
 			android:id="@+id/item_text2"
-			android:layout_width="wrap_content"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:ellipsize="marquee"
 			android:fontFamily="@font/burbank_big_condensed"
