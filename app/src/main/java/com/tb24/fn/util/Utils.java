@@ -36,6 +36,7 @@ import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
 import com.tb24.fn.R;
+import com.tb24.fn.activity.BaseActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -313,20 +314,31 @@ public final class Utils {
 		return e instanceof IOException ? "Connection to server failed. (" + e.getLocalizedMessage() + ")" : e.getLocalizedMessage();
 	}
 
-	public static Bitmap bitmapFromTga(Context ctx, String uPath) {
-		try {
-			InputStream is = ctx.getAssets().open(uPath.substring(1, uPath.lastIndexOf('.')) + ".tga");
-			byte[] buffer = new byte[is.available()];
-			is.read(buffer);
-			is.close();
-			int[] pixels = TGAReader.read(buffer, TGAReader.ARGB);
-			int width = TGAReader.getWidth(buffer);
-			int height = TGAReader.getHeight(buffer);
-			return Bitmap.createBitmap(pixels, 0, width, width, height, Bitmap.Config.ARGB_8888);
-		} catch (IOException e) {
-			Log.w("LockerActivity", "Failed loading image\n" + e.toString());
-			return null;
+	public static Bitmap bitmapFromTga(BaseActivity activity, String uPath) {
+		Bitmap bitmap = activity.getThisApplication().bitmapCache.get(uPath);
+
+		synchronized (activity.getThisApplication().bitmapCache) {
+			if (bitmap == null) {
+				try {
+					InputStream is = activity.getAssets().open(uPath.substring(1, uPath.lastIndexOf('.')) + ".tga");
+					byte[] buffer = new byte[is.available()];
+					is.read(buffer);
+					is.close();
+					int[] pixels = TGAReader.read(buffer, TGAReader.ARGB);
+					int width = TGAReader.getWidth(buffer);
+					int height = TGAReader.getHeight(buffer);
+					bitmap = Bitmap.createBitmap(pixels, 0, width, width, height, Bitmap.Config.ARGB_8888);
+				} catch (IOException e) {
+					Log.w("TGAReader", "Failed loading image\n" + e.toString());
+				}
+
+				if (bitmap != null) {
+					activity.getThisApplication().bitmapCache.put(uPath, bitmap);
+				}
+			}
 		}
+
+		return bitmap;
 	}
 
 	public static String toHexString(byte[] bytes) {

@@ -1,5 +1,6 @@
 package com.tb24.fn.activity;
 
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.R;
@@ -29,15 +29,17 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ChallengeBundleActivity extends BaseActivity {
 	private RecyclerView list;
 	private ChallengeAdapter adapter;
 	private LoadingViewController lc;
 	private JsonObject attributesFromProfile;
-	private FortMcpProfile profileData;
+	private Set<FortItemStack> set = new HashSet<>();
 
 	public static void populateQuestView(BaseActivity activity, View view, FortItemStack item) {
 		ProgressBar questProgressBar = view.findViewById(R.id.quest_progress_bar);
@@ -48,9 +50,9 @@ public class ChallengeBundleActivity extends BaseActivity {
 
 		if (jsonElement1 == null) {
 			questTitle.setText("Currently unavailable");
-			questProgressBar.setVisibility(View.GONE);
-			questProgressText.setVisibility(View.GONE);
-			questRewardParent.setVisibility(View.GONE);
+			questProgressBar.setVisibility(View.INVISIBLE);
+			questProgressText.setVisibility(View.INVISIBLE);
+			questRewardParent.setVisibility(View.INVISIBLE);
 			return;
 		}
 
@@ -111,9 +113,6 @@ public class ChallengeBundleActivity extends BaseActivity {
 		setContentView(R.layout.common_loadable_recycler_view);
 		setupActionBar();
 		list = findViewById(R.id.main_recycler_view);
-		int p = (int) Utils.dp(getResources(), 4);
-		list.setPadding(p, p, p, p);
-		list.setClipToPadding(false);
 		list.setLayoutManager(new LinearLayoutManager(ChallengeBundleActivity.this));
 		lc = new LoadingViewController(this, list, "Challenge data not found") {
 			@Override
@@ -139,8 +138,6 @@ public class ChallengeBundleActivity extends BaseActivity {
 	}
 
 	private void displayData(FortMcpProfile profile) {
-		profileData = profile;
-
 		if (profile == null) {
 			lc.loading();
 			return;
@@ -161,7 +158,14 @@ public class ChallengeBundleActivity extends BaseActivity {
 			}
 		}
 
+		for (JsonElement s : attributesFromProfile.get("grantedquestinstanceids").getAsJsonArray()) {
+			set.add(profile.items.get(s.getAsString()));
+		}
+
 		FortChallengeBundleItemDefinition def = getThisApplication().gson.fromJson(a.getAsJsonArray().get(0).getAsJsonObject(), FortChallengeBundleItemDefinition.class);
+		setTitle(Utils.color(def.DisplayName, def.DisplayStyle.AccentColor.asInt()));
+		getWindow().setStatusBarColor(def.DisplayStyle.PrimaryColor.asInt());
+		getActionBar().setBackgroundDrawable(new ColorDrawable(def.DisplayStyle.PrimaryColor.asInt()));
 		List<FortChallengeBundleItemDefinition.QuestInfo> data = Arrays.asList(def.QuestInfos);
 
 		if (adapter == null) {
@@ -193,14 +197,17 @@ public class ChallengeBundleActivity extends BaseActivity {
 		public void onBindViewHolder(@NonNull ChallengeViewHolder holder, int position) {
 			final FortChallengeBundleItemDefinition.QuestInfo item = data.get(position);
 			FortItemStack itemStack = null;
-			JsonArray grantedquestinstanceids = activity.attributesFromProfile.get("grantedquestinstanceids").getAsJsonArray();
+			String questName = item.QuestDefinition.asset_path_name.substring(item.QuestDefinition.asset_path_name.lastIndexOf('/') + 1, item.QuestDefinition.asset_path_name.lastIndexOf('.')).toLowerCase();
 
-			if (position < grantedquestinstanceids.size()) {
-				itemStack = activity.profileData.items.get(grantedquestinstanceids.get(position).getAsString());
+			for (FortItemStack entry : activity.set) {
+				if (entry.templateId.equals("Quest:" + questName)) {
+					itemStack = entry;
+					break;
+				}
 			}
 
 			if (itemStack == null) {
-				itemStack = new FortItemStack("Quest", item.QuestDefinition.asset_path_name.substring(item.QuestDefinition.asset_path_name.lastIndexOf('.') + 1), 1);
+				itemStack = new FortItemStack("Quest", questName, 1);
 			}
 
 			populateQuestView(activity, holder.itemView, itemStack);

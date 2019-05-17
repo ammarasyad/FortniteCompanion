@@ -1,0 +1,26 @@
+[
+  {
+	"export_type": "AthenaBackpackItemDefinition",
+	"CharacterParts": [
+	  "CP_Backpack_AssassinSuitCoin"
+	],
+	"Rarity": "EFortRarity::Legendary",
+	"DisplayName": "Gold Token",
+	"ShortDescription": "Back Bling",
+	"Description": "Out of unity comes strength.",
+	"GameplayTags": {
+	  "gameplay_tags": [
+		"Cosmetics.Set.AssassinSuit",
+		"Cosmetics.Source.Event.AssassinSuit.Backpack"
+	  ]
+	},
+	"SmallPreviewImage": {
+	  "asset_path_name": "/Game/UI/Foundation/Textures/Icons/Backpacks/T-Icon-Backpacks-273-AssassinSuitCoin.T-Icon-Backpacks-273-AssassinSuitCoin",
+	  "sub_path_string": ""
+	},
+	"LargePreviewImage": {
+	  "asset_path_name": "/Game/UI/Foundation/Textures/Icons/Backpacks/T-Icon-Backpacks-273-AssassinSuitCoin-L.T-Icon-Backpacks-273-AssassinSuitCoin-L",
+	  "sub_path_string": ""
+	}
+  }
+]

@@ -5,7 +5,7 @@
 			<gradient
 				android:endColor="@color/r_u_b_light"
 				android:startColor="@color/r_u_b_dark" />
-			<padding android:bottom="4dp" />
+			<padding android:bottom="@dimen/rarity_bg_square_padding" />
 		</shape>
 	</item>
 	<item>

@@ -77,8 +77,8 @@ public class ItemShopActivity extends BaseActivity {
 	private ViewGroup vBucksView;
 	private CommonCoreProfileAttributes attributes;
 	private int vBucksQty;
-	private List<FortCatalogResponse.CatalogEntry> weekly;
-	private List<FortCatalogResponse.CatalogEntry> daily;
+	private List<FortCatalogResponse.CatalogEntry> featuredItems;
+	private List<FortCatalogResponse.CatalogEntry> dailyItems;
 	private Call<FortCatalogResponse> catalogCall;
 	private Call<CalendarTimelineResponse> calendarCall;
 	private Handler handler = new Handler();
@@ -183,9 +183,6 @@ public class ItemShopActivity extends BaseActivity {
 	}
 
 	public void display(FortCatalogResponse data) {
-		weekly = new ArrayList<>();
-		daily = new ArrayList<>();
-
 		for (FortCatalogResponse.Storefront storefront : data.storefronts) {
 			List<FortCatalogResponse.CatalogEntry> c = Arrays.asList(storefront.catalogEntries);
 
@@ -196,7 +193,7 @@ public class ItemShopActivity extends BaseActivity {
 						return ComparisonChain.start().compare(o1.categories[0], o2.categories[0]).compare(o2.sortPriority, o1.sortPriority).result();
 					}
 				});
-				weekly = c;
+				featuredItems = c;
 			} else if (storefront.name.equals("BRDailyStorefront")) {
 				Collections.sort(c, new Comparator<FortCatalogResponse.CatalogEntry>() {
 					@Override
@@ -207,21 +204,34 @@ public class ItemShopActivity extends BaseActivity {
 						EFortRarity rarity2 = EFortRarity.COMMON;
 
 						if (jsonElement != null) {
-							rarity1 = EFortRarity.fromObject(jsonElement.getAsJsonArray().get(0).getAsJsonObject());
+							rarity1 = ItemUtils.getRarity(jsonElement.getAsJsonArray().get(0).getAsJsonObject());
 						}
 
 						if (jsonElement1 != null) {
-							rarity2 = EFortRarity.fromObject(jsonElement1.getAsJsonArray().get(0).getAsJsonObject());
+							rarity2 = ItemUtils.getRarity(jsonElement1.getAsJsonArray().get(0).getAsJsonObject());
 						}
 
 						return ComparisonChain.start().compare(rarity2, rarity1).compare(o2.prices[0].basePrice, o1.prices[0].basePrice).compare(o1.itemGrants[0].getIdName(), o2.itemGrants[0].getIdName()).result();
 					}
 				});
-				daily = c;
+				dailyItems = c;
 			}
 		}
 
-		list.setAdapter(adapter = new ItemShopAdapter(this));
+		if (featuredItems == null) {
+			featuredItems = new ArrayList<>();
+		}
+
+		if (dailyItems == null) {
+			dailyItems = new ArrayList<>();
+		}
+
+		if (adapter == null) {
+			list.setAdapter(adapter = new ItemShopAdapter(this));
+		} else {
+			adapter.notifyDataSetChanged();
+		}
+
 		lc.content();
 	}
 
@@ -339,7 +349,7 @@ public class ItemShopActivity extends BaseActivity {
 
 		@Override
 		public void onBindViewHolder(@NonNull final ItemShopViewHolder holder, final int positionWithHeader) {
-			final boolean isDaily = positionWithHeader - 1 >= activity.weekly.size();
+			final boolean isDaily = positionWithHeader - 1 >= activity.featuredItems.size();
 
 			if (getItemViewType(positionWithHeader) == 1) {
 				holder.itemName.setText(isDaily ? "Daily Items" : "Featured Items");
@@ -355,9 +365,9 @@ public class ItemShopActivity extends BaseActivity {
 			final FortCatalogResponse.CatalogEntry item;
 
 			if (isDaily) {
-				item = activity.daily.get(positionWithHeader - 2 - activity.weekly.size());
+				item = activity.dailyItems.get(positionWithHeader - 2 - activity.featuredItems.size());
 			} else {
-				item = activity.weekly.get(positionWithHeader - 1);
+				item = activity.featuredItems.get(positionWithHeader - 1);
 			}
 
 			holder.backgroundable.setBackgroundResource(R.drawable.bg_common);
@@ -394,7 +404,7 @@ public class ItemShopActivity extends BaseActivity {
 					try {
 						holder.itemName.setText(displayName);
 						holder.shortDescription.setText(ItemUtils.shortDescription(itemStack, jsonObject));
-						holder.backgroundable.setBackgroundResource(ItemUtils.rarityBackground(jsonObject));
+						holder.backgroundable.setBackground(ItemUtils.rarityBgSlot(activity, ItemUtils.getRarity(jsonObject)));
 					} catch (NullPointerException e) {
 						Log.w("ItemShopActivity", "Failed setting short description or rarity background for " + itemStack.templateId, e);
 					}
@@ -718,7 +728,7 @@ public class ItemShopActivity extends BaseActivity {
 			if (json != null) {
 				JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
 				bitmap = ItemUtils.getBitmapImageFromItemStackData(activity, item, jsonObject);
-				rarityBackground.setBackgroundResource(ItemUtils.rarityBackground(jsonObject));
+				rarityBackground.setBackground(ItemUtils.rarityBgSlot(activity, ItemUtils.getRarity(jsonObject)));
 			}
 
 			((ImageView) slotView.findViewById(R.id.item_img)).setImageBitmap(bitmap);
@@ -729,12 +739,12 @@ public class ItemShopActivity extends BaseActivity {
 
 		@Override
 		public int getItemViewType(int position) {
-			return position == 0 || position - 1 == activity.weekly.size() ? 1 : 0;
+			return position == 0 || position - 1 == activity.featuredItems.size() ? 1 : 0;
 		}
 
 		@Override
 		public int getItemCount() {
-			return activity.weekly.size() + activity.daily.size() + 2;
+			return activity.featuredItems.size() + activity.dailyItems.size() + 2;
 		}
 
 		static class ItemShopViewHolder extends RecyclerView.ViewHolder {

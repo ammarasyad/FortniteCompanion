@@ -25,6 +25,7 @@ import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.util.EFortRarity;
 import com.tb24.fn.util.ItemUtils;
+import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
@@ -92,14 +93,14 @@ public class LockerActivity extends BaseActivity {
 				EFortRarity rarity2 = EFortRarity.COMMON;
 
 				if (jsonElement != null) {
-					rarity1 = EFortRarity.fromObject(jsonElement.getAsJsonArray().get(0).getAsJsonObject());
+					rarity1 = ItemUtils.getRarity(jsonElement.getAsJsonArray().get(0).getAsJsonObject());
 				}
 
 				if (jsonElement1 != null) {
-					rarity2 = EFortRarity.fromObject(jsonElement1.getAsJsonArray().get(0).getAsJsonObject());
+					rarity2 = ItemUtils.getRarity(jsonElement1.getAsJsonArray().get(0).getAsJsonObject());
 				}
 
-				return ComparisonChain.start().compare(o1.getIdCategory(), o2.getIdCategory()).compare(rarity2, rarity1).compare(o1.getIdName(), o2.getIdName()).result();
+				return ComparisonChain.start().compareTrueFirst(JsonUtils.getBooleanOr("favorite", o1.attributes, false), JsonUtils.getBooleanOr("favorite", o2.attributes, false)).compare(o1.getIdCategory(), o2.getIdCategory()).compare(rarity2, rarity1).compare(o1.getIdName(), o2.getIdName()).result();
 			}
 		});
 
@@ -125,20 +126,25 @@ public class LockerActivity extends BaseActivity {
 		@NonNull
 		@Override
 		public LockerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-			return new LockerViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.slot_view_encased, parent, false));
+			LockerViewHolder holder = new LockerViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.slot_view_encased, parent, false));
+			holder.favorite.setImageBitmap(Utils.bitmapFromTga(activity, "/Game/UI/Foundation/Textures/Icons/Locker/T_Icon_FavoriteTab_64.T_Icon_FavoriteTab_64"));
+			holder.newIcon.setImageBitmap(Utils.bitmapFromTga(activity, "/Game/UI/Foundation/Textures/Icons/Manage/T-Icon-Manage-New-32.T-Icon-Manage-New-32"));
+			return holder;
 		}
 
 		@Override
 		public void onBindViewHolder(@NonNull LockerViewHolder holder, int position) {
 			final FortItemStack item = data.get(position);
 			holder.rarityBackground.setBackgroundResource(R.drawable.bg_common);
+			holder.newIcon.setVisibility(JsonUtils.getBooleanOr("item_seen", item.attributes, false) ? View.INVISIBLE : View.VISIBLE);
+			holder.favorite.setVisibility(JsonUtils.getBooleanOr("favorite", item.attributes, false) ? View.VISIBLE : View.INVISIBLE);
 			final JsonElement json = activity.getThisApplication().itemRegistry.get(item.templateId);
 			Bitmap bitmap = null;
 
 			if (json != null) {
 				JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
 				bitmap = ItemUtils.getBitmapImageFromItemStackData(activity, item, jsonObject);
-				holder.rarityBackground.setBackgroundResource(ItemUtils.rarityBackground(jsonObject));
+				holder.rarityBackground.setBackground(ItemUtils.rarityBgSlot(activity, ItemUtils.getRarity(jsonObject)));
 			}
 
 			holder.displayImage.setImageBitmap(bitmap);
@@ -208,6 +214,7 @@ public class LockerActivity extends BaseActivity {
 			TextView itemName;
 			TextView quantity;
 			ImageView favorite;
+			ImageView newIcon;
 			View rarityBackground;
 
 			LockerViewHolder(View itemView) {
@@ -215,7 +222,8 @@ public class LockerActivity extends BaseActivity {
 				displayImage = itemView.findViewById(R.id.item_img);
 				itemName = itemView.findViewById(R.id.item_slot_dbg_text);
 				quantity = itemView.findViewById(R.id.item_slot_quantity);
-				favorite = itemView.findViewById(R.id.item_owned);
+				favorite = itemView.findViewById(R.id.item_favorite);
+				newIcon = itemView.findViewById(R.id.item_new);
 				rarityBackground = itemView.findViewById(R.id.to_set_background);
 			}
 		}

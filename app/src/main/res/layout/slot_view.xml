@@ -20,15 +20,15 @@
 		android:layout_height="match_parent"
 		android:gravity="center"
 		android:textSize="8sp"
-		tools:text="AthenaItem:blablabla" />
+		tools:text="Name" />
 
 	<com.tb24.fn.view.OutlineTextView
 		android:id="@+id/item_slot_quantity"
 		android:layout_width="match_parent"
-		android:gravity="end"
 		android:layout_height="wrap_content"
 		android:layout_alignParentBottom="true"
 		android:layout_marginEnd="4dp"
+		android:gravity="end"
 		android:textColor="#FFFFFF"
 		android:textStyle="bold"
 		app:outlineColor="#80000000"
@@ -40,5 +40,21 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:scaleType="fitCenter" />
+
+	<ImageView
+		android:id="@+id/item_favorite"
+		android:layout_width="16dp"
+		android:layout_height="16dp"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentEnd="true"
+		android:visibility="gone" />
+
+	<ImageView
+		android:id="@+id/item_new"
+		android:layout_width="16dp"
+		android:layout_height="16dp"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentEnd="true"
+		android:visibility="gone" />
 
 </com.tb24.fn.view.SlotView>

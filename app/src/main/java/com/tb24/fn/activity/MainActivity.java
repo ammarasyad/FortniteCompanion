@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -58,7 +57,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.i("a", String.valueOf(getResources().getDisplayMetrics().density));
+//		Log.i("a", String.valueOf(getResources().getDisplayMetrics().density));
 		setContentView(R.layout.activity_main);
 //		getActionBar().setSubtitle("DEBUG VERSION -- by Armzyy");
 		findViewById(R.id.main_screen_btn_stats).setOnClickListener(this);

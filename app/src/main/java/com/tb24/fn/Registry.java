@@ -38,11 +38,10 @@ public class Registry {
 		registerPath("ChallengeBundle", "Game/Athena/Items/ChallengeBundles/*");
 		registerPath("ChallengeBundleSchedule", "Game/Athena/Items/ChallengeBundleSchedules/*");
 		registerPath("Quest", "Game/Athena/Items/Quests/*");
-		registerPath("Token", "Game/Items/Tokens", "Game/Items/Tokens/Fake_LS_Tokens");
+		registerPath("Token", "Game/Items/Tokens/*");
 		registerPath("AthenaHero_", "Game/Athena/Heroes");
 		registerPath("AthenaWeapon_", "Game/Athena/Items/Weapons");
-		registerPath("DisplayAsset_", "Game/Catalog/DisplayAssets");
-		registerPath("AthenaCosmeticMetadata_", "Game/Athena/Items/Cosmetics/Metadata");
+//		registerPath("DisplayAsset_", "Game/Catalog/DisplayAssets");
 
 		for (Map.Entry<String, List<String>> entry : paths.entrySet()) {
 			for (String path : entry.getValue()) {
@@ -57,7 +56,7 @@ public class Registry {
 						}
 
 						fileName = file;
-						register(entry.getKey(), file.substring(0, dotIndex).toLowerCase(), GSON.fromJson(Utils.getStringFromAssets(assets, path + '/' + file), JsonElement.class));
+						itemRegistry.put(entry.getKey(), file.substring(0, dotIndex).toLowerCase(), GSON.fromJson(Utils.getStringFromAssets(assets, path + '/' + file), JsonElement.class));
 					}
 				} catch (Throwable e) {
 					Log.w("Registry", "Failed registering " + fileName, e);
@@ -95,10 +94,6 @@ public class Registry {
 				addAllFolders(sub, value);
 			}
 		}
-	}
-
-	private void register(String itemNamespace, String itemName, JsonElement json) {
-		itemRegistry.put(itemNamespace, itemName, json);
 	}
 
 	public JsonElement get(String namespacedString) {
