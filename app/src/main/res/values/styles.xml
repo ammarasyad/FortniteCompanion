@@ -6,6 +6,7 @@
 		<item name="android:colorPrimary">@color/colorPrimary</item>
 		<item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
 		<item name="android:colorAccent">@color/btn_primary_m_hovered_grad_rgba0</item>
+		<item name="android:statusBarColor">?android:colorPrimary</item>
 		<item name="android:windowBackground">?android:colorPrimaryDark</item>
 		<item name="android:fontFamily">@font/noto_sans</item>
 		<item name="android:textAppearanceButton">@style/CustomButton</item>
@@ -54,7 +55,7 @@
 	</style>
 
 	<style name="BannerStyle">
-		<item name="android:background">#FF5555</item>
+		<item name="android:background">#F76070</item>
 		<item name="android:fontFamily">@font/burbank_big_condensed</item>
 		<item name="android:paddingLeft">8dp</item>
 		<item name="android:paddingTop">2dp</item>
@@ -75,7 +76,6 @@
 	<style name="btn_primary_m_yellow">
 		<item name="android:background">@drawable/btn_primary_shiny</item>
 		<item name="android:fontFamily">@font/burbank_big_condensed</item>
-		<item name="android:foreground">?android:selectableItemBackground</item>
 		<item name="android:paddingStart">12dp</item>
 		<item name="android:paddingEnd">12dp</item>
 		<item name="android:textColor">#1C2238</item>
@@ -86,7 +86,6 @@
 	<style name="btn_primary_m_normal">
 		<item name="android:background">@drawable/btn_primary</item>
 		<item name="android:fontFamily">@font/burbank_big_condensed</item>
-		<item name="android:foreground">?android:selectableItemBackground</item>
 		<item name="android:paddingStart">12dp</item>
 		<item name="android:paddingEnd">12dp</item>
 		<item name="android:textColor">#1C2238</item>

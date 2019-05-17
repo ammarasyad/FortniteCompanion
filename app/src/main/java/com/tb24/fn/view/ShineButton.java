@@ -16,12 +16,13 @@ import com.tb24.fn.util.Utils;
 
 @SuppressLint("AppCompatCustomView")
 public class ShineButton extends Button {
+	private static final float SHINE_DURATION = 500.0F;
+	private static final float SHINE_DELAY_BETWEEN = 2000.0F;
 	private Paint paint;
 	private Path path;
 	private Path path2;
 	private float indentLow;
 	private float indentHigh;
-	private float shineWidth;
 	private Interpolator interpolator = new AccelerateDecelerateInterpolator();
 
 	public ShineButton(Context context) {
@@ -51,11 +52,14 @@ public class ShineButton extends Button {
 		path2 = new Path();
 		indentLow = Utils.dpF(getResources(), 3.0F);
 		indentHigh = Utils.dpF(getResources(), 6.0F);
-		shineWidth = Utils.dpF(getResources(), 48.0F);
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
+		if (!isShown()) {
+			return;
+		}
+
 		super.onDraw(canvas);
 
 		path.reset();
@@ -69,15 +73,17 @@ public class ShineButton extends Button {
 		canvas.drawRect(0, 0, getWidth(), getHeight(), paint);
 		canvas.restore();
 
-		float a = SystemClock.uptimeMillis() % 2500.0F;
+		float a = SystemClock.uptimeMillis() % (SHINE_DURATION + SHINE_DELAY_BETWEEN);
 
-		if (a <= 500.0F) {
-			float off = interpolator.getInterpolation(a / 500.0F) * (shineWidth + getWidth());
+		if (a <= SHINE_DURATION) {
+			float shineWidth = 0.2F * getWidth();
+			float off = interpolator.getInterpolation(a / SHINE_DURATION) * (shineWidth + getWidth());
 			path2.reset();
+			float indentDelta = indentHigh - indentLow;
 			path2.moveTo(shineWidth, 0);
-			path2.lineTo(indentHigh - indentLow, 0);
+			path2.lineTo(indentDelta, 0);
 			path2.lineTo(0, getHeight());
-			path2.lineTo(shineWidth - indentHigh - indentLow, getHeight());
+			path2.lineTo(shineWidth - indentDelta, getHeight());
 			path2.close();
 			canvas.save();
 			canvas.clipPath(path);
