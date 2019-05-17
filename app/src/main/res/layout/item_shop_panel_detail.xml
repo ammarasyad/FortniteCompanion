@@ -89,23 +89,43 @@
 				android:tint="#359B5C" />
 		</LinearLayout>
 
-		<Button
+		<com.tb24.fn.view.ShineButton
 			android:id="@+id/btn_item_shop_purchase"
 			style="@style/btn_primary_m_yellow"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="8dp"
 			android:minWidth="220dp"
-			tools:text="Purchase items" />
+			tools:text="Purchase Items" />
 
-		<Button
+		<com.tb24.fn.view.ShineButton
 			android:id="@+id/btn_item_shop_gift"
 			style="@style/btn_primary_m_normal"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="8dp"
 			android:minWidth="220dp"
-			android:text="Buy as a gift" />
+			android:text="Buy As A Gift" />
+
+		<TextView
+			android:id="@+id/item_shop_gift_2fa"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:singleLine="true"
+			android:text="2FA required to send gifts"
+			android:textColor="#FFFFFF"
+			android:textStyle="bold"
+			android:visibility="gone" />
+
+		<com.tb24.fn.view.ShineButton
+			android:id="@+id/btn_item_shop_preview_styles"
+			style="@style/btn_primary_m_normal"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="8dp"
+			android:minWidth="220dp"
+			android:text="Preview Styles"
+			android:visibility="gone" />
 	</LinearLayout>
 
 	<TextView

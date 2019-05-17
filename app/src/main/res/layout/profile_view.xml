@@ -65,7 +65,7 @@
 			android:orientation="horizontal">
 
 			<ProgressBar
-				android:id="@+id/progressBar"
+				android:id="@+id/p_xp_bar"
 				style="?android:attr/progressBarStyleHorizontal"
 				android:layout_width="0dp"
 				android:layout_height="wrap_content"
@@ -75,8 +75,7 @@
 				android:id="@+id/p_lvl_up_reward_img"
 				android:layout_width="24dp"
 				android:layout_height="24dp"
-				android:layout_marginStart="8dp"
-				android:src="@drawable/t_fnbr_battlepoints_l" />
+				android:layout_marginStart="8dp" />
 
 			<TextView
 				android:id="@+id/p_lvl_up_reward"
@@ -110,8 +109,7 @@
 				android:id="@+id/p_battle_pass_img"
 				android:layout_width="36dp"
 				android:layout_height="36dp"
-				android:layout_marginEnd="6dp"
-				android:src="@drawable/t_fnbr_battlepass_l" />
+				android:layout_marginEnd="6dp" />
 
 			<LinearLayout
 				android:layout_width="0dp"
@@ -161,10 +159,10 @@
 			</LinearLayout>
 
 			<ImageView
+				android:id="@+id/p_battle_pass_stars_img"
 				android:layout_width="32dp"
 				android:layout_height="32dp"
-				android:layout_marginEnd="6dp"
-				android:src="@drawable/t_fnbr_battlepoints_l" />
+				android:layout_marginEnd="6dp" />
 
 			<TextView
 				android:id="@+id/p_battle_pass_stars"

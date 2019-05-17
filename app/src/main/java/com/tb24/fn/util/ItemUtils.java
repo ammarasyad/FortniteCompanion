@@ -8,6 +8,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 import android.text.TextUtils;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -84,7 +85,11 @@ public class ItemUtils {
 		LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{border, content});
 		int p = (int) ctx.getResources().getDimension(R.dimen.rarity_bg_square_padding);
 		layerDrawable.setLayerInset(1, p, p, p, p);
-		layerDrawable.setPadding(p, p, p, p);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			layerDrawable.setPadding(p, p, p, p);
+		}
+
 		return layerDrawable;
 	}
 
@@ -103,16 +108,20 @@ public class ItemUtils {
 		border.setColors(colors);
 		border.setColorFilter(OVERLAY_COLOR, PorterDuff.Mode.OVERLAY);
 		LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{content, border});
-		layerDrawable.setLayerHeight(1, (int) ctx.getResources().getDimension(R.dimen.rarity_bg_square_padding));
-		layerDrawable.setLayerGravity(1, Gravity.BOTTOM);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			layerDrawable.setLayerHeight(1, (int) ctx.getResources().getDimension(R.dimen.rarity_bg_square_padding));
+			layerDrawable.setLayerGravity(1, Gravity.BOTTOM);
+		}
+
 		return layerDrawable;
 	}
 
-	public static String shortDescription(FortItemStack itemStack, JsonObject jsonObject) {
+	public static String getShortDescription(FortItemStack itemStack, JsonObject definitionObj) {
 		String s;
 
-		if (jsonObject.has("ShortDescription")) {
-			s = jsonObject.get("ShortDescription").getAsString();
+		if (definitionObj.has("ShortDescription")) {
+			s = definitionObj.get("ShortDescription").getAsString();
 		} else {
 			s = shortDescriptionFromCtg(itemStack.getIdCategory());
 		}
@@ -122,6 +131,8 @@ public class ItemUtils {
 
 	public static String shortDescriptionFromCtg(String idCategory) {
 		switch (idCategory) {
+			case "AthenaBackpack":
+				return "Back Bling";
 			case "AthenaCharacter":
 				return "Outfit";
 			case "AthenaDance":
@@ -137,16 +148,18 @@ public class ItemUtils {
 		}
 	}
 
-	public static void populateItemDetailBox(ViewGroup viewGroup, FortItemStack item, JsonElement json) {
-		JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
+	public static void populateItemDetailBox(ViewGroup view, FortItemStack item, JsonElement definitionElm) {
+		View backgroundView = view.findViewById(R.id.to_set_background);
+		TextView itemTitle = view.findViewById(R.id.item_text2);
+		JsonObject jsonObject = definitionElm.getAsJsonArray().get(0).getAsJsonObject();
 		EFortRarity rarity = getRarity(jsonObject);
-		View viewById = viewGroup.findViewById(R.id.to_set_background);
-		viewById.setBackground(rarityBgTitle(viewGroup.getContext(), rarity));
-		int twelve = (int) Utils.dp(viewGroup.getResources(), 12);
-		int eight = (int) Utils.dp(viewGroup.getResources(), 8);
-		viewById.setPadding(twelve, eight, twelve, eight);
-		((TextView) viewGroup.findViewById(R.id.item_text1)).setText(TextUtils.concat(Utils.color(rarity.name, FortniteCompanionApp.rarityData[rarity.ordinal()].Color1.asInt()), " | ", shortDescription(item, jsonObject)));
-		((TextView) viewGroup.findViewById(R.id.item_text2)).setText((item.attributes != null && item.attributes.has("DUMMY") ? "[Dummy] " : "") + JsonUtils.getStringOr("DisplayName", jsonObject, "??"));
+		backgroundView.setBackground(rarityBgTitle(view.getContext(), rarity));
+		int twelve = (int) Utils.dp(view.getResources(), 12);
+		int eight = (int) Utils.dp(view.getResources(), 8);
+		backgroundView.setPadding(twelve, eight, twelve, eight);
+		((TextView) view.findViewById(R.id.item_text1)).setText(TextUtils.concat(Utils.color(rarity.name, FortniteCompanionApp.rarityData[rarity.ordinal()].Color1.asInt()), " | ", getShortDescription(item, jsonObject)));
+		itemTitle.setShadowLayer(10.0F, 0.0F, 0.0F, FortniteCompanionApp.rarityData[rarity.ordinal()].Color1.asInt());
+		itemTitle.setText((item.attributes != null && item.attributes.has("DUMMY") ? "[Dummy] " : "") + JsonUtils.getStringOr("DisplayName", jsonObject, "??"));
 		CharSequence concat = JsonUtils.getStringOr("Description", jsonObject, "");
 
 		if (jsonObject.has("GameplayTags")) {
@@ -159,7 +172,7 @@ public class ItemUtils {
 			}
 		}
 
-		TextView textItemDescription = viewGroup.findViewById(R.id.item_text3);
+		TextView textItemDescription = view.findViewById(R.id.item_text3);
 
 		if (concat.length() == 0) {
 			textItemDescription.setVisibility(View.GONE);
@@ -169,11 +182,11 @@ public class ItemUtils {
 		}
 	}
 
-	public static EFortRarity getRarity(JsonObject jsonObject) {
+	public static EFortRarity getRarity(JsonObject definitionObj) {
 		EFortRarity rarity = EFortRarity.UNCOMMON;
 
-		if (jsonObject.has("Rarity")) {
-			rarity = EFortRarity.from(jsonObject.get("Rarity").getAsString());
+		if (definitionObj.has("Rarity")) {
+			rarity = EFortRarity.from(definitionObj.get("Rarity").getAsString());
 		}
 
 		return rarity;

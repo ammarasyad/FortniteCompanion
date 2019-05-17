@@ -8,7 +8,6 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.icu.text.MeasureFormat;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
@@ -29,6 +28,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.common.base.Charsets;
@@ -51,7 +51,7 @@ import java.util.Random;
 
 public final class Utils {
 	public static final Gson GSON = new Gson();
-	public static final String[] STRINGS = {"That wasn't supposed to happen", "There was an error", "We hit a roadblock", "Not the llama you're looking for", "Whoops!"};
+	public static final String[] STRINGS = {"That wasn't supposed to happen", "There was an error", "We hit a roadblock", "Not the llama you're looking for", "Whoops!", "Uh oh! Something goofed"};
 	public static final Random RANDOM = new Random();
 	public static final DialogInterface.OnClickListener LISTENER_TO_CANCEL = new DialogInterface.OnClickListener() {
 		@Override
@@ -63,6 +63,7 @@ public final class Utils {
 	private static final int SECONDS_PER_HOUR = 60 * 60;
 	private static final int SECONDS_PER_DAY = 24 * 60 * 60;
 	private static final Joiner JOINER = Joiner.on(' ');
+	private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat();
 	private static boolean darkSet;
 	private static int dark;
 
@@ -206,27 +207,31 @@ public final class Utils {
 		return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, size, res.getDisplayMetrics());
 	}
 
-	public static Bitmap getBitmapFromAssets(Context ctx, String fileName) {
-		AssetManager assetManager = ctx.getAssets();
-		InputStream istr;
-
-		try {
-			istr = assetManager.open(fileName);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-
-		Bitmap bitmap = BitmapFactory.decodeStream(istr);
-
-		try {
-			istr.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return bitmap;
+	public static float dpF(Resources res, float size) {
+		return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, size, res.getDisplayMetrics());
 	}
+
+//	public static Bitmap getBitmapFromAssets(Context ctx, String fileName) {
+//		AssetManager assetManager = ctx.getAssets();
+//		InputStream istr;
+//
+//		try {
+//			istr = assetManager.open(fileName);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//			return null;
+//		}
+//
+//		Bitmap bitmap = BitmapFactory.decodeStream(istr);
+//
+//		try {
+//			istr.close();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//
+//		return bitmap;
+//	}
 
 	public static String getStringFromAssets(AssetManager assetManager, String fileName) {
 		String s;
@@ -287,7 +292,7 @@ public final class Utils {
 	}
 
 	public static String formatDateSimple(Date time) {
-		return new SimpleDateFormat().format(time);
+		return SIMPLE_DATE_FORMAT.format(time);
 	}
 
 	public static boolean isSameDay(final Date date1, final Date date2) {
@@ -355,6 +360,15 @@ public final class Utils {
 		}
 
 		return hexString.toString();
+	}
+
+	public static void progressBarSetProgressAnimateFromEmpty(ProgressBar progressBar, int val) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			progressBar.setProgress(0);
+			progressBar.setProgress(val, true);
+		} else {
+			progressBar.setProgress(val);
+		}
 	}
 
 	public interface EditTextDialogCallback {

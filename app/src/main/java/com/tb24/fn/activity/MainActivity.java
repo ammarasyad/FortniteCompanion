@@ -54,6 +54,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	private Call<XGameProfile> callSelfName;
 	private LoadingViewController profileLc;
 
+	public static boolean checkAuthError(EpicError error) {
+		boolean invalidToken = error.errorCode.equals("errors.com.epicgames.common.oauth.invalid_token") || error.numericErrorCode == 1014;
+		boolean tokenVerificationFailed = error.errorCode.equals("errors.com.epicgames.common.authentication.token_verification_failed") || error.numericErrorCode == 1031;
+		boolean authenticationFailed = error.errorCode.equals("errors.com.epicgames.common.oauth.authentication_failed") || error.numericErrorCode == 1032;
+		return invalidToken || tokenVerificationFailed || authenticationFailed;
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -181,7 +188,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			getThisApplication().clearLoginData();
 			new AlertDialog.Builder(MainActivity.this)
 					.setTitle("You have been logged out")
-					.setMessage("Log in again to continue using some features")
+					.setMessage("Please log in again")
 					.setPositiveButton(android.R.string.ok, null)
 					.setOnDismissListener(new DialogInterface.OnDismissListener() {
 						@Override
@@ -193,13 +200,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		}
 	}
 
-	public static boolean checkAuthError(EpicError error) {
-		boolean invalidToken = error.errorCode.equals("errors.com.epicgames.common.oauth.invalid_token") || error.numericErrorCode == 1014;
-		boolean tokenVerificationFailed = error.errorCode.equals("errors.com.epicgames.common.authentication.token_verification_failed") || error.numericErrorCode == 1031;
-		boolean authenticationFailed = error.errorCode.equals("errors.com.epicgames.common.oauth.authentication_failed") || error.numericErrorCode == 1032;
-		return invalidToken || tokenVerificationFailed || authenticationFailed;
-	}
-
 	private void displayAthenaLevelAndBattlePass() {
 		profileLc.content();
 
@@ -207,33 +207,35 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			return;
 		}
 
-		//TODO animate
 		AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileManager.profileData.get("athena").stats.attributesObj;
 		((TextView) findViewById(R.id.p_season)).setText("Season " + attributes.season_num);
 		((TextView) findViewById(R.id.p_level)).setText(String.valueOf(attributes.level));
 		int i = MAX_XPS[attributes.level - 1];
-		ProgressBar progressBar = findViewById(R.id.progressBar);
 		boolean battlePassMax = attributes.book_level == 100;
 		boolean levelMax = attributes.level == 100;
+		ProgressBar progressBar = findViewById(R.id.p_xp_bar);
+		View lvlUpReward = findViewById(R.id.p_lvl_up_reward);
+		TextView xpProgress = findViewById(R.id.p_xp_progress);
 
 		if (levelMax) {
 			progressBar.setMax(1);
 			progressBar.setProgress(1);
-			findViewById(R.id.p_lvl_up_reward).setVisibility(View.GONE);
-			((TextView) findViewById(R.id.p_xp_progress)).setText("MAX");
+			lvlUpReward.setVisibility(View.GONE);
+			xpProgress.setText("MAX");
 		} else {
 			progressBar.setMax(i);
-			progressBar.setProgress(attributes.xp);
-			findViewById(R.id.p_lvl_up_reward).setVisibility(View.VISIBLE);
+			Utils.progressBarSetProgressAnimateFromEmpty(progressBar, attributes.xp);
+			lvlUpReward.setVisibility(View.VISIBLE);
 			int next = attributes.book_level + 1;
-			((ImageView) findViewById(R.id.p_lvl_up_reward_img)).setImageDrawable(getDrawable(battlePassMax ? R.drawable.t_fnbr_seasonalxp_l : R.drawable.t_fnbr_battlepoints_l));
-			((TextView) findViewById(R.id.p_lvl_up_reward)).setText(String.valueOf((next % 10 == 0 ? 10 : next % 5 == 0 ? 5 : 2) * (battlePassMax ? 100 : 1)));
-			((TextView) findViewById(R.id.p_xp_progress)).setText(String.format("%,d / %,d", attributes.xp, i));
+			((ImageView) findViewById(R.id.p_lvl_up_reward_img)).setImageBitmap(Utils.bitmapFromTga(this, battlePassMax ? "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-SeasonalXP.T-FNBR-SeasonalXP" : "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePoints.T-FNBR-BattlePoints"));
+			((TextView) lvlUpReward).setText(String.valueOf((next % 10 == 0 ? 10 : next % 5 == 0 ? 5 : 2) * (battlePassMax ? 100 : 1)));
+			xpProgress.setText(String.format("%,d / %,d", attributes.xp, i));
 		}
 
-		((ImageView) findViewById(R.id.p_battle_pass_img)).setImageDrawable(getDrawable(attributes.book_purchased ? R.drawable.t_fnbr_battlepass_l : R.drawable.t_fnbr_battlepass_default_l));
+		((ImageView) findViewById(R.id.p_battle_pass_img)).setImageBitmap(Utils.bitmapFromTga(this, attributes.book_purchased ? "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePass.T-FNBR-BattlePass" : "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePass-Default.T-FNBR-BattlePass-Default"));
 		((TextView) findViewById(R.id.p_battle_pass_type)).setText(attributes.book_purchased ? "Battle Pass" : "Free Pass");
 		((TextView) findViewById(R.id.p_battle_pass_tier)).setText(String.valueOf(attributes.book_level));
+		((ImageView) findViewById(R.id.p_battle_pass_stars_img)).setImageBitmap(Utils.bitmapFromTga(this, "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePoints.T-FNBR-BattlePoints"));
 		((TextView) findViewById(R.id.p_battle_pass_stars)).setText(battlePassMax ? "MAX" : (attributes.book_xp + " / 10"));
 	}
 

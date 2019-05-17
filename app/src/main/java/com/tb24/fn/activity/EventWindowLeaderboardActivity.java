@@ -675,6 +675,7 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 
 	private static class ParallelogramShape extends RectShape {
 		private final int indent;
+		private final Path path = new Path();
 
 		public ParallelogramShape(@Px int indent) {
 			this.indent = indent;
@@ -682,12 +683,12 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 
 		@Override
 		public void draw(Canvas canvas, Paint paint) {
-			Path path = new Path();
+			path.reset();
 			path.moveTo(getWidth(), 0);
 			path.lineTo(indent, 0);
 			path.lineTo(0, getHeight());
 			path.lineTo(getWidth() - indent, getHeight());
-			path.lineTo(getWidth(), 0);
+			path.close();
 			canvas.drawPath(path, paint);
 		}
 	}

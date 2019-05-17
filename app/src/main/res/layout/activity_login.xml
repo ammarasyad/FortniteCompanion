@@ -74,7 +74,7 @@
 				android:background="?android:selectableItemBackground"
 				android:text="Get one-time password" />
 
-			<Button
+			<com.tb24.fn.view.ShineButton
 				android:id="@+id/email_sign_in_button"
 				style="@style/btn_primary_m_normal"
 				android:layout_width="match_parent"

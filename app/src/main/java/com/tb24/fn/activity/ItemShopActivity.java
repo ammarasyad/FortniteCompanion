@@ -403,7 +403,7 @@ public class ItemShopActivity extends BaseActivity {
 
 					try {
 						holder.itemName.setText(displayName);
-						holder.shortDescription.setText(ItemUtils.shortDescription(itemStack, jsonObject));
+						holder.shortDescription.setText(ItemUtils.getShortDescription(itemStack, jsonObject));
 						holder.backgroundable.setBackground(ItemUtils.rarityBgSlot(activity, ItemUtils.getRarity(jsonObject)));
 					} catch (NullPointerException e) {
 						Log.w("ItemShopActivity", "Failed setting short description or rarity background for " + itemStack.templateId, e);
@@ -603,7 +603,7 @@ public class ItemShopActivity extends BaseActivity {
 				private void updateButtons() {
 					boolean finallyOwned = purchaseSuccess || finalOwned;
 					owned.setVisibility(finallyOwned ? View.VISIBLE : View.GONE);
-					btnPurchase.setText(purchasePending ? "Purchase pending" : item.itemGrants.length == 1 ? "Purchase" : "Purchase items");
+					btnPurchase.setText(purchasePending ? "Purchase Pending" : item.itemGrants.length == 1 ? "Purchase" : "Purchase Items");
 					btnPurchase.setEnabled(!purchasePending);
 					btnPurchase.setVisibility(finallyOwned ? View.GONE : View.VISIBLE);
 					boolean notEnough = activity.vBucksQty < price.basePrice;
