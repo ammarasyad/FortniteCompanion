@@ -17,4 +17,5 @@
 	<string name="title_stats">Stats</string>
 	<string name="title_locker">Locker</string>
 	<string name="title_stw_info">Save the World Info</string>
+	<string name="action_logout">Log Out</string>
 </resources>

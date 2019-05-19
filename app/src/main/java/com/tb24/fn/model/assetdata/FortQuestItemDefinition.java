@@ -8,7 +8,7 @@ public class FortQuestItemDefinition {
 	public Boolean bShouldDisplayOverallQuestInformation;
 	public Boolean bAthenaMustCompleteInSingleMatch;
 	public Boolean bIncludedInCategories;
-	public String ObjectiveCompletionCount;
+	public Integer ObjectiveCompletionCount;
 	public Reward[] Rewards;
 	public Objective[] Objectives;
 	public Float Weight;

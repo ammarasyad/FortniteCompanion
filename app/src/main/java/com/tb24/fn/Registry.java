@@ -38,6 +38,7 @@ public class Registry {
 		registerPath("ChallengeBundle", "Game/Athena/Items/ChallengeBundles/*");
 		registerPath("ChallengeBundleSchedule", "Game/Athena/Items/ChallengeBundleSchedules/*");
 		registerPath("Quest", "Game/Athena/Items/Quests/*");
+		registerPath("AccountResource", "Game/Items/PersistentResources");
 		registerPath("Token", "Game/Items/Tokens/*");
 		registerPath("AthenaHero_", "Game/Athena/Heroes");
 		registerPath("AthenaWeapon_", "Game/Athena/Items/Weapons");

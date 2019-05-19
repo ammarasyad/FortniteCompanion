@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.JsonElement;
@@ -37,7 +38,7 @@ public class ItemUtils {
 		try {
 			if (jsonObject.has("SmallPreviewImage")) {
 				String path = jsonObject.get("SmallPreviewImage").getAsJsonObject().get("asset_path_name").getAsString();
-				return Utils.bitmapFromTga(activity, path);
+				return Utils.loadTga(activity, path);
 			} else if (jsonObject.has("HeroDefinition")) {
 				JsonElement json1 = activity.getThisApplication().itemRegistry.get("AthenaHero_:" + jsonObject.get("HeroDefinition").getAsString());
 
@@ -190,5 +191,24 @@ public class ItemUtils {
 		}
 
 		return rarity;
+	}
+
+	public static void populateSlotView(BaseActivity activity, View slotView, FortItemStack item, JsonElement defData) {
+		View attemptFindId = slotView.findViewById(R.id.to_set_background);
+		View rarityBackground = attemptFindId == null ? slotView : attemptFindId;
+		TextView quantity = slotView.findViewById(R.id.item_slot_quantity);
+		rarityBackground.setBackgroundResource(R.drawable.bg_common);
+		Bitmap bitmap = null;
+
+		if (defData != null) {
+			JsonObject jsonObject = defData.getAsJsonArray().get(0).getAsJsonObject();
+			bitmap = getBitmapImageFromItemStackData(activity, item, jsonObject);
+			rarityBackground.setBackground(rarityBgSlot(activity, getRarity(jsonObject)));
+		}
+
+		((ImageView) slotView.findViewById(R.id.item_img)).setImageBitmap(bitmap);
+		((TextView) slotView.findViewById(R.id.item_slot_dbg_text)).setText(bitmap == null ? item.templateId : null);
+		quantity.setVisibility(item.quantity > 1 ? View.VISIBLE : View.GONE);
+		quantity.setText(String.valueOf(item.quantity));
 	}
 }

@@ -8,22 +8,22 @@ import android.graphics.Path;
 import android.graphics.Region;
 import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 
 import com.tb24.fn.util.Utils;
 
 @SuppressLint("AppCompatCustomView")
 public class ShineButton extends Button {
-	private static final float SHINE_DURATION = 500.0F;
-	private static final float SHINE_DELAY_BETWEEN = 2000.0F;
+	private static final long SHINE_DURATION = 500;
+	private static final long SHINE_DELAY_BETWEEN = 1500;
 	private Paint paint;
 	private Path path;
 	private Path path2;
 	private float indentLow;
 	private float indentHigh;
-	private Interpolator interpolator = new AccelerateDecelerateInterpolator();
+	private Interpolator interpolator = new LinearInterpolator();
 
 	public ShineButton(Context context) {
 		super(context);
@@ -47,7 +47,6 @@ public class ShineButton extends Button {
 
 	protected void init() {
 		paint = new Paint();
-		paint.setColor(0x90FFFFFF);
 		path = new Path();
 		path2 = new Path();
 		indentLow = Utils.dpF(getResources(), 3.0F);
@@ -56,12 +55,7 @@ public class ShineButton extends Button {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		if (!isShown()) {
-			return;
-		}
-
 		super.onDraw(canvas);
-
 		path.reset();
 		path.moveTo(getWidth() - indentLow, indentLow);
 		path.lineTo(indentHigh, indentHigh);
@@ -70,14 +64,19 @@ public class ShineButton extends Button {
 		path.close();
 		canvas.save();
 		canvas.clipPath(path, Region.Op.DIFFERENCE);
+		paint.setColor(0x90FFFFFF);
 		canvas.drawRect(0, 0, getWidth(), getHeight(), paint);
 		canvas.restore();
 
-		float a = SystemClock.uptimeMillis() % (SHINE_DURATION + SHINE_DELAY_BETWEEN);
+		if (!isEnabled() || !isShown()) {
+			return;
+		}
+
+		long a = SystemClock.uptimeMillis() % (SHINE_DURATION + SHINE_DELAY_BETWEEN);
 
 		if (a <= SHINE_DURATION) {
 			float shineWidth = 0.2F * getWidth();
-			float off = interpolator.getInterpolation(a / SHINE_DURATION) * (shineWidth + getWidth());
+			float off = interpolator.getInterpolation((float) a / (float) SHINE_DURATION) * (shineWidth + getWidth());
 			path2.reset();
 			float indentDelta = indentHigh - indentLow;
 			path2.moveTo(shineWidth, 0);
@@ -88,6 +87,7 @@ public class ShineButton extends Button {
 			canvas.save();
 			canvas.clipPath(path);
 			canvas.translate(-shineWidth + off, 0.0F);
+			paint.setColor(0xB0FFFFFF);
 			canvas.drawPath(path2, paint);
 			canvas.restore();
 		}

@@ -88,6 +88,10 @@ public class ChallengeBundleActivity extends BaseActivity {
 			max += objective.Count;
 		}
 
+		if (quest.ObjectiveCompletionCount != null) {
+			max = quest.ObjectiveCompletionCount;
+		}
+
 		questProgressBar.setMax(max);
 		questProgressBar.setProgress(completion);
 		questProgressText.setText(TextUtils.concat(String.format("%,d", completion), " / ", String.format("%,d", max)));

@@ -1,24 +1,46 @@
-<android.support.v7.preference.PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
-	<android.support.v7.preference.DropDownPreference
-		app:defaultValue="NAW"
-		app:key="matchmaking_region"
-		app:title="Events Region" />
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+	<PreferenceCategory android:title="App settings">
+		<android.support.v7.preference.DropDownPreference
+			android:defaultValue="NAW"
+			android:key="matchmaking_region"
+			android:title="Events Region" />
+	</PreferenceCategory>
 
-	<!--Leaderboard Privacy-->
-	<android.support.v7.preference.CheckBoxPreference
-		app:defaultValue="false"
-		app:key="leaderboard_privacy"
-		app:persistent="false"
-		app:title="Opt out of public leaderboards" />
+	<PreferenceCategory
+		android:key="account_ctg"
+		android:title="Account settings">
+		<!--Leaderboard Privacy-->
+		<SwitchPreference
+			android:defaultValue="false"
+			android:key="leaderboard_privacy"
+			android:persistent="false"
+			android:title="Opt out of public leaderboards" />
 
-	<android.support.v7.preference.CheckBoxPreference
-		app:defaultValue="false"
-		app:key="fake_purchases"
-		app:summary="If you wanna flex"
-		app:title="Simulate purchases" />
+		<android.support.v7.preference.DropDownPreference
+			android:enabled="false"
+			android:key="mtx_platform"
+			android:persistent="false"
+			android:title="Store platform" />
+	</PreferenceCategory>
 
-	<android.support.v7.preference.Preference
-		app:key="dump_login_data"
-		app:title="Dump login data" />
+	<PreferenceCategory android:title="Debugging">
+		<SwitchPreference
+			android:defaultValue="false"
+			android:key="fake_purchases"
+			android:summary="Simulated items will be marked as dummy and removed after the next profile refresh"
+			android:title="Simulate purchases" />
 
-</android.support.v7.preference.PreferenceScreen>
+		<Preference
+			android:key="dump_login_data"
+			android:summary="Display login data on the app log"
+			android:title="Dump login data" />
+	</PreferenceCategory>
+
+	<!-- Layout preference doesn't obey allowDividerAbove, so put it in a PreferenceCategory -->
+	<PreferenceCategory>
+		<com.tb24.fn.view.LayoutPreference
+			android:key="log_out"
+			android:layout="@layout/log_out_settings_button"
+			android:selectable="false" />
+	</PreferenceCategory>
+</PreferenceScreen>

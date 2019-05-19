@@ -1,0 +1,384 @@
+package com.tb24.fn.activity;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.FluentIterable;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.tb24.fn.R;
+import com.tb24.fn.event.ProfileUpdatedEvent;
+import com.tb24.fn.model.AthenaProfileAttributes;
+import com.tb24.fn.model.FortItemStack;
+import com.tb24.fn.model.FortMcpProfile;
+import com.tb24.fn.util.EFortRarity;
+import com.tb24.fn.util.ItemUtils;
+import com.tb24.fn.util.JsonUtils;
+import com.tb24.fn.util.LoadingViewController;
+import com.tb24.fn.util.Utils;
+
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.Comparator;
+import java.util.List;
+
+public class LockerItemSelectionActivity extends BaseActivity {
+	private RecyclerView list;
+	private LockerAdapter adapter;
+	private LoadingViewController lc;
+	private GridLayoutManager layout;
+	private String selectedItem;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.common_loadable_recycler_view);
+		setupActionBar();
+
+		if (getIntent().hasExtra("a")) {
+			getActionBar().setTitle("Selecting");
+			getActionBar().setSubtitle(getTitleText(getIntent().getIntExtra("a", 0)));
+		}
+
+		list = findViewById(R.id.main_recycler_view);
+		int p = (int) Utils.dp(getResources(), 4);
+		list.setPadding(p, p, p, p);
+		list.setClipToPadding(false);
+		list.post(new Runnable() {
+			@Override
+			public void run() {
+				layout = new GridLayoutManager(LockerItemSelectionActivity.this, (int) (list.getWidth() / Utils.dp(getResources(), 66 + 8)));
+				list.setLayoutManager(layout);
+			}
+		});
+		lc = new LoadingViewController(this, list, "");
+		displayData(getThisApplication().profileManager.profileData.get("athena"));
+		getThisApplication().eventBus.register(this);
+	}
+
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onProfileUpdated(ProfileUpdatedEvent event) {
+		if (event.profileId.equals("athena")) {
+			displayData(event.profileObj);
+		}
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		getThisApplication().eventBus.unregister(this);
+	}
+
+	private void displayData(FortMcpProfile profile) {
+		if (profile == null) {
+			lc.loading();
+			return;
+		}
+
+		FluentIterable<FortItemStack> chain = FluentIterable.from(profile.items.values());
+
+		if (getIntent().hasExtra("a")) {
+			int id = getIntent().getIntExtra("a", 0);
+			String selected = getSelected((AthenaProfileAttributes) profile.stats.attributesObj, id);
+			selectedItem = selected == null ? null : selected.contains("-") ? profile.items.get(selected).templateId : selected;
+			final String filter = getFilter(id);
+
+			if (filter != null) {
+				chain = chain.filter(new Predicate<FortItemStack>() {
+					@Override
+					public boolean apply(@NullableDecl FortItemStack input) {
+						return input.getIdCategory().equals(filter);
+					}
+				});
+			}
+		}
+
+		List<FortItemStack> data = chain.toSortedList(new Comparator<FortItemStack>() {
+			@Override
+			public int compare(FortItemStack o1, FortItemStack o2) {
+				JsonElement jsonElement = getThisApplication().itemRegistry.get(o1.templateId);
+				JsonElement jsonElement1 = getThisApplication().itemRegistry.get(o2.templateId);
+				EFortRarity rarity1 = EFortRarity.COMMON;
+				EFortRarity rarity2 = EFortRarity.COMMON;
+
+				if (jsonElement != null) {
+					rarity1 = ItemUtils.getRarity(jsonElement.getAsJsonArray().get(0).getAsJsonObject());
+				}
+
+				if (jsonElement1 != null) {
+					rarity2 = ItemUtils.getRarity(jsonElement1.getAsJsonArray().get(0).getAsJsonObject());
+				}
+
+				return ComparisonChain.start().compareTrueFirst(JsonUtils.getBooleanOr("favorite", o1.attributes, false), JsonUtils.getBooleanOr("favorite", o2.attributes, false)).compare(o1.getIdCategory(), o2.getIdCategory()).compare(rarity2, rarity1).compare(o1.getIdName(), o2.getIdName()).result();
+			}
+		});
+
+		if (adapter == null) {
+			list.setAdapter(adapter = new LockerAdapter(this, data));
+		} else {
+			adapter.data = data;
+			adapter.notifyDataSetChanged();
+		}
+
+		lc.content();
+	}
+
+	private static String getFilter(int id) {
+		switch (id) {
+			case R.id.locker_slot_character:
+				return "AthenaCharacter";
+			case R.id.locker_slot_backpack:
+				return "AthenaBackpack";
+			case R.id.locker_slot_pickaxe:
+				return "AthenaPickaxe";
+			case R.id.locker_slot_glider:
+				return "AthenaGlider";
+			case R.id.locker_slot_skydivecontrail:
+				return "AthenaSkyDiveContrail";
+			case R.id.locker_slot_emote1:
+			case R.id.locker_slot_emote2:
+			case R.id.locker_slot_emote3:
+			case R.id.locker_slot_emote4:
+			case R.id.locker_slot_emote5:
+			case R.id.locker_slot_emote6:
+				return "AthenaDance";
+			case R.id.locker_slot_wrap1:
+			case R.id.locker_slot_wrap2:
+			case R.id.locker_slot_wrap3:
+			case R.id.locker_slot_wrap4:
+			case R.id.locker_slot_wrap5:
+			case R.id.locker_slot_wrap6:
+				return "AthenaItemWrap";
+			case R.id.locker_slot_musicpack:
+				return "AthenaMusicPack";
+			case R.id.locker_slot_loadingscreen:
+				return "AthenaLoadingScreen";
+			default:
+				return null;
+		}
+	}
+
+	private static String getTitleText(int id) {
+		switch (id) {
+			case R.id.locker_slot_character:
+				return "Outfit";
+			case R.id.locker_slot_backpack:
+				return "Back Bling";
+			case R.id.locker_slot_pickaxe:
+				return "Harvesting Tool";
+			case R.id.locker_slot_glider:
+				return "Glider";
+			case R.id.locker_slot_skydivecontrail:
+				return "Contrail";
+			case R.id.locker_slot_emote1:
+				return "Emote 1";
+			case R.id.locker_slot_emote2:
+				return "Emote 2";
+			case R.id.locker_slot_emote3:
+				return "Emote 3";
+			case R.id.locker_slot_emote4:
+				return "Emote 4";
+			case R.id.locker_slot_emote5:
+				return "Emote 5";
+			case R.id.locker_slot_emote6:
+				return "Emote 6";
+			case R.id.locker_slot_wrap1:
+				return "Wrap 1";
+			case R.id.locker_slot_wrap2:
+				return "Wrap 2";
+			case R.id.locker_slot_wrap3:
+				return "Wrap 3";
+			case R.id.locker_slot_wrap4:
+				return "Wrap 4";
+			case R.id.locker_slot_wrap5:
+				return "Wrap 5";
+			case R.id.locker_slot_wrap6:
+				return "Wrap 6";
+			case R.id.locker_slot_musicpack:
+				return "Music";
+			case R.id.locker_slot_loadingscreen:
+				return "Loading Screen";
+			default:
+				return "??";
+		}
+	}
+
+	private static String getSelected(AthenaProfileAttributes attributes, int id) {
+		switch (id) {
+			case R.id.locker_slot_character:
+				return attributes.favorite_character;
+			case R.id.locker_slot_backpack:
+				return attributes.favorite_backpack;
+			case R.id.locker_slot_pickaxe:
+				return attributes.favorite_pickaxe;
+			case R.id.locker_slot_glider:
+				return attributes.favorite_glider;
+			case R.id.locker_slot_skydivecontrail:
+				return attributes.favorite_skydivecontrail;
+			case R.id.locker_slot_emote1:
+				return attributes.favorite_dance[0];
+			case R.id.locker_slot_emote2:
+				return attributes.favorite_dance[1];
+			case R.id.locker_slot_emote3:
+				return attributes.favorite_dance[2];
+			case R.id.locker_slot_emote4:
+				return attributes.favorite_dance[3];
+			case R.id.locker_slot_emote5:
+				return attributes.favorite_dance[4];
+			case R.id.locker_slot_emote6:
+				return attributes.favorite_dance[5];
+			case R.id.locker_slot_wrap1:
+				return attributes.favorite_itemwraps[0];
+			case R.id.locker_slot_wrap2:
+				return attributes.favorite_itemwraps[1];
+			case R.id.locker_slot_wrap3:
+				return attributes.favorite_itemwraps[2];
+			case R.id.locker_slot_wrap4:
+				return attributes.favorite_itemwraps[3];
+			case R.id.locker_slot_wrap5:
+				return attributes.favorite_itemwraps[4];
+			case R.id.locker_slot_wrap6:
+				return attributes.favorite_itemwraps[5];
+			case R.id.locker_slot_musicpack:
+				return attributes.favorite_musicpack;
+			case R.id.locker_slot_loadingscreen:
+				return attributes.favorite_loadingscreen;
+			default:
+				return null;
+		}
+	}
+
+	private static class LockerAdapter extends RecyclerView.Adapter<LockerAdapter.LockerViewHolder> {
+		private final LockerItemSelectionActivity activity;
+		private List<FortItemStack> data;
+
+		public LockerAdapter(LockerItemSelectionActivity activity, List<FortItemStack> data) {
+			this.activity = activity;
+			this.data = data;
+		}
+
+		@NonNull
+		@Override
+		public LockerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+			LockerViewHolder holder = new LockerViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.slot_view_encased, parent, false));
+			holder.favorite.setImageBitmap(Utils.loadTga(activity, "/Game/UI/Foundation/Textures/Icons/Locker/T_Icon_FavoriteTab_64.T_Icon_FavoriteTab_64"));
+			holder.newIcon.setImageBitmap(Utils.loadTga(activity, "/Game/UI/Foundation/Textures/Icons/Manage/T-Icon-Manage-New-32.T-Icon-Manage-New-32"));
+			return holder;
+		}
+
+		@Override
+		public void onBindViewHolder(@NonNull LockerViewHolder holder, int position) {
+			final FortItemStack item = data.get(position);
+			holder.itemView.setSelected(item.templateId.equals(activity.selectedItem));
+			holder.rarityBackground.setBackgroundResource(R.drawable.bg_common);
+			holder.newIcon.setVisibility(JsonUtils.getBooleanOr("item_seen", item.attributes, false) ? View.INVISIBLE : View.VISIBLE);
+			holder.favorite.setVisibility(JsonUtils.getBooleanOr("favorite", item.attributes, false) ? View.VISIBLE : View.INVISIBLE);
+			final JsonElement json = activity.getThisApplication().itemRegistry.get(item.templateId);
+			Bitmap bitmap = null;
+
+			if (json != null) {
+				JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
+				bitmap = ItemUtils.getBitmapImageFromItemStackData(activity, item, jsonObject);
+				holder.rarityBackground.setBackground(ItemUtils.rarityBgSlot(activity, ItemUtils.getRarity(jsonObject)));
+			}
+
+			holder.displayImage.setImageBitmap(bitmap);
+			holder.itemName.setText(bitmap == null ? item.templateId : null);
+			holder.quantity.setVisibility(item.quantity > 1 ? View.VISIBLE : View.GONE);
+			holder.quantity.setText(String.valueOf(item.quantity));
+			holder.itemView.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					String attributesDbgString = new GsonBuilder().setPrettyPrinting().create().toJson(item.attributes);
+					ViewGroup viewGroup = null;
+
+					if (json != null) {
+						viewGroup = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.fort_item_detail_box, null);
+						ItemUtils.populateItemDetailBox(viewGroup, item, json);
+					}
+
+					AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+							.setCustomTitle(viewGroup)
+							.setMessage(attributesDbgString)
+							.setPositiveButton(android.R.string.ok, null);
+
+					// TODO dedicated challenges tab instead of deeply buried like this
+					if (json != null && item.getIdCategory().equals("Quest")) {
+						View inflate = LayoutInflater.from(activity).inflate(R.layout.test_quest, null);
+						ChallengeBundleActivity.populateQuestView(activity, inflate, item);
+						builder.setView(inflate);
+					} else if (json != null && item.getIdCategory().equals("ChallengeBundle")) {
+						builder.setNeutralButton("More Details", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								Intent intent = new Intent(activity, ChallengeBundleActivity.class);
+								intent.putExtra("a", item.templateId);
+								activity.startActivity(intent);
+							}
+						});
+					}
+
+					builder.show();
+				}
+			});
+			holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+				@Override
+				public boolean onLongClick(View v) {
+					if (json == null) {
+						return false;
+					}
+
+					ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.fort_item_detail_box, null);
+					ItemUtils.populateItemDetailBox(viewGroup, item, json);
+					Toast toast = new Toast(activity);
+					toast.setView(viewGroup);
+					toast.setDuration(Toast.LENGTH_LONG);
+					toast.show();
+					return true;
+				}
+			});
+		}
+
+		@Override
+		public int getItemCount() {
+			return data.size();
+		}
+
+		static class LockerViewHolder extends RecyclerView.ViewHolder {
+			ImageView displayImage;
+			TextView itemName;
+			TextView quantity;
+			ImageView favorite;
+			ImageView newIcon;
+			View rarityBackground;
+
+			LockerViewHolder(View itemView) {
+				super(itemView);
+				displayImage = itemView.findViewById(R.id.item_img);
+				itemName = itemView.findViewById(R.id.item_slot_dbg_text);
+				quantity = itemView.findViewById(R.id.item_slot_quantity);
+				favorite = itemView.findViewById(R.id.item_favorite);
+				newIcon = itemView.findViewById(R.id.item_new);
+				rarityBackground = itemView.findViewById(R.id.to_set_background);
+			}
+		}
+	}
+
+}

@@ -42,12 +42,15 @@ import retrofit2.Response;
 public class MainActivity extends BaseActivity implements View.OnClickListener, View.OnLongClickListener {
 	private static final int[] MAX_XPS = new int[]{100, 200, 300, 400, 500, 650, 800, 950, 1100, 1250, 1400, 1550, 1700, 1850, 2000, 2150, 2300, 2450, 2600, 2750, 2900, 3050, 3200, 3350, 3500, 3650, 3800, 3950, 4100, 4250, 4400, 4550, 4700, 4850, 5000, 5150, 5300, 5450, 5600, 5800, 6000, 6200, 6400, 6600, 6800, 7000, 7200, 7400, 7600, 7800, 8100, 8400, 8700, 9000, 9300, 9600, 9900, 10200, 10500, 10800, 11200, 11600, 12000, 12400, 12800, 13200, 13600, 14000, 14400, 14800, 15300, 15800, 16300, 16800, 17300, 17800, 18300, 18800, 19300, 19800, 20800, 21800, 22800, 23800, 24800, 25800, 26800, 27800, 28800, 30800, 32800, 34800, 36800, 38800, 40800, 42800, 45800, 49800, 54800};
 	private static final int UPDATE_IF_OK_REQ_CODE = 0;
-
 	private SharedPreferences prefs;
 	private Button loginBtn;
-	private boolean loggedIn;
+	private TextView loginText;
+	private ViewGroup vBucksView;
+	private ViewGroup profileFrame;
+	private ViewGroup profileContent;
+	private ViewGroup profileLoader;
 	private MenuItem menuVbucks;
-	private ViewGroup vBucksView, profileFrame, profileContent, profileLoader;
+	private boolean loggedIn;
 	private Call<FortMcpResponse> callMcpCommonPublic;
 	private Call<FortMcpResponse> callMcpCommonCore;
 	private Call<FortMcpResponse> callMcpAthena;
@@ -78,6 +81,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		loginBtn = findViewById(R.id.main_screen_btn_login);
 		loginBtn.setOnClickListener(this);
+		loginText = findViewById(R.id.main_screen_login_username);
 		profileFrame = findViewById(R.id.profile_frame);
 		profileContent = findViewById(R.id.p_root);
 		DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
@@ -104,9 +108,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		findViewById(R.id.main_screen_btn_events).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_locker).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_stw).setEnabled(loggedIn);
+		loginBtn.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
 
 		if (loggedIn) {
-			updateLogInButtonText("...");
+			updateLogInText("...");
 			profileLc.loading();
 			String accountId = prefs.getString("epic_account_id", "");
 			callMcpCommonPublic = getThisApplication().profileManager.requestFullProfileUpdate("common_public");
@@ -122,7 +127,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 							@Override
 							public void run() {
 								if (response.isSuccessful()) {
-									updateLogInButtonText((getThisApplication().currentLoggedIn = response.body()).getDisplayName());
+									updateLogInText((getThisApplication().currentLoggedIn = response.body()).getDisplayName());
 								} else {
 									validateLoggedIn(EpicError.parse(response));
 								}
@@ -134,7 +139,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 				}
 			}.start();
 		} else {
-			updateLogInButtonText(null);
+			updateLogInText(null);
 			profileLc.content();
 			openLogin();
 		}
@@ -159,6 +164,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		if (event.profileId.equals("athena") && !getThisApplication().profileManager.profileData.containsKey("athena")) {
 			profileLc.content();
 		}
+	}
+
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onLoggedOut(LoggedOutEvent event) {
+		recreate();
 	}
 
 	@Override
@@ -227,20 +237,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			Utils.progressBarSetProgressAnimateFromEmpty(progressBar, attributes.xp);
 			lvlUpReward.setVisibility(View.VISIBLE);
 			int next = attributes.book_level + 1;
-			((ImageView) findViewById(R.id.p_lvl_up_reward_img)).setImageBitmap(Utils.bitmapFromTga(this, battlePassMax ? "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-SeasonalXP.T-FNBR-SeasonalXP" : "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePoints.T-FNBR-BattlePoints"));
+			((ImageView) findViewById(R.id.p_lvl_up_reward_img)).setImageBitmap(Utils.loadTga(this, battlePassMax ? "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-SeasonalXP.T-FNBR-SeasonalXP" : "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePoints.T-FNBR-BattlePoints"));
 			((TextView) lvlUpReward).setText(String.valueOf((next % 10 == 0 ? 10 : next % 5 == 0 ? 5 : 2) * (battlePassMax ? 100 : 1)));
 			xpProgress.setText(String.format("%,d / %,d", attributes.xp, i));
 		}
 
-		((ImageView) findViewById(R.id.p_battle_pass_img)).setImageBitmap(Utils.bitmapFromTga(this, attributes.book_purchased ? "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePass.T-FNBR-BattlePass" : "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePass-Default.T-FNBR-BattlePass-Default"));
+		((ImageView) findViewById(R.id.p_battle_pass_img)).setImageBitmap(Utils.loadTga(this, attributes.book_purchased ? "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePass.T-FNBR-BattlePass" : "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePass-Default.T-FNBR-BattlePass-Default"));
 		((TextView) findViewById(R.id.p_battle_pass_type)).setText(attributes.book_purchased ? "Battle Pass" : "Free Pass");
 		((TextView) findViewById(R.id.p_battle_pass_tier)).setText(String.valueOf(attributes.book_level));
-		((ImageView) findViewById(R.id.p_battle_pass_stars_img)).setImageBitmap(Utils.bitmapFromTga(this, "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePoints.T-FNBR-BattlePoints"));
+		((ImageView) findViewById(R.id.p_battle_pass_stars_img)).setImageBitmap(Utils.loadTga(this, "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePoints.T-FNBR-BattlePoints"));
 		((TextView) findViewById(R.id.p_battle_pass_stars)).setText(battlePassMax ? "MAX" : (attributes.book_xp + " / 10"));
 	}
 
-	private void updateLogInButtonText(String displayName) {
-		loginBtn.setText(displayName == null ? "Log in" : ("Logged in as: " + displayName));
+	private void updateLogInText(String displayName) {
+		loginText.setVisibility(displayName == null ? View.GONE : View.VISIBLE);
+		loginText.setText(displayName);
 	}
 
 	@Override
@@ -317,43 +328,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 				startActivity(new Intent(this, LockerActivity.class));
 				break;
 			case R.id.main_screen_btn_login:
-				if (loggedIn) {
-					new AlertDialog.Builder(this)
-							.setTitle("Log out?")
-							.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									new Thread("Logout Worker") {
-										@Override
-										public void run() {
-											Call<Void> call = getThisApplication().accountPublicService.oauthSessionsKillAccessToken(prefs.getString("epic_account_access_token", null));
-
-											try {
-												Response<Void> response = call.execute();
-
-//												if (response.isSuccessful()) {
-												getThisApplication().clearLoginData();
-												runOnUiThread(new Runnable() {
-													@Override
-													public void run() {
-														recreate();
-													}
-												});
-//												} else {
-//													Utils.dialogOkNonMain(MainActivity.this, "Can't Log Out", EpicError.parse(response).getDisplayText());
-//												}
-											} catch (IOException e) {
-												Utils.throwableDialog(MainActivity.this, e);
-											}
-										}
-									}.start();
-								}
-							})
-							.setNegativeButton("No", null)
-							.show();
-				} else {
-					openLogin();
-				}
+				openLogin();
 				break;
 		}
 	}

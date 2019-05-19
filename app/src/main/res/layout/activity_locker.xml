@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+
+		<include
+			android:id="@+id/locker_slot_character"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_backpack"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_pickaxe"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_glider"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_skydivecontrail"
+			layout="@layout/slot_view" />
+	</LinearLayout>
+
+	<LinearLayout
+		android:id="@+id/locker_emote_slots"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+
+		<include
+			android:id="@+id/locker_slot_emote1"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_emote2"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_emote3"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_emote4"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_emote5"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_emote6"
+			layout="@layout/slot_view" />
+	</LinearLayout>
+
+	<LinearLayout
+		android:id="@+id/locker_wrap_slots"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+
+		<include
+			android:id="@+id/locker_slot_wrap1"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_wrap2"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_wrap3"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_wrap4"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_wrap5"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_wrap6"
+			layout="@layout/slot_view" />
+	</LinearLayout>
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content">
+
+		<include
+			android:id="@+id/locker_slot_banner"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_musicpack"
+			layout="@layout/slot_view" />
+
+		<include
+			android:id="@+id/locker_slot_loadingscreen"
+			layout="@layout/slot_view" />
+	</LinearLayout>
+</LinearLayout>

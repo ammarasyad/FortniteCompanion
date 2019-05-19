@@ -278,6 +278,10 @@ public final class Utils {
 	}
 
 	public static Spanned makeItDark(CharSequence s, Context ctx) {
+		if (s == null) {
+			return null;
+		}
+
 		if (!darkSet) {
 			darkSet = true;
 			TypedValue typedValue = new TypedValue();
@@ -319,7 +323,7 @@ public final class Utils {
 		return e instanceof IOException ? "Connection to server failed. (" + e.getLocalizedMessage() + ")" : e.getLocalizedMessage();
 	}
 
-	public static Bitmap bitmapFromTga(BaseActivity activity, String uPath) {
+	public static Bitmap loadTga(BaseActivity activity, String uPath) {
 		Bitmap bitmap = activity.getThisApplication().bitmapCache.get(uPath);
 
 		synchronized (activity.getThisApplication().bitmapCache) {

@@ -53,7 +53,7 @@ public class FortniteCompanionApp extends Application {
 	public void onCreate() {
 		super.onCreate();
 		OkHttpClient.Builder builder = new OkHttpClient.Builder();
-		builder.cache(new Cache(getCacheDir(), 8 * 1024 * 1024));
+		builder.cache(new Cache(getCacheDir(), 4 * 1024 * 1024));
 		builder.addInterceptor(new DefaultInterceptor(this));
 //		builder.addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY));
 		Retrofit.Builder retrofitBuilder = new Retrofit.Builder().client(builder.build()).addConverterFactory(GsonConverterFactory.create(gson));

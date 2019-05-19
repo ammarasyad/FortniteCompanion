@@ -173,13 +173,17 @@ public class ItemShopActivity extends BaseActivity {
 	}
 
 	private void scheduleRefresh() {
-		handler.postDelayed(scheduleRunnable = new Runnable() {
-			@Override
-			public void run() {
-				calendarData = null;
-				load();
-			}
-		}, calendarData.dailyStoreEnd.getTime() - System.currentTimeMillis());
+		long delta = calendarData.dailyStoreEnd.getTime() - System.currentTimeMillis();
+
+		if (delta >= 0) {
+			handler.postDelayed(scheduleRunnable = new Runnable() {
+				@Override
+				public void run() {
+					calendarData = null;
+					load();
+				}
+			}, delta);
+		}
 	}
 
 	public void display(FortCatalogResponse data) {
@@ -511,7 +515,7 @@ public class ItemShopActivity extends BaseActivity {
 						for (int i = 0; i < item.itemGrants.length; i++) {
 							FortItemStack itemStackLoop = item.itemGrants[i];
 							View slotView = LayoutInflater.from(activity).inflate(R.layout.slot_view, null);
-							populateSlotView(itemStackLoop, slotView, jsons.get(i));
+							ItemUtils.populateSlotView(activity, slotView, itemStackLoop, jsons.get(i));
 							final int finalI = i;
 							slotView.setOnClickListener(new View.OnClickListener() {
 								@Override
@@ -677,7 +681,7 @@ public class ItemShopActivity extends BaseActivity {
 							TextView purchasedItemTitle = purchasedDialogView.findViewById(R.id.item_shop_purchased_item_title);
 							View slotView = purchasedDialogView.findViewById(R.id.to_set_background);
 							purchasedItemTitle.setText(compiledNames.get(0));
-							populateSlotView(firstItemGrant, purchasedDialogView, jsons.get(0));
+							ItemUtils.populateSlotView(activity, purchasedDialogView, firstItemGrant, jsons.get(0));
 							final Dialog dialog = new Dialog(activity);
 							dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 							dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
@@ -717,24 +721,6 @@ public class ItemShopActivity extends BaseActivity {
 					});
 				}
 			});
-		}
-
-		private void populateSlotView(FortItemStack item, View slotView, JsonElement json) {
-			View rarityBackground = slotView.findViewById(R.id.to_set_background);
-			TextView quantity = slotView.findViewById(R.id.item_slot_quantity);
-			rarityBackground.setBackgroundResource(R.drawable.bg_common);
-			Bitmap bitmap = null;
-
-			if (json != null) {
-				JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
-				bitmap = ItemUtils.getBitmapImageFromItemStackData(activity, item, jsonObject);
-				rarityBackground.setBackground(ItemUtils.rarityBgSlot(activity, ItemUtils.getRarity(jsonObject)));
-			}
-
-			((ImageView) slotView.findViewById(R.id.item_img)).setImageBitmap(bitmap);
-			((TextView) slotView.findViewById(R.id.item_slot_dbg_text)).setText(bitmap == null ? item.templateId : null);
-			quantity.setVisibility(item.quantity > 1 ? View.VISIBLE : View.GONE);
-			quantity.setText(String.valueOf(item.quantity));
 		}
 
 		@Override

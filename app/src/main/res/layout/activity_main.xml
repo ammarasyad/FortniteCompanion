@@ -115,7 +115,17 @@
 				android:id="@+id/main_screen_btn_login"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
-				tools:text="Logged in as: USERNAME" />
+				android:text="@string/action_login" />
+
+			<TextView
+				android:id="@+id/main_screen_login_username"
+				android:layout_width="match_parent"
+				android:layout_height="wrap_content"
+				android:layout_marginTop="16dp"
+				android:gravity="center_horizontal"
+				android:textColor="?android:textColorPrimary"
+				android:textStyle="bold"
+				tools:text="Username" />
 		</LinearLayout>
 	</ScrollView>
 </LinearLayout>

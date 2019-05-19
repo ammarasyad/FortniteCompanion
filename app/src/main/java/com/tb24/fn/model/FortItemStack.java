@@ -15,6 +15,11 @@ public class FortItemStack {
 		this.quantity = quantity;
 	}
 
+	public FortItemStack(String templateId, int quantity) {
+		this.templateId = templateId;
+		this.quantity = quantity;
+	}
+
 	public String getIdCategory() {
 		return templateId.split(":")[0];
 	}
