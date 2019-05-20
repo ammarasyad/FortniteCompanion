@@ -12,7 +12,7 @@ import retrofit2.Response;
 public abstract class WithBasicDataActivity extends BaseActivity {
 	protected void load(final LoadingViewController lc) {
 		if (getThisApplication().basicData != null) {
-			display(getThisApplication().basicData);
+			refreshUi(getThisApplication().basicData);
 			return;
 		}
 
@@ -30,7 +30,7 @@ public abstract class WithBasicDataActivity extends BaseActivity {
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
-								display(getThisApplication().basicData);
+								refreshUi(getThisApplication().basicData);
 							}
 						});
 					} else {
@@ -53,5 +53,5 @@ public abstract class WithBasicDataActivity extends BaseActivity {
 		}).start();
 	}
 
-	protected abstract void display(FortBasicDataResponse data);
+	protected abstract void refreshUi(FortBasicDataResponse data);
 }

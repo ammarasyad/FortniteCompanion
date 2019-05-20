@@ -354,8 +354,8 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 		TableRow row = new TableRow(this);
 		row.setGravity(Gravity.CENTER_VERTICAL);
 		TextView one = new TextView(this), two = new TextView(this);
-		TextViewCompat.setTextAppearance(one, R.style.BurbankSmallBold);
-		TextViewCompat.setTextAppearance(two, R.style.BurbankSmallBlack);
+		TextViewCompat.setTextAppearance(one, R.style.TextAppearance_BurbankSmall_Bold);
+		TextViewCompat.setTextAppearance(two, R.style.TextAppearance_BurbankSmall_Black);
 		two.setGravity(Gravity.CENTER_HORIZONTAL);
 		two.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
 		one.setText(k);

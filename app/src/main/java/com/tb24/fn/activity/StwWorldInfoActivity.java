@@ -64,7 +64,7 @@ public class StwWorldInfoActivity extends BaseActivity {
 							@Override
 							public void run() {
 								lc.content();
-								displayData();
+								refreshUi();
 							}
 						});
 					} else {
@@ -87,7 +87,7 @@ public class StwWorldInfoActivity extends BaseActivity {
 		}.start();
 	}
 
-	private void displayData() {
+	private void refreshUi() {
 		StringBuilder sb = new StringBuilder();
 
 		WorldInfoResponse.TheaterData[] theaters = data.theaters;

@@ -37,6 +37,7 @@ public class Registry {
 		registerPath("AthenaSkyDiveContrail", "Game/Athena/Items/Cosmetics/Contrails");
 		registerPath("ChallengeBundle", "Game/Athena/Items/ChallengeBundles/*");
 		registerPath("ChallengeBundleSchedule", "Game/Athena/Items/ChallengeBundleSchedules/*");
+		registerPath("CosmeticVariantToken", "Game/Athena/Items/CosmeticVariantTokens");
 		registerPath("Quest", "Game/Athena/Items/Quests/*");
 		registerPath("AccountResource", "Game/Items/PersistentResources");
 		registerPath("Token", "Game/Items/Tokens/*");

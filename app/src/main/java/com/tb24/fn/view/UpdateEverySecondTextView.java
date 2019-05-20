@@ -2,6 +2,7 @@ package com.tb24.fn.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.widget.TextView;
@@ -10,8 +11,9 @@ import com.google.common.base.Supplier;
 
 @SuppressLint("AppCompatCustomView")
 public class UpdateEverySecondTextView extends TextView {
-	private boolean mShouldRunTicker;
+	private Handler handler = new Handler();
 	private Supplier<CharSequence> textSupplier;
+	private boolean mShouldRunTicker;
 	private final Runnable mTicker = new Runnable() {
 		public void run() {
 			if (textSupplier != null) {
@@ -21,7 +23,7 @@ public class UpdateEverySecondTextView extends TextView {
 			long now = SystemClock.uptimeMillis();
 			long next = now + (1000 - now % 1000);
 
-			getHandler().postAtTime(mTicker, next);
+			handler.postAtTime(mTicker, next);
 		}
 	};
 
@@ -54,7 +56,7 @@ public class UpdateEverySecondTextView extends TextView {
 			mTicker.run();
 		} else if (mShouldRunTicker && !isVisible) {
 			mShouldRunTicker = false;
-			getHandler().removeCallbacks(mTicker);
+			handler.removeCallbacks(mTicker);
 		}
 	}
 }

@@ -41,7 +41,7 @@ public class NewsActivity extends WithBasicDataActivity {
 	}
 
 	@Override
-	protected void display(FortBasicDataResponse data) {
+	protected void refreshUi(FortBasicDataResponse data) {
 		lc.content();
 		FortBasicDataResponse.NewsRoot newsType = mode == 0 ? data.savetheworldnews : data.battleroyalenews;
 		List<FortBasicDataResponse.CommonUISimpleMessageBase> news = newsType.news.messages;

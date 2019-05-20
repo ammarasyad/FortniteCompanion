@@ -3,7 +3,7 @@ package com.tb24.fn.model.assetdata;
 import com.google.gson.JsonElement;
 import com.tb24.fn.model.FortItemStack;
 
-public class FortQuestItemDefinition {
+public class FortQuestItemDefinition extends FortItemDefinition {
 	public String QuestType;
 	public Boolean bShouldDisplayOverallQuestInformation;
 	public Boolean bAthenaMustCompleteInSingleMatch;
@@ -14,11 +14,6 @@ public class FortQuestItemDefinition {
 	public Float Weight;
 	public String CompletionText;
 	public String GrantToProfileType;
-	public String DisplayName;
-	public String Description;
-	public GameplayTags GameplayTags;
-	public AssetReference SmallPreviewImage;
-	public AssetReference LargePreviewImage;
 
 	public static class Reward {
 		public ItemAsset ItemPrimaryAssetId;

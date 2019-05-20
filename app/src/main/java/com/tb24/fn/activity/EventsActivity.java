@@ -118,7 +118,7 @@ public class EventsActivity extends WithBasicDataActivity {
 		}.start();
 	}
 
-	public void display(FortBasicDataResponse data) {
+	public void refreshUi(FortBasicDataResponse data) {
 		lc.content();
 		loadExtraData(data);
 	}

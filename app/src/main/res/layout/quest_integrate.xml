@@ -8,7 +8,7 @@
 
 	<com.tb24.fn.view.ForcedMarqueeTextView
 		android:id="@+id/quest_title"
-		style="@style/BurbankSmallBold"
+		style="@style/TextAppearance.BurbankSmall.Bold"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:ellipsize="marquee"
@@ -32,7 +32,7 @@
 
 		<TextView
 			android:id="@+id/quest_progress_text"
-			style="@style/BurbankSmallBold"
+			style="@style/TextAppearance.BurbankSmall.Bold"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginStart="8dp"

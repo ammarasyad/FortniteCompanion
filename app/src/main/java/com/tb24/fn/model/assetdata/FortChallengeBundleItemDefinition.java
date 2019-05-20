@@ -2,13 +2,10 @@ package com.tb24.fn.model.assetdata;
 
 import com.google.gson.JsonObject;
 
-public class FortChallengeBundleItemDefinition {
+public class FortChallengeBundleItemDefinition extends FortItemDefinition {
 	public QuestInfo[] QuestInfos;
 	public BundleCompletionReward[] BundleCompletionRewards;
 	public DisplayStyle DisplayStyle;
-	public String DisplayName;
-	public AssetReference SmallPreviewImage;
-	public AssetReference LargePreviewImage;
 
 	public static class BundleCompletionReward {
 		public Integer CompletionCount;

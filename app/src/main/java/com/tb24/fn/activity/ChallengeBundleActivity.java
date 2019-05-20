@@ -22,6 +22,7 @@ import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.assetdata.FortChallengeBundleItemDefinition;
 import com.tb24.fn.model.assetdata.FortQuestItemDefinition;
 import com.tb24.fn.util.ItemUtils;
+import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
@@ -46,6 +47,9 @@ public class ChallengeBundleActivity extends BaseActivity {
 		TextView questTitle = view.findViewById(R.id.quest_title);
 		TextView questProgressText = view.findViewById(R.id.quest_progress_text);
 		View questRewardParent = view.findViewById(R.id.quest_reward_parent);
+		boolean done = item.attributes != null && JsonUtils.getStringOr("quest_state", item.attributes, "").equals("Claimed");
+		view.setAlpha(done ? 0.6F : 1.0F);
+		view.findViewById(R.id.quest_done).setVisibility(done ? View.VISIBLE : View.GONE);
 		JsonElement jsonElement1 = activity.getThisApplication().itemRegistry.get(item.templateId);
 
 		if (jsonElement1 == null) {
@@ -124,14 +128,14 @@ public class ChallengeBundleActivity extends BaseActivity {
 				return adapter == null;
 			}
 		};
-		displayData(getThisApplication().profileManager.profileData.get("athena"));
+		refreshUi(getThisApplication().profileManager.profileData.get("athena"));
 		getThisApplication().eventBus.register(this);
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onProfileUpdated(ProfileUpdatedEvent event) {
 		if (event.profileId.equals("athena")) {
-			displayData(event.profileObj);
+			refreshUi(event.profileObj);
 		}
 	}
 
@@ -141,7 +145,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 		getThisApplication().eventBus.unregister(this);
 	}
 
-	private void displayData(FortMcpProfile profile) {
+	private void refreshUi(FortMcpProfile profile) {
 		if (profile == null) {
 			lc.loading();
 			return;

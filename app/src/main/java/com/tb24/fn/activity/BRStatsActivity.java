@@ -130,14 +130,14 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 			btntxt();
 
 			if (loaded) {
-				loadStats();
+				refreshUi();
 			}
 		} else if (v.getId() == R.id.br_stats_btn_mode_cycle) {
 			selectedGameMode = GameMode.values()[(selectedGameMode.ordinal() + 1) % GameMode.values().length];
 			btn2txt();
 
 			if (loaded) {
-				loadStats();
+				refreshUi();
 			}
 		}
 	}
@@ -161,7 +161,7 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
-								loadStats();
+								refreshUi();
 								lc.content();
 							}
 						});
@@ -186,7 +186,7 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 		}).start();
 	}
 
-	private void loadStats() {
+	private void refreshUi() {
 		if (statsData == null || statsData.stats.size() == 0) {
 			return;
 		}

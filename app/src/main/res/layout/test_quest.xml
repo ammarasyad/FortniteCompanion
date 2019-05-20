@@ -9,6 +9,18 @@
 	android:paddingStart="16dp"
 	android:paddingEnd="16dp">
 
+	<TextView
+		android:id="@+id/quest_done"
+		style="@style/TextAppearance.BurbankSmall.Bold"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_marginEnd="8dp"
+		android:text="Done!"
+		android:textAllCaps="true"
+		android:textColor="#359B5C"
+		android:textFontWeight="900"
+		android:textStyle="italic" />
+
 	<include
 		layout="@layout/quest_integrate"
 		android:layout_width="0dp"
@@ -26,12 +38,11 @@
 		<ImageView
 			android:id="@+id/quest_reward_icon"
 			android:layout_width="36dp"
-			android:layout_height="36dp"
-			tools:src="@drawable/t_fnbr_battlepoints_l" />
+			android:layout_height="36dp" />
 
 		<TextView
 			android:id="@+id/quest_reward_text"
-			style="@style/BurbankSmallBold"
+			style="@style/TextAppearance.BurbankSmall.Bold"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			tools:text="10" />

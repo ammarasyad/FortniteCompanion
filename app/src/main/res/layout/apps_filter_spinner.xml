@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="?android:attr/actionBarSize"
+	android:background="?android:attr/colorPrimary"
+	android:gravity="center_vertical"
+	android:paddingEnd="@dimen/switchbar_subsettings_margin_end"
+	android:orientation="horizontal">
+
+	<Spinner
+		android:id="@+id/filter_spinner"
+		android:layout_height="wrap_content"
+		android:layout_width="0dp"
+		android:layout_weight="1"
+		android:paddingStart="64dp"
+		android:backgroundTint="?android:attr/colorAccent"
+		android:background="@drawable/app_filter_spinner_background"/>
+
+	<!--<ImageView-->
+		<!--android:id="@+id/filter_settings"-->
+		<!--style="?android:attr/borderlessButtonStyle"-->
+		<!--android:layout_width="56dp"-->
+		<!--android:layout_height="56dp"-->
+		<!--android:contentDescription="@string/configure"-->
+		<!--android:scaleType="center"-->
+		<!--android:src="@drawable/ic_settings_24dp_inverse"-->
+		<!--android:visibility="gone" />-->
+
+</LinearLayout>

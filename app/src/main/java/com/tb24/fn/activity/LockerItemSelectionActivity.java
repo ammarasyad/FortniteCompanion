@@ -6,12 +6,16 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,10 +26,13 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.R;
+import com.tb24.fn.Registry;
 import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
+import com.tb24.fn.model.assetdata.AthenaPetCarrierItemDefinition;
+import com.tb24.fn.model.assetdata.FortItemDefinition;
 import com.tb24.fn.util.EFortRarity;
 import com.tb24.fn.util.ItemUtils;
 import com.tb24.fn.util.JsonUtils;
@@ -36,111 +43,34 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-public class LockerItemSelectionActivity extends BaseActivity {
+public class LockerItemSelectionActivity extends BaseActivity implements AdapterView.OnItemSelectedListener {
+	protected static final String ARG_FILTER_INDEX = "filter_index";
+	private static final ItemFilter ALL_FILTER = new ItemFilter(new Predicate<FortItemStack>() {
+		@Override
+		public boolean apply(@NullableDecl FortItemStack input) {
+			return true;
+		}
+	}, R.string.locker_filter_all, null);
+	private ViewGroup mPinnedHeaderFrameLayout;
+	private ViewGroup mSpinnerHeader;
+	private Spinner mFilterSpinner;
+	private ArrayAdapter<String> mFilterAdapter;
+	private int mFilterIndex;
+	private List<ItemFilter> itemFilters;
 	private RecyclerView list;
 	private LockerAdapter adapter;
 	private LoadingViewController lc;
 	private GridLayoutManager layout;
 	private String selectedItem;
+	private String itemTypeFilter;
+	private FortMcpProfile profileData;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.common_loadable_recycler_view);
-		setupActionBar();
-
-		if (getIntent().hasExtra("a")) {
-			getActionBar().setTitle("Selecting");
-			getActionBar().setSubtitle(getTitleText(getIntent().getIntExtra("a", 0)));
-		}
-
-		list = findViewById(R.id.main_recycler_view);
-		int p = (int) Utils.dp(getResources(), 4);
-		list.setPadding(p, p, p, p);
-		list.setClipToPadding(false);
-		list.post(new Runnable() {
-			@Override
-			public void run() {
-				layout = new GridLayoutManager(LockerItemSelectionActivity.this, (int) (list.getWidth() / Utils.dp(getResources(), 66 + 8)));
-				list.setLayoutManager(layout);
-			}
-		});
-		lc = new LoadingViewController(this, list, "");
-		displayData(getThisApplication().profileManager.profileData.get("athena"));
-		getThisApplication().eventBus.register(this);
-	}
-
-	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onProfileUpdated(ProfileUpdatedEvent event) {
-		if (event.profileId.equals("athena")) {
-			displayData(event.profileObj);
-		}
-	}
-
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		getThisApplication().eventBus.unregister(this);
-	}
-
-	private void displayData(FortMcpProfile profile) {
-		if (profile == null) {
-			lc.loading();
-			return;
-		}
-
-		FluentIterable<FortItemStack> chain = FluentIterable.from(profile.items.values());
-
-		if (getIntent().hasExtra("a")) {
-			int id = getIntent().getIntExtra("a", 0);
-			String selected = getSelected((AthenaProfileAttributes) profile.stats.attributesObj, id);
-			selectedItem = selected == null ? null : selected.contains("-") ? profile.items.get(selected).templateId : selected;
-			final String filter = getFilter(id);
-
-			if (filter != null) {
-				chain = chain.filter(new Predicate<FortItemStack>() {
-					@Override
-					public boolean apply(@NullableDecl FortItemStack input) {
-						return input.getIdCategory().equals(filter);
-					}
-				});
-			}
-		}
-
-		List<FortItemStack> data = chain.toSortedList(new Comparator<FortItemStack>() {
-			@Override
-			public int compare(FortItemStack o1, FortItemStack o2) {
-				JsonElement jsonElement = getThisApplication().itemRegistry.get(o1.templateId);
-				JsonElement jsonElement1 = getThisApplication().itemRegistry.get(o2.templateId);
-				EFortRarity rarity1 = EFortRarity.COMMON;
-				EFortRarity rarity2 = EFortRarity.COMMON;
-
-				if (jsonElement != null) {
-					rarity1 = ItemUtils.getRarity(jsonElement.getAsJsonArray().get(0).getAsJsonObject());
-				}
-
-				if (jsonElement1 != null) {
-					rarity2 = ItemUtils.getRarity(jsonElement1.getAsJsonArray().get(0).getAsJsonObject());
-				}
-
-				return ComparisonChain.start().compareTrueFirst(JsonUtils.getBooleanOr("favorite", o1.attributes, false), JsonUtils.getBooleanOr("favorite", o2.attributes, false)).compare(o1.getIdCategory(), o2.getIdCategory()).compare(rarity2, rarity1).compare(o1.getIdName(), o2.getIdName()).result();
-			}
-		});
-
-		if (adapter == null) {
-			list.setAdapter(adapter = new LockerAdapter(this, data));
-		} else {
-			adapter.data = data;
-			adapter.notifyDataSetChanged();
-		}
-
-		lc.content();
-	}
-
-	private static String getFilter(int id) {
+	public static String getItemCategoryFilterById(int id) {
 		switch (id) {
 			case R.id.locker_slot_character:
 				return "AthenaCharacter";
@@ -165,6 +95,7 @@ public class LockerItemSelectionActivity extends BaseActivity {
 			case R.id.locker_slot_wrap4:
 			case R.id.locker_slot_wrap5:
 			case R.id.locker_slot_wrap6:
+			case R.id.locker_slot_wrap7:
 				return "AthenaItemWrap";
 			case R.id.locker_slot_musicpack:
 				return "AthenaMusicPack";
@@ -175,7 +106,196 @@ public class LockerItemSelectionActivity extends BaseActivity {
 		}
 	}
 
-	private static String getTitleText(int id) {
+	private static List<ItemFilter> getItemFilterListByItemCategory(final Registry registry, String filterId) {
+		List<ItemFilter> out = new ArrayList<>();
+		out.add(ALL_FILTER);
+		out.add(new ItemFilter(new Predicate<FortItemStack>() {
+			@Override
+			public boolean apply(@NullableDecl FortItemStack input) {
+				if (input == null) {
+					return false;
+				}
+
+				return input.attributes != null && !JsonUtils.getBooleanOr("item_seen", input.attributes, true);
+			}
+		}, R.string.locker_filter_new, null));
+		out.add(new ItemFilter(new Predicate<FortItemStack>() {
+			@Override
+			public boolean apply(@NullableDecl FortItemStack input) {
+				if (input == null) {
+					return false;
+				}
+
+				return input.attributes != null && JsonUtils.getBooleanOr("favorite", input.attributes, false);
+			}
+		}, R.string.locker_filter_favorite, null));
+		ItemFilter filterStyles = new ItemFilter(new Predicate<FortItemStack>() {
+			@Override
+			public boolean apply(@NullableDecl FortItemStack input) {
+				if (input == null) {
+					return false;
+				}
+
+				FortItemDefinition defData = input.setAndGetDefData(registry);
+				return defData != null && defData.ItemVariants != null;
+			}
+		}, R.string.locker_filter_styles, null);
+		ItemFilter filterReactive = new ItemFilter(new Predicate<FortItemStack>() {
+			@Override
+			public boolean apply(@NullableDecl FortItemStack input) {
+				if (input == null) {
+					return false;
+				}
+
+				FortItemDefinition defData = input.setAndGetDefData(registry);
+				return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.UserFacingFlags.Reactive") >= 0;
+			}
+		}, R.string.locker_filter_reactive, null);
+
+		switch (filterId) {
+			case "AthenaCharacter":
+				out.add(filterStyles);
+				out.add(filterReactive);
+				break;
+			case "AthenaBackpack":
+				out.add(filterStyles);
+				out.add(filterReactive);
+				out.add(new ItemFilter(new Predicate<FortItemStack>() {
+					@Override
+					public boolean apply(@NullableDecl FortItemStack input) {
+						if (input == null) {
+							return false;
+						}
+
+						return input.setAndGetDefData(registry) instanceof AthenaPetCarrierItemDefinition;
+					}
+				}, R.string.locker_filter_pets, null));
+				break;
+			case "AthenaPickaxe":
+				out.add(filterStyles);
+				out.add(filterReactive);
+				break;
+			case "AthenaGlider":
+				out.add(filterStyles);
+				out.add(filterReactive);
+				break;
+			case "AthenaSkyDiveContrail":
+				break;
+			case "AthenaDance":
+				out.add(new ItemFilter(new Predicate<FortItemStack>() {
+					@Override
+					public boolean apply(@NullableDecl FortItemStack input) {
+						if (input == null) {
+							return false;
+						}
+
+						FortItemDefinition defData = input.setAndGetDefData(registry);
+						return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.EmoteType.Dance") >= 0;
+					}
+				}, R.string.locker_filter_dances, null));
+				out.add(new ItemFilter(new Predicate<FortItemStack>() {
+					@Override
+					public boolean apply(@NullableDecl FortItemStack input) {
+						if (input == null) {
+							return false;
+						}
+
+						FortItemDefinition defData = input.setAndGetDefData(registry);
+						return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.EmoteType.Emoji") >= 0;
+					}
+				}, R.string.locker_filter_emoticons, null));
+				out.add(new ItemFilter(new Predicate<FortItemStack>() {
+					@Override
+					public boolean apply(@NullableDecl FortItemStack input) {
+						if (input == null) {
+							return false;
+						}
+
+						FortItemDefinition defData = input.setAndGetDefData(registry);
+						return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.EmoteType.Spray") >= 0;
+					}
+				}, R.string.locker_filter_sprays, null));
+				out.add(new ItemFilter(new Predicate<FortItemStack>() {
+					@Override
+					public boolean apply(@NullableDecl FortItemStack input) {
+						if (input == null) {
+							return false;
+						}
+
+						FortItemDefinition defData = input.setAndGetDefData(registry);
+						return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.EmoteType.Toy") >= 0;
+					}
+				}, R.string.locker_filter_toys, null));
+				break;
+			case "AthenaItemWrap":
+				out.add(new ItemFilter(new Predicate<FortItemStack>() {
+					@Override
+					public boolean apply(@NullableDecl FortItemStack input) {
+						if (input == null) {
+							return false;
+						}
+
+						FortItemDefinition defData = input.setAndGetDefData(registry);
+						return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.UserFacingFlags.Wrap.Animated") >= 0;
+					}
+				}, R.string.locker_filter_animated, null));
+				break;
+			case "AthenaMusicPack":
+				break;
+			case "AthenaLoadingScreen":
+				out.add(new ItemFilter(new Predicate<FortItemStack>() {
+					@Override
+					public boolean apply(@NullableDecl FortItemStack input) {
+						if (input == null) {
+							return false;
+						}
+
+						FortItemDefinition defData = input.setAndGetDefData(registry);
+						return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.UserFacingFlags.LoadingScreen.Animated") >= 0;
+					}
+				}, R.string.locker_filter_animated, null));
+				break;
+		}
+
+		return out;
+	}
+
+	private static FortItemStack getRandomItemByCategory(String filterId) {
+		String name;
+
+		switch (filterId) {
+			case "AthenaCharacter":
+				name = "CID_Random";
+				break;
+			case "AthenaBackpack":
+				name = "BID_Random";
+				break;
+			case "AthenaPickaxe":
+				name = "Pickaxe_Random";
+				break;
+			case "AthenaGlider":
+				name = "Glider_Random";
+				break;
+			case "AthenaSkyDiveContrail":
+				name = "Trails_Random";
+				break;
+			case "AthenaItemWrap":
+				name = "Wrap_Random";
+				break;
+			case "AthenaMusicPack":
+				name = "MusicPack_Random";
+				break;
+			case "AthenaLoadingScreen":
+				name = "LSID_Random";
+				break;
+			default:
+				return null;
+		}
+
+		return new FortItemStack(filterId, name.toLowerCase(), 1);
+	}
+
+	public static String getTitleTextById(int id) {
 		switch (id) {
 			case R.id.locker_slot_character:
 				return "Outfit";
@@ -200,17 +320,21 @@ public class LockerItemSelectionActivity extends BaseActivity {
 			case R.id.locker_slot_emote6:
 				return "Emote 6";
 			case R.id.locker_slot_wrap1:
-				return "Wrap 1";
+				return "Vehicle Wrap";
 			case R.id.locker_slot_wrap2:
-				return "Wrap 2";
+				return "Assault Rifle Wrap";
 			case R.id.locker_slot_wrap3:
-				return "Wrap 3";
+				return "Shotgun Wrap";
 			case R.id.locker_slot_wrap4:
-				return "Wrap 4";
+				return "SMG Wrap";
 			case R.id.locker_slot_wrap5:
-				return "Wrap 5";
+				return "Sniper Wrap";
 			case R.id.locker_slot_wrap6:
-				return "Wrap 6";
+				return "Pistol Wrap";
+			case R.id.locker_slot_wrap7:
+				return "Misc Wrap";
+			case R.id.locker_slot_banner:
+				return "Banner";
 			case R.id.locker_slot_musicpack:
 				return "Music";
 			case R.id.locker_slot_loadingscreen:
@@ -220,7 +344,7 @@ public class LockerItemSelectionActivity extends BaseActivity {
 		}
 	}
 
-	private static String getSelected(AthenaProfileAttributes attributes, int id) {
+	private static String getSelectedItemFromProfileById(AthenaProfileAttributes attributes, int id) {
 		switch (id) {
 			case R.id.locker_slot_character:
 				return attributes.favorite_character;
@@ -233,29 +357,31 @@ public class LockerItemSelectionActivity extends BaseActivity {
 			case R.id.locker_slot_skydivecontrail:
 				return attributes.favorite_skydivecontrail;
 			case R.id.locker_slot_emote1:
-				return attributes.favorite_dance[0];
+				return 0 > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[0];
 			case R.id.locker_slot_emote2:
-				return attributes.favorite_dance[1];
+				return 1 > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[1];
 			case R.id.locker_slot_emote3:
-				return attributes.favorite_dance[2];
+				return 2 > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[2];
 			case R.id.locker_slot_emote4:
-				return attributes.favorite_dance[3];
+				return 3 > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[3];
 			case R.id.locker_slot_emote5:
-				return attributes.favorite_dance[4];
+				return 4 > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[4];
 			case R.id.locker_slot_emote6:
-				return attributes.favorite_dance[5];
+				return 5 > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[5];
 			case R.id.locker_slot_wrap1:
-				return attributes.favorite_itemwraps[0];
+				return 0 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[0];
 			case R.id.locker_slot_wrap2:
-				return attributes.favorite_itemwraps[1];
+				return 1 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[1];
 			case R.id.locker_slot_wrap3:
-				return attributes.favorite_itemwraps[2];
+				return 2 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[2];
 			case R.id.locker_slot_wrap4:
-				return attributes.favorite_itemwraps[3];
+				return 3 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[3];
 			case R.id.locker_slot_wrap5:
-				return attributes.favorite_itemwraps[4];
+				return 4 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[4];
 			case R.id.locker_slot_wrap6:
-				return attributes.favorite_itemwraps[5];
+				return 5 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[5];
+			case R.id.locker_slot_wrap7:
+				return 6 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[6];
 			case R.id.locker_slot_musicpack:
 				return attributes.favorite_musicpack;
 			case R.id.locker_slot_loadingscreen:
@@ -263,6 +389,168 @@ public class LockerItemSelectionActivity extends BaseActivity {
 			default:
 				return null;
 		}
+	}
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.common_loadable_recycler_view);
+		setupActionBar();
+		mPinnedHeaderFrameLayout = findViewById(R.id.pinned_header);
+
+		if (getIntent().hasExtra("a")) {
+			int id = getIntent().getIntExtra("a", 0);
+			itemTypeFilter = getItemCategoryFilterById(id);
+			itemFilters = getItemFilterListByItemCategory(getThisApplication().itemRegistry, itemTypeFilter);
+
+			if (getActionBar() != null) {
+				getActionBar().setTitle("Selecting");
+				getActionBar().setSubtitle(getTitleTextById(id));
+			}
+
+			mSpinnerHeader = (ViewGroup) setPinnedHeaderView(R.layout.apps_filter_spinner);
+			mFilterSpinner = mSpinnerHeader.findViewById(R.id.filter_spinner);
+			mFilterAdapter = new ArrayAdapter<>(mFilterSpinner.getContext(), R.layout.filter_spinner_item);
+			mFilterAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+			for (ItemFilter filter : itemFilters) {
+				mFilterAdapter.add(getString(filter.name));
+			}
+
+			mFilterSpinner.setAdapter(mFilterAdapter);
+			mFilterSpinner.setSelection(mFilterIndex = savedInstanceState != null ? savedInstanceState.getInt(ARG_FILTER_INDEX) : 0);
+			mFilterSpinner.setOnItemSelectedListener(this);
+		}
+
+		list = findViewById(R.id.main_recycler_view);
+		int p = (int) Utils.dp(getResources(), 4);
+		list.setPadding(p, p, p, p);
+		list.setClipToPadding(false);
+		list.post(new Runnable() {
+			@Override
+			public void run() {
+				layout = new GridLayoutManager(LockerItemSelectionActivity.this, (int) (list.getWidth() / Utils.dp(getResources(), 66 + 8)));
+				list.setLayoutManager(layout);
+			}
+		});
+		lc = new LoadingViewController(this, list, "") {
+			@Override
+			public boolean shouldShowEmpty() {
+				return adapter.data.isEmpty();
+			}
+		};
+		profileData = getThisApplication().profileManager.profileData.get("athena");
+		refreshUi();
+		getThisApplication().eventBus.register(this);
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putInt(ARG_FILTER_INDEX, mFilterIndex);
+	}
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		getThisApplication().eventBus.unregister(this);
+	}
+
+	@Override
+	public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+		mFilterIndex = position;
+		refreshUi();
+	}
+
+	@Override
+	public void onNothingSelected(AdapterView<?> parent) {
+		// Select something.
+		mFilterSpinner.setSelection(0);
+	}
+
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onProfileUpdated(ProfileUpdatedEvent event) {
+		if (event.profileId.equals("athena")) {
+			profileData = event.profileObj;
+			refreshUi();
+		}
+	}
+
+	private void refreshUi() {
+		if (profileData == null) {
+			lc.loading();
+			return;
+		}
+
+		FluentIterable<FortItemStack> chain = FluentIterable.from(profileData.items.values());
+		FortItemStack randomItem = null;
+
+		if (getIntent().hasExtra("a")) {
+			int id = getIntent().getIntExtra("a", 0);
+			String selected = getSelectedItemFromProfileById((AthenaProfileAttributes) profileData.stats.attributesObj, id);
+			selectedItem = selected == null ? null : selected.contains("-") ? profileData.items.get(selected).templateId : selected;
+
+			if (itemTypeFilter != null) {
+				ItemFilter itemFilter = itemFilters.get(mFilterIndex);
+				chain = chain.filter(new Predicate<FortItemStack>() {
+					@Override
+					public boolean apply(@NullableDecl FortItemStack input) {
+						return input != null && input.getIdCategory().equals(itemTypeFilter);
+					}
+				}).filter(itemFilter.predicate);
+
+				if (itemFilter == ALL_FILTER) {
+					randomItem = getRandomItemByCategory(itemTypeFilter);
+				}
+
+				lc.mEmptyView.setText(String.format("You have no %s items.", getString(itemFilter.name).toUpperCase()));
+			}
+		}
+
+		List<FortItemStack> data = chain.toSortedList(new Comparator<FortItemStack>() {
+			@Override
+			public int compare(FortItemStack o1, FortItemStack o2) {
+				JsonElement jsonElement = getThisApplication().itemRegistry.get(o1.templateId);
+				JsonElement jsonElement1 = getThisApplication().itemRegistry.get(o2.templateId);
+				EFortRarity rarity1 = EFortRarity.COMMON;
+				EFortRarity rarity2 = EFortRarity.COMMON;
+
+				if (jsonElement != null) {
+					rarity1 = ItemUtils.getRarity(jsonElement.getAsJsonArray().get(0).getAsJsonObject());
+				}
+
+				if (jsonElement1 != null) {
+					rarity2 = ItemUtils.getRarity(jsonElement1.getAsJsonArray().get(0).getAsJsonObject());
+				}
+
+				return ComparisonChain.start().compareTrueFirst(JsonUtils.getBooleanOr("favorite", o1.attributes, false), JsonUtils.getBooleanOr("favorite", o2.attributes, false)).compare(o1.getIdCategory(), o2.getIdCategory()).compare(rarity2, rarity1).compare(o1.getIdName(), o2.getIdName()).result();
+			}
+		});
+
+		if (randomItem != null) {
+			data = new ArrayList<>(data);
+			data.add(randomItem);
+		}
+
+		if (adapter == null) {
+			list.setAdapter(adapter = new LockerAdapter(this, data));
+		} else {
+			adapter.update(data);
+		}
+
+		lc.content();
+	}
+
+	public View setPinnedHeaderView(int layoutResId) {
+		final LayoutInflater inflater = getLayoutInflater();
+		final View pinnedHeader = inflater.inflate(layoutResId, mPinnedHeaderFrameLayout, false);
+		setPinnedHeaderView(pinnedHeader);
+		return pinnedHeader;
+	}
+
+	public void setPinnedHeaderView(View pinnedHeader) {
+		mPinnedHeaderFrameLayout.addView(pinnedHeader);
+		mPinnedHeaderFrameLayout.setVisibility(View.VISIBLE);
 	}
 
 	private static class LockerAdapter extends RecyclerView.Adapter<LockerAdapter.LockerViewHolder> {
@@ -279,7 +567,7 @@ public class LockerItemSelectionActivity extends BaseActivity {
 		public LockerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 			LockerViewHolder holder = new LockerViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.slot_view_encased, parent, false));
 			holder.favorite.setImageBitmap(Utils.loadTga(activity, "/Game/UI/Foundation/Textures/Icons/Locker/T_Icon_FavoriteTab_64.T_Icon_FavoriteTab_64"));
-			holder.newIcon.setImageBitmap(Utils.loadTga(activity, "/Game/UI/Foundation/Textures/Icons/Manage/T-Icon-Manage-New-32.T-Icon-Manage-New-32"));
+//			holder.newIcon.setImageBitmap(Utils.loadTga(activity, "/Game/UI/Foundation/Textures/Icons/Manage/T-Icon-Manage-New-32.T-Icon-Manage-New-32"));
 			return holder;
 		}
 
@@ -288,8 +576,12 @@ public class LockerItemSelectionActivity extends BaseActivity {
 			final FortItemStack item = data.get(position);
 			holder.itemView.setSelected(item.templateId.equals(activity.selectedItem));
 			holder.rarityBackground.setBackgroundResource(R.drawable.bg_common);
-			holder.newIcon.setVisibility(JsonUtils.getBooleanOr("item_seen", item.attributes, false) ? View.INVISIBLE : View.VISIBLE);
-			holder.favorite.setVisibility(JsonUtils.getBooleanOr("favorite", item.attributes, false) ? View.VISIBLE : View.INVISIBLE);
+
+			if (item.attributes != null) {
+				holder.newIcon.setVisibility(JsonUtils.getBooleanOr("item_seen", item.attributes, false) ? View.INVISIBLE : View.VISIBLE);
+				holder.favorite.setVisibility(JsonUtils.getBooleanOr("favorite", item.attributes, false) ? View.VISIBLE : View.INVISIBLE);
+			}
+
 			final JsonElement json = activity.getThisApplication().itemRegistry.get(item.templateId);
 			Bitmap bitmap = null;
 
@@ -361,12 +653,38 @@ public class LockerItemSelectionActivity extends BaseActivity {
 			return data.size();
 		}
 
+		public void update(final List<FortItemStack> newData) {
+			DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+				@Override
+				public int getOldListSize() {
+					return data.size();
+				}
+
+				@Override
+				public int getNewListSize() {
+					return newData.size();
+				}
+
+				@Override
+				public boolean areItemsTheSame(int oldItemPosition, int newItemPosition) {
+					return data.get(oldItemPosition).templateId.equals(newData.get(newItemPosition).templateId);
+				}
+
+				@Override
+				public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
+					return true;
+				}
+			});
+			diffResult.dispatchUpdatesTo(this);
+			data = newData;
+		}
+
 		static class LockerViewHolder extends RecyclerView.ViewHolder {
 			ImageView displayImage;
 			TextView itemName;
 			TextView quantity;
 			ImageView favorite;
-			ImageView newIcon;
+			TextView newIcon;
 			View rarityBackground;
 
 			LockerViewHolder(View itemView) {
@@ -381,4 +699,15 @@ public class LockerItemSelectionActivity extends BaseActivity {
 		}
 	}
 
+	private static class ItemFilter {
+		public Predicate<FortItemStack> predicate;
+		public int name;
+		public String icon;
+
+		public ItemFilter(Predicate<FortItemStack> predicate, int name, String icon) {
+			this.predicate = predicate;
+			this.name = name;
+			this.icon = icon;
+		}
+	}
 }
