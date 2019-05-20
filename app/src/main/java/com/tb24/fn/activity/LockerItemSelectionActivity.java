@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
@@ -22,7 +23,6 @@ import android.widget.Toast;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.FluentIterable;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.R;
@@ -31,6 +31,8 @@ import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
+import com.tb24.fn.model.FortMcpResponse;
+import com.tb24.fn.model.SetItemFavoriteStatusBatch;
 import com.tb24.fn.model.assetdata.AthenaPetCarrierItemDefinition;
 import com.tb24.fn.model.assetdata.FortItemDefinition;
 import com.tb24.fn.util.EFortRarity;
@@ -43,10 +45,16 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class LockerItemSelectionActivity extends BaseActivity implements AdapterView.OnItemSelectedListener {
 	protected static final String ARG_FILTER_INDEX = "filter_index";
@@ -69,6 +77,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 	private String selectedItem;
 	private String itemTypeFilter;
 	private FortMcpProfile profileData;
+	private Map<String, Boolean> favModification = new HashMap<>();
 
 	public static String getItemCategoryFilterById(int id) {
 		switch (id) {
@@ -454,6 +463,34 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 	public void onDestroy() {
 		super.onDestroy();
 		getThisApplication().eventBus.unregister(this);
+
+		if (!favModification.isEmpty()) {
+			SetItemFavoriteStatusBatch payload = new SetItemFavoriteStatusBatch();
+			payload.itemIds = new String[favModification.size()];
+			payload.itemFavStatus = new Boolean[favModification.size()];
+			int i = 0;
+
+			for (Map.Entry<String, Boolean> entry : favModification.entrySet()) {
+				payload.itemIds[i] = entry.getKey();
+				payload.itemFavStatus[i] = entry.getValue();
+				++i;
+			}
+
+			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp("SetItemFavoriteStatusBatch", PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""), "athena", -1, true, payload);
+			new Thread("Set Favorite Worker") {
+				@Override
+				public void run() {
+					try {
+						Response<FortMcpResponse> response = call.execute();
+
+						if (response.isSuccessful()) {
+							getThisApplication().profileManager.executeProfileChanges(response.body());
+						}
+					} catch (IOException ignored) {
+					}
+				}
+			}.start();
+		}
 	}
 
 	@Override
@@ -553,6 +590,16 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		mPinnedHeaderFrameLayout.setVisibility(View.VISIBLE);
 	}
 
+	private String findItemId(String templateId) {
+		for (Map.Entry<String, FortItemStack> entry : profileData.items.entrySet()) {
+			if (entry.getValue().templateId.equals(templateId)) {
+				return entry.getKey();
+			}
+		}
+
+		return null;
+	}
+
 	private static class LockerAdapter extends RecyclerView.Adapter<LockerAdapter.LockerViewHolder> {
 		private final LockerItemSelectionActivity activity;
 		private List<FortItemStack> data;
@@ -567,7 +614,6 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		public LockerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 			LockerViewHolder holder = new LockerViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.slot_view_encased, parent, false));
 			holder.favorite.setImageBitmap(Utils.loadTga(activity, "/Game/UI/Foundation/Textures/Icons/Locker/T_Icon_FavoriteTab_64.T_Icon_FavoriteTab_64"));
-//			holder.newIcon.setImageBitmap(Utils.loadTga(activity, "/Game/UI/Foundation/Textures/Icons/Manage/T-Icon-Manage-New-32.T-Icon-Manage-New-32"));
 			return holder;
 		}
 
@@ -598,7 +644,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			holder.itemView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					String attributesDbgString = new GsonBuilder().setPrettyPrinting().create().toJson(item.attributes);
+//					String attributesDbgString = new GsonBuilder().setPrettyPrinting().create().toJson(item.attributes);
 					ViewGroup viewGroup = null;
 
 					if (json != null) {
@@ -608,8 +654,32 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 
 					AlertDialog.Builder builder = new AlertDialog.Builder(activity)
 							.setCustomTitle(viewGroup)
-							.setMessage(attributesDbgString)
+//							.setMessage(attributesDbgString)
 							.setPositiveButton(android.R.string.ok, null);
+
+					if (item.attributes != null && activity.itemTypeFilter != null) {
+						builder.setItems(new CharSequence[]{JsonUtils.getBooleanOr("favorite", item.attributes, false) ? "Unfavorite" : "Favorite", "Mark Seen"}, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								if (which == 0) {
+									if (item.attributes.has("favorite")) {
+										boolean newFavValue = !item.attributes.get("favorite").getAsBoolean();
+//										item.attributes = Utils.cloneJsonObject(item.attributes);
+										// TODO new favorite property affected new AND old instances so the entry's UI wouldn't update
+										item.attributes.addProperty("favorite", newFavValue);
+										activity.favModification.put(activity.findItemId(item.templateId), newFavValue);
+										activity.refreshUi();
+									}
+								} else if (which == 1) {
+									// TODO mark item seen
+								}
+							}
+						});
+					}
+
+					if (json == null) {
+						builder.setTitle(item.templateId);
+					}
 
 					// TODO dedicated challenges tab instead of deeply buried like this
 					if (json != null && item.getIdCategory().equals("Quest")) {
@@ -649,6 +719,11 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		}
 
 		@Override
+		public void onBindViewHolder(@NonNull LockerViewHolder holder, int position, @NonNull List<Object> payloads) {
+			super.onBindViewHolder(holder, position, payloads);
+		}
+
+		@Override
 		public int getItemCount() {
 			return data.size();
 		}
@@ -672,7 +747,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 
 				@Override
 				public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-					return true;
+					return data.get(oldItemPosition).attributes == newData.get(newItemPosition).attributes;
 				}
 			});
 			diffResult.dispatchUpdatesTo(this);

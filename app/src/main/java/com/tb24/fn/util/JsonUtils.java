@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import java.util.Date;
 
 public class JsonUtils {
-
 	public static String getStringOr(String key, JsonObject node, String defaultValue) {
 		JsonElement element = node.get(key);
 		return element != null ? (element.isJsonNull() ? defaultValue : element.getAsString()) : defaultValue;

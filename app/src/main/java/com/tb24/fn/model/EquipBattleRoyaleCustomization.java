@@ -1,9 +1,10 @@
 package com.tb24.fn.model;
 
 public class EquipBattleRoyaleCustomization {
-	public CustomizationSlot slotName;
+	public ECustomizationSlot slotName;
+	// TODO what is the item id parameter name???
 
-	public enum CustomizationSlot {
+	public enum ECustomizationSlot {
 		Backpack, VictoryPose, LoadingScreen, Character, Glider, Dance, CallingCard, ConsumableEmote, MapMarker, SkyDiveContrail, Hat, PetSkin, ItemWrap, MusicPack, BattleBus, Pickaxe, VehicleDecoration
 	}
 }

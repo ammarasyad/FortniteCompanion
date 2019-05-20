@@ -35,6 +35,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.tb24.fn.R;
 import com.tb24.fn.activity.BaseActivity;
 
@@ -373,6 +374,15 @@ public final class Utils {
 		} else {
 			progressBar.setProgress(val);
 		}
+	}
+
+	public static JsonObject cloneJsonObject(JsonObject jsonObject) {
+//		try {
+		return GSON.fromJson(GSON.toJson(jsonObject, JsonObject.class), JsonObject.class);
+//		} catch (JsonSyntaxException e) {
+//			e.printStackTrace();
+//			return null;
+//		}
 	}
 
 	public interface EditTextDialogCallback {
