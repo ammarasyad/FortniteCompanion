@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
 import com.tb24.fn.Registry;
 import com.tb24.fn.model.assetdata.FortItemDefinition;
 
@@ -12,6 +13,7 @@ public class FortItemStack {
 	public String templateId;
 	public JsonObject attributes;
 	public Integer quantity;
+	@Expose(serialize = false, deserialize = false)
 	private FortItemDefinition defData;
 
 	public FortItemStack() {

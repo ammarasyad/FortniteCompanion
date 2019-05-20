@@ -1,4 +1,4 @@
-package com.tb24.fn.model;
+package com.tb24.fn.model.command;
 
 import com.tb24.fn.util.EMtxPlatform;
 

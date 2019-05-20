@@ -19,3 +19,15 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-ignorewarnings
+-keepattributes *Annotation*
+-keep class com.tb24.fn.model.**
+-keepclassmembers class ** {
+    @org.greenrobot.eventbus.Subscribe public *;
+}
+-keep class org.greenrobot.eventbus.** {
+    *;
+}
+-keepnames class * extends java.lang.Throwable
+-dontobfuscate

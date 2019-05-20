@@ -35,13 +35,13 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 import com.google.common.io.CharStreams;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.tb24.fn.R;
 import com.tb24.fn.activity.BaseActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -376,9 +376,9 @@ public final class Utils {
 		}
 	}
 
-	public static JsonObject cloneJsonObject(JsonObject jsonObject) {
+	public static <T> T cloneObjectUsingJson(T object, Type typeOfT) {
 //		try {
-		return GSON.fromJson(GSON.toJson(jsonObject, JsonObject.class), JsonObject.class);
+		return GSON.fromJson(GSON.toJson(object, typeOfT), typeOfT);
 //		} catch (JsonSyntaxException e) {
 //			e.printStackTrace();
 //			return null;

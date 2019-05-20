@@ -22,7 +22,7 @@ import com.tb24.fn.model.CommonCoreProfileAttributes;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.FortMcpResponse;
-import com.tb24.fn.model.SetMtxPlatform;
+import com.tb24.fn.model.command.SetMtxPlatform;
 import com.tb24.fn.util.EMtxPlatform;
 import com.tb24.fn.util.ERegion;
 import com.tb24.fn.util.Utils;

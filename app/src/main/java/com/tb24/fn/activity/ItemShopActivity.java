@@ -44,7 +44,7 @@ import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortCatalogResponse;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpResponse;
-import com.tb24.fn.model.PurchaseCatalogEntry;
+import com.tb24.fn.model.command.PurchaseCatalogEntry;
 import com.tb24.fn.util.EFortRarity;
 import com.tb24.fn.util.ItemUtils;
 import com.tb24.fn.util.LoadingViewController;

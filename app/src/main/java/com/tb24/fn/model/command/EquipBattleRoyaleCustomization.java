@@ -1,4 +1,4 @@
-package com.tb24.fn.model;
+package com.tb24.fn.model.command;
 
 public class EquipBattleRoyaleCustomization {
 	public ECustomizationSlot slotName;

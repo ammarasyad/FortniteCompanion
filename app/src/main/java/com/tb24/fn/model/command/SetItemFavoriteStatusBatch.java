@@ -1,4 +1,4 @@
-package com.tb24.fn.model;
+package com.tb24.fn.model.command;
 
 // com.epicgames.fortnite.core.game.commands.items.SetItemFavoriteStatusBatch
 // profileId == athena

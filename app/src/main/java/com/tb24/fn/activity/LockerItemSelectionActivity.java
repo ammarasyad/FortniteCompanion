@@ -32,9 +32,9 @@ import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.FortMcpResponse;
-import com.tb24.fn.model.SetItemFavoriteStatusBatch;
 import com.tb24.fn.model.assetdata.AthenaPetCarrierItemDefinition;
 import com.tb24.fn.model.assetdata.FortItemDefinition;
+import com.tb24.fn.model.command.SetItemFavoriteStatusBatch;
 import com.tb24.fn.util.EFortRarity;
 import com.tb24.fn.util.ItemUtils;
 import com.tb24.fn.util.JsonUtils;
@@ -64,20 +64,24 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			return true;
 		}
 	}, R.string.locker_filter_all, null);
+
 	private ViewGroup mPinnedHeaderFrameLayout;
 	private ViewGroup mSpinnerHeader;
 	private Spinner mFilterSpinner;
 	private ArrayAdapter<String> mFilterAdapter;
-	private int mFilterIndex;
-	private List<ItemFilter> itemFilters;
 	private RecyclerView list;
 	private LockerAdapter adapter;
 	private LoadingViewController lc;
 	private GridLayoutManager layout;
-	private String selectedItem;
+
 	private String itemTypeFilter;
+	private List<ItemFilter> itemFilters;
+	private int mFilterIndex;
+	private String selectedItem;
+
 	private FortMcpProfile profileData;
-	private Map<String, Boolean> favModification = new HashMap<>();
+	private FortItemStack[] referenceData;
+	private Map<String, Boolean> favoriteChangeMap = new HashMap<>();
 
 	public static String getItemCategoryFilterById(int id) {
 		switch (id) {
@@ -464,13 +468,13 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		super.onDestroy();
 		getThisApplication().eventBus.unregister(this);
 
-		if (!favModification.isEmpty()) {
+		if (!favoriteChangeMap.isEmpty()) {
 			SetItemFavoriteStatusBatch payload = new SetItemFavoriteStatusBatch();
-			payload.itemIds = new String[favModification.size()];
-			payload.itemFavStatus = new Boolean[favModification.size()];
+			payload.itemIds = new String[favoriteChangeMap.size()];
+			payload.itemFavStatus = new Boolean[favoriteChangeMap.size()];
 			int i = 0;
 
-			for (Map.Entry<String, Boolean> entry : favModification.entrySet()) {
+			for (Map.Entry<String, Boolean> entry : favoriteChangeMap.entrySet()) {
 				payload.itemIds[i] = entry.getKey();
 				payload.itemFavStatus[i] = entry.getValue();
 				++i;
@@ -569,12 +573,14 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			data.add(randomItem);
 		}
 
+
 		if (adapter == null) {
 			list.setAdapter(adapter = new LockerAdapter(this, data));
 		} else {
 			adapter.update(data);
 		}
 
+		referenceData = Utils.cloneObjectUsingJson(data.toArray(new FortItemStack[0]), FortItemStack[].class);
 		lc.content();
 	}
 
@@ -667,7 +673,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 //										item.attributes = Utils.cloneJsonObject(item.attributes);
 										// TODO new favorite property affected new AND old instances so the entry's UI wouldn't update
 										item.attributes.addProperty("favorite", newFavValue);
-										activity.favModification.put(activity.findItemId(item.templateId), newFavValue);
+										activity.favoriteChangeMap.put(activity.findItemId(item.templateId), newFavValue);
 										activity.refreshUi();
 									}
 								} else if (which == 1) {
@@ -732,7 +738,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new DiffUtil.Callback() {
 				@Override
 				public int getOldListSize() {
-					return data.size();
+					return activity.referenceData.length;
 				}
 
 				@Override
@@ -747,7 +753,9 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 
 				@Override
 				public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
-					return data.get(oldItemPosition).attributes == newData.get(newItemPosition).attributes;
+					JsonObject oldAttr = activity.referenceData[oldItemPosition].attributes;
+					JsonObject newAttr = newData.get(newItemPosition).attributes;
+					return (oldAttr == null || newAttr == null) || JsonUtils.getBooleanOr("favorite", oldAttr, false) == JsonUtils.getBooleanOr("favorite", newAttr, false);
 				}
 			});
 			diffResult.dispatchUpdatesTo(this);
