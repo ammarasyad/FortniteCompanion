@@ -43,4 +43,10 @@
 			android:layout="@layout/log_out_settings_button"
 			android:selectable="false" />
 	</PreferenceCategory>
+
+	<PreferenceCategory>
+		<com.tb24.fn.view.LayoutPreference
+			android:layout="@layout/copyright"
+			android:selectable="false" />
+	</PreferenceCategory>
 </PreferenceScreen>
