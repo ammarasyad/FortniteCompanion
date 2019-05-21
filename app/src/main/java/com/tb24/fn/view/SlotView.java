@@ -55,20 +55,11 @@ public class SlotView extends RelativeLayout {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
-//		try {
-//			GradientDrawable drawable = (GradientDrawable) ((LayerDrawable) getBackground()).getDrawable(1);
-//
-//			if (drawable.getGradientRadius() != getWidth()) {
-//				drawable.setGradientRadius(getWidth());
-//			}
-//		} catch (ClassCastException ignored) {
-//		}
-
 		if (isSelected() || isHovered() || isFocused() || isPressed()) {
 			getDrawingRect(rect);
 			int by = (int) -paint.getStrokeWidth() + one + 1;
 			rect.inset(by, by);
-			paint.setColor(isSelected() || isPressed() ? 0xFFFFFF00 : 0xFFFFFFFF);
+			paint.setColor(isHovered() ? 0xFFFFFFFF : 0xFFFFF500);
 			canvas.drawRect(rect, paint);
 		}
 	}

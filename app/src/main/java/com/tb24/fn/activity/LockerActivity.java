@@ -3,6 +3,8 @@ package com.tb24.fn.activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.SparseArray;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -10,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -26,10 +29,13 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-public class LockerActivity extends BaseActivity implements View.OnClickListener, View.OnHoverListener, View.OnTouchListener {
+public class LockerActivity extends BaseActivity implements View.OnClickListener, View.OnHoverListener, View.OnTouchListener, View.OnFocusChangeListener {
 	private View selected;
 	private TextView hoverText;
+	private TextView hoverText2;
 	private FortMcpProfile profileData;
+	private SparseArray<FortItemStack> itemMap = new SparseArray<>();
+	private Toast toast;
 
 	private static Bitmap getEmptyIcon(BaseActivity activity, int id) {
 		String path = null;
@@ -85,6 +91,7 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 		setContentView(R.layout.activity_locker);
 		setupActionBar();
 		hoverText = findViewById(R.id.locker_hover_text);
+		hoverText2 = findViewById(R.id.locker_hover_text_2);
 		getThisApplication().eventBus.register(this);
 
 		if (getThisApplication().profileManager.profileData.containsKey("athena")) {
@@ -107,6 +114,7 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 
 	private void refreshUi(FortMcpProfile profile) {
 		profileData = profile;
+		itemMap.clear();
 		AthenaProfileAttributes attributes = (AthenaProfileAttributes) profile.stats.attributesObj;
 		View characterSlot = findViewById(R.id.locker_slot_character);
 		apply(characterSlot, attributes.favorite_character);
@@ -136,6 +144,7 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 	private void apply(final View slot, String itemGuid) {
 		slot.setOnClickListener(this);
 		slot.setOnHoverListener(this);
+		slot.setOnFocusChangeListener(this);
 		slot.setOnTouchListener(this);
 		final String filter = LockerItemSelectionActivity.getItemCategoryFilterById(slot.getId());
 		TextView newText = slot.findViewById(R.id.item_new);
@@ -160,6 +169,7 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 			return;
 		}
 
+		itemMap.put(slot.getId(), item);
 		ItemUtils.populateSlotView(this, slot, item, getThisApplication().itemRegistry.get(item.templateId));
 	}
 
@@ -192,6 +202,13 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 	}
 
 	@Override
+	public void onFocusChange(View v, boolean hasFocus) {
+		if (v.hasFocus()) {
+			select(v);
+		}
+	}
+
+	@Override
 	public boolean onTouch(View v, MotionEvent event) {
 		if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
 			select(v);
@@ -207,6 +224,24 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 
 		selected = v;
 		v.setSelected(true);
-		hoverText.setText(LockerItemSelectionActivity.getTitleTextById(v.getId()));
+		hoverText.setText(LockerItemSelectionActivity.getRowTitleTextById(v.getId()));
+		hoverText2.setText(LockerItemSelectionActivity.getTitleTextById(v.getId()));
+		FortItemStack item = itemMap.get(v.getId());
+
+		if (toast != null) {
+			toast.cancel();
+		}
+
+		if (item == null) {
+			return;
+		}
+
+		ViewGroup viewGroup = (ViewGroup) getLayoutInflater().inflate(R.layout.fort_item_detail_box, null);
+		ItemUtils.populateItemDetailBox(viewGroup, item);
+		toast = new Toast(this);
+		toast.setGravity(Gravity.FILL_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+		toast.setView(viewGroup);
+		toast.setDuration(Toast.LENGTH_LONG);
+		toast.show();
 	}
 }

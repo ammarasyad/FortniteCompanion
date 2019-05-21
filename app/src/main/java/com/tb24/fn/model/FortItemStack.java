@@ -9,7 +9,8 @@ import com.tb24.fn.Registry;
 import com.tb24.fn.model.assetdata.FortItemDefinition;
 
 public class FortItemStack {
-	private static Gson gson = new GsonBuilder().registerTypeAdapter(FortItemDefinition.class, new FortItemDefinition.Serializer()).create();
+	private static final Gson GSON = new GsonBuilder().registerTypeAdapter(FortItemDefinition.class, new FortItemDefinition.Serializer()).create();
+	public static Registry sRegistry;
 	public String templateId;
 	public JsonObject attributes;
 	public Integer quantity;
@@ -37,15 +38,15 @@ public class FortItemStack {
 		return templateId.split(":")[1];
 	}
 
-	public FortItemDefinition setAndGetDefData(Registry registry) {
+	public FortItemDefinition getDefData() {
 		if (defData == null) {
-			JsonElement jsonElement = registry.get(templateId);
+			JsonElement jsonElement = sRegistry.get(templateId);
 
 			if (jsonElement == null) {
 				return null;
 			}
 
-			defData = gson.fromJson(jsonElement.getAsJsonArray().get(0), FortItemDefinition.class);
+			defData = GSON.fromJson(jsonElement.getAsJsonArray().get(0), FortItemDefinition.class);
 		}
 
 		return defData;

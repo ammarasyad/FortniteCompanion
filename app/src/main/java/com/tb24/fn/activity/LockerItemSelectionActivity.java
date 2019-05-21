@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -153,7 +154,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 					return false;
 				}
 
-				FortItemDefinition defData = input.setAndGetDefData(registry);
+				FortItemDefinition defData = input.getDefData();
 				return defData != null && defData.ItemVariants != null;
 			}
 		}, R.string.locker_filter_styles, null);
@@ -164,7 +165,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 					return false;
 				}
 
-				FortItemDefinition defData = input.setAndGetDefData(registry);
+				FortItemDefinition defData = input.getDefData();
 				return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.UserFacingFlags.Reactive") >= 0;
 			}
 		}, R.string.locker_filter_reactive, null);
@@ -184,7 +185,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 							return false;
 						}
 
-						return input.setAndGetDefData(registry) instanceof AthenaPetCarrierItemDefinition;
+						return input.getDefData() instanceof AthenaPetCarrierItemDefinition;
 					}
 				}, R.string.locker_filter_pets, null));
 				break;
@@ -206,7 +207,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 							return false;
 						}
 
-						FortItemDefinition defData = input.setAndGetDefData(registry);
+						FortItemDefinition defData = input.getDefData();
 						return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.EmoteType.Dance") >= 0;
 					}
 				}, R.string.locker_filter_dances, null));
@@ -217,7 +218,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 							return false;
 						}
 
-						FortItemDefinition defData = input.setAndGetDefData(registry);
+						FortItemDefinition defData = input.getDefData();
 						return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.EmoteType.Emoji") >= 0;
 					}
 				}, R.string.locker_filter_emoticons, null));
@@ -228,7 +229,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 							return false;
 						}
 
-						FortItemDefinition defData = input.setAndGetDefData(registry);
+						FortItemDefinition defData = input.getDefData();
 						return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.EmoteType.Spray") >= 0;
 					}
 				}, R.string.locker_filter_sprays, null));
@@ -239,7 +240,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 							return false;
 						}
 
-						FortItemDefinition defData = input.setAndGetDefData(registry);
+						FortItemDefinition defData = input.getDefData();
 						return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.EmoteType.Toy") >= 0;
 					}
 				}, R.string.locker_filter_toys, null));
@@ -252,7 +253,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 							return false;
 						}
 
-						FortItemDefinition defData = input.setAndGetDefData(registry);
+						FortItemDefinition defData = input.getDefData();
 						return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.UserFacingFlags.Wrap.Animated") >= 0;
 					}
 				}, R.string.locker_filter_animated, null));
@@ -267,7 +268,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 							return false;
 						}
 
-						FortItemDefinition defData = input.setAndGetDefData(registry);
+						FortItemDefinition defData = input.getDefData();
 						return defData != null && defData.GameplayTags != null && Arrays.binarySearch(defData.GameplayTags.gameplay_tags, "Cosmetics.UserFacingFlags.LoadingScreen.Animated") >= 0;
 					}
 				}, R.string.locker_filter_animated, null));
@@ -356,6 +357,38 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				return "Music";
 			case R.id.locker_slot_loadingscreen:
 				return "Loading Screen";
+			default:
+				return "??";
+		}
+	}
+
+	public static String getRowTitleTextById(int id) {
+		switch (id) {
+			case R.id.locker_slot_character:
+			case R.id.locker_slot_backpack:
+			case R.id.locker_slot_pickaxe:
+			case R.id.locker_slot_glider:
+			case R.id.locker_slot_skydivecontrail:
+				return "Gear";
+			case R.id.locker_slot_emote1:
+			case R.id.locker_slot_emote2:
+			case R.id.locker_slot_emote3:
+			case R.id.locker_slot_emote4:
+			case R.id.locker_slot_emote5:
+			case R.id.locker_slot_emote6:
+				return "Emote";
+			case R.id.locker_slot_wrap1:
+			case R.id.locker_slot_wrap2:
+			case R.id.locker_slot_wrap3:
+			case R.id.locker_slot_wrap4:
+			case R.id.locker_slot_wrap5:
+			case R.id.locker_slot_wrap6:
+			case R.id.locker_slot_wrap7:
+				return "Wrap";
+			case R.id.locker_slot_banner:
+			case R.id.locker_slot_musicpack:
+			case R.id.locker_slot_loadingscreen:
+				return "Account";
 			default:
 				return "??";
 		}
@@ -575,8 +608,8 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		List<FortItemStack> data = chain.toSortedList(new Comparator<FortItemStack>() {
 			@Override
 			public int compare(FortItemStack o1, FortItemStack o2) {
-				FortItemDefinition defData = o1.setAndGetDefData(getThisApplication().itemRegistry);
-				FortItemDefinition defData1 = o2.setAndGetDefData(getThisApplication().itemRegistry);
+				FortItemDefinition defData = o1.getDefData();
+				FortItemDefinition defData1 = o2.getDefData();
 				EFortRarity rarity1 = EFortRarity.COMMON;
 				EFortRarity rarity2 = EFortRarity.COMMON;
 
@@ -633,6 +666,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 	private static class LockerAdapter extends RecyclerView.Adapter<LockerAdapter.LockerViewHolder> {
 		private final LockerItemSelectionActivity activity;
 		private List<FortItemStack> data;
+		private Toast toast;
 
 		public LockerAdapter(LockerItemSelectionActivity activity, List<FortItemStack> data) {
 			this.activity = activity;
@@ -651,7 +685,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		public void onBindViewHolder(@NonNull LockerViewHolder holder, int position) {
 			final FortItemStack item = data.get(position);
 			holder.itemView.setSelected(item.templateId.equals(activity.selectedItem));
-			holder.rarityBackground.setBackgroundResource(R.drawable.bg_common);
+			holder.innerSlotView.setBackgroundResource(R.drawable.bg_common);
 
 			if (item.attributes != null) {
 				holder.newIcon.setVisibility(JsonUtils.getBooleanOr("item_seen", item.attributes, false) ? View.INVISIBLE : View.VISIBLE);
@@ -664,28 +698,39 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			if (json != null) {
 				JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
 				bitmap = ItemUtils.getBitmapImageFromItemStackData(activity, item, jsonObject);
-				holder.rarityBackground.setBackground(ItemUtils.rarityBgSlot(activity, ItemUtils.getRarity(jsonObject)));
+				holder.innerSlotView.setBackground(ItemUtils.rarityBgSlot(activity, ItemUtils.getRarity(jsonObject)));
 			}
 
 			holder.displayImage.setImageBitmap(bitmap);
 			holder.itemName.setText(bitmap == null ? item.templateId : null);
 			holder.quantity.setVisibility(item.quantity > 1 ? View.VISIBLE : View.GONE);
 			holder.quantity.setText(String.valueOf(item.quantity));
-			holder.itemView.setOnClickListener(new View.OnClickListener() {
+			holder.innerSlotView.setFocusableInTouchMode(true);
+			holder.innerSlotView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					// TODO apply item
+//					EquipBattleRoyaleCustomization payload = new EquipBattleRoyaleCustomization();
+//					payload.slotName = EquipBattleRoyaleCustomization.ECustomizationSlot.Dance;
+//					payload.WHATISTHIS = activity.findItemId(item.templateId);
+//					Call<FortMcpResponse> call = ...;
+				}
+			});
+			holder.innerSlotView.setOnLongClickListener(new View.OnLongClickListener() {
+				@Override
+				public boolean onLongClick(View v) {
 //					String attributesDbgString = new GsonBuilder().setPrettyPrinting().create().toJson(item.attributes);
 					ViewGroup viewGroup = null;
 
 					if (json != null) {
-						viewGroup = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.fort_item_detail_box, null);
-						ItemUtils.populateItemDetailBox(viewGroup, item, json);
+						viewGroup = (ViewGroup) activity.getLayoutInflater().inflate(R.layout.fort_item_detail_box, null);
+						ItemUtils.populateItemDetailBox(viewGroup, item);
 					}
 
 					AlertDialog.Builder builder = new AlertDialog.Builder(activity)
 							.setCustomTitle(viewGroup)
 //							.setMessage(attributesDbgString)
-							.setPositiveButton(android.R.string.ok, null);
+							.setPositiveButton("Close", null);
 
 					if (item.attributes != null && activity.itemTypeFilter != null) {
 						String favorite = JsonUtils.getBooleanOr("favorite", item.attributes, false) ? "Unfavorite" : "Favorite";
@@ -722,7 +767,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 
 					// TODO dedicated challenges tab instead of deeply buried like this
 					if (json != null && item.getIdCategory().equals("Quest")) {
-						View inflate = LayoutInflater.from(activity).inflate(R.layout.quest_entry, null);
+						View inflate = activity.getLayoutInflater().inflate(R.layout.quest_entry, null);
 						ChallengeBundleActivity.populateQuestView(activity, inflate, item);
 						builder.setView(inflate);
 					} else if (json != null && item.getIdCategory().equals("ChallengeBundle")) {
@@ -737,29 +782,36 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 					}
 
 					builder.show();
+					return true;
 				}
 			});
-			holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+			holder.innerSlotView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 				@Override
-				public boolean onLongClick(View v) {
-					if (json == null) {
-						return false;
+				public void onFocusChange(View v, boolean hasFocus) {
+					if (hasFocus) {
+						showItemToast(item, json);
 					}
-
-					ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.fort_item_detail_box, null);
-					ItemUtils.populateItemDetailBox(viewGroup, item, json);
-					Toast toast = new Toast(activity);
-					toast.setView(viewGroup);
-					toast.setDuration(Toast.LENGTH_LONG);
-					toast.show();
-					return true;
 				}
 			});
 		}
 
-		@Override
-		public void onBindViewHolder(@NonNull LockerViewHolder holder, int position, @NonNull List<Object> payloads) {
-			super.onBindViewHolder(holder, position, payloads);
+		private void showItemToast(FortItemStack item, JsonElement json) {
+			if (json == null) {
+				return;
+			}
+
+			ViewGroup viewGroup = (ViewGroup) activity.getLayoutInflater().inflate(R.layout.fort_item_detail_box, null);
+			ItemUtils.populateItemDetailBox(viewGroup, item);
+
+			if (toast != null) {
+				toast.cancel();
+			}
+
+			toast = new Toast(activity);
+			toast.setGravity(Gravity.FILL_HORIZONTAL | Gravity.BOTTOM, 0, 0);
+			toast.setView(viewGroup);
+			toast.setDuration(Toast.LENGTH_LONG);
+			toast.show();
 		}
 
 		@Override
@@ -801,7 +853,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			TextView quantity;
 			ImageView favorite;
 			TextView newIcon;
-			View rarityBackground;
+			View innerSlotView;
 
 			LockerViewHolder(View itemView) {
 				super(itemView);
@@ -810,7 +862,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				quantity = itemView.findViewById(R.id.item_slot_quantity);
 				favorite = itemView.findViewById(R.id.item_favorite);
 				newIcon = itemView.findViewById(R.id.item_new);
-				rarityBackground = itemView.findViewById(R.id.to_set_background);
+				innerSlotView = itemView.findViewById(R.id.to_set_background);
 			}
 		}
 	}

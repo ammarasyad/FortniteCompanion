@@ -60,7 +60,7 @@ public class ProfileActivity extends BaseActivity {
 			((TextView) findViewById(R.id.profile_name)).setText(currentLoggedIn.name + ' ' + currentLoggedIn.lastName);
 			((TextView) findViewById(R.id.profile_email)).setText(currentLoggedIn.email);
 			((TextView) findViewById(R.id.profile_account_id)).setText(currentLoggedIn.getDisplayName() + " \u2022 " + currentLoggedIn.getId());
-			((TextView) findViewById(R.id.profile_country)).setText("Country: " + currentLoggedIn.country);
+			((TextView) findViewById(R.id.profile_country)).setText(currentLoggedIn.country);
 			((TextView) findViewById(R.id.profile_display_name_changes)).setText(String.valueOf(currentLoggedIn.numberOfDisplayNameChanges));
 			((TextView) findViewById(R.id.profile_display_name_last_change)).setText(Utils.formatDateSimple(currentLoggedIn.lastDisplayNameChange));
 			((TextView) findViewById(R.id.profile_2fa)).setText(bool(currentLoggedIn.tfaEnabled));

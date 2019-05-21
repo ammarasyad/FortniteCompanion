@@ -25,11 +25,12 @@ import com.tb24.fn.R;
 import com.tb24.fn.activity.BaseActivity;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.RarityData;
+import com.tb24.fn.model.assetdata.FortItemDefinition;
 
 public class ItemUtils {
 	public static final int OVERLAY_COLOR = 0xFFC0C0C0;
-	public static JsonObject setData;
-	public static JsonObject userFacingTagsData;
+	public static JsonObject sSetData;
+	public static JsonObject sUserFacingTagsData;
 
 	public ItemUtils() {
 	}
@@ -65,7 +66,7 @@ public class ItemUtils {
 		}
 
 //		TODO with the rarity data the colors suck
-		RarityData rarityData = FortniteCompanionApp.rarityData[rarity.ordinal()];
+		RarityData rarityData = FortniteCompanionApp.sRarityData[rarity.ordinal()];
 		GradientDrawable content = new GradientDrawable() {
 			@Override
 			public void draw(Canvas canvas) {
@@ -99,7 +100,7 @@ public class ItemUtils {
 			return ctx.getDrawable(rarity == EFortRarity.COMMON ? R.drawable.bg_common2 : rarity == EFortRarity.UNCOMMON ? R.drawable.bg_uncommon2 : rarity == EFortRarity.RARE ? R.drawable.bg_rare2 : rarity == EFortRarity.EPIC ? R.drawable.bg_epic2 : rarity == EFortRarity.LEGENDARY ? R.drawable.bg_legendary2 : R.drawable.bg_common2);
 		}
 
-		RarityData rarityData = FortniteCompanionApp.rarityData[rarity.ordinal()];
+		RarityData rarityData = FortniteCompanionApp.sRarityData[rarity.ordinal()];
 		int[] colors = {rarityData.Color3.asInt(), rarityData.Color1.asInt()};
 		GradientDrawable content = new GradientDrawable();
 		content.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
@@ -118,16 +119,16 @@ public class ItemUtils {
 		return layerDrawable;
 	}
 
-	public static String getShortDescription(FortItemStack itemStack, JsonObject definitionObj) {
-		String s;
+	public static String getShortDescription(FortItemStack itemStack) {
+		String out;
 
-		if (definitionObj.has("ShortDescription")) {
-			s = definitionObj.get("ShortDescription").getAsString();
+		if (itemStack.getDefData().ShortDescription != null) {
+			out = itemStack.getDefData().ShortDescription;
 		} else {
-			s = shortDescriptionFromCtg(itemStack.getIdCategory());
+			out = shortDescriptionFromCtg(itemStack.getIdCategory());
 		}
 
-		return s;
+		return out;
 	}
 
 	public static String shortDescriptionFromCtg(String idCategory) {
@@ -149,33 +150,42 @@ public class ItemUtils {
 		}
 	}
 
-	public static void populateItemDetailBox(ViewGroup view, FortItemStack item, JsonElement definitionElm) {
+	public static void populateItemDetailBox(ViewGroup view, FortItemStack item) {
+		if (item == null) {
+			return;
+		}
+
 		View backgroundView = view.findViewById(R.id.to_set_background);
 		TextView itemTitle = view.findViewById(R.id.item_text2);
-		JsonObject jsonObject = definitionElm.getAsJsonArray().get(0).getAsJsonObject();
-		EFortRarity rarity = getRarity(jsonObject);
+		FortItemDefinition defData = item.getDefData();
+
+		if (defData == null) {
+			return;
+		}
+
+		EFortRarity rarity = EFortRarity.from(defData.Rarity);
 		backgroundView.setBackground(rarityBgTitle(view.getContext(), rarity));
 		int twelve = (int) Utils.dp(view.getResources(), 12);
 		int eight = (int) Utils.dp(view.getResources(), 8);
 		backgroundView.setPadding(twelve, eight, twelve, eight);
-		((TextView) view.findViewById(R.id.item_text1)).setText(TextUtils.concat(Utils.color(rarity.name, FortniteCompanionApp.rarityData[rarity.ordinal()].Color1.asInt()), " | ", getShortDescription(item, jsonObject)));
-		itemTitle.setShadowLayer(10.0F, 0.0F, 0.0F, FortniteCompanionApp.rarityData[rarity.ordinal()].Color1.asInt());
-		itemTitle.setText((item.attributes != null && item.attributes.has("DUMMY") ? "[Dummy] " : "") + JsonUtils.getStringOr("DisplayName", jsonObject, "??"));
-		CharSequence concat = JsonUtils.getStringOr("Description", jsonObject, "");
+		((TextView) view.findViewById(R.id.item_text1)).setText(TextUtils.concat(Utils.color(rarity.name, FortniteCompanionApp.sRarityData[rarity.ordinal()].Color1.asInt()), " | ", getShortDescription(item)));
+		itemTitle.setShadowLayer(10.0F, 0.0F, 0.0F, FortniteCompanionApp.sRarityData[rarity.ordinal()].Color1.asInt());
+		itemTitle.setText((item.attributes != null && item.attributes.has("DUMMY") ? "[Dummy] " : "") + defData.DisplayName);
+		CharSequence concat = defData.Description;
 
-		if (jsonObject.has("GameplayTags")) {
-			for (JsonElement s : jsonObject.get("GameplayTags").getAsJsonObject().get("gameplay_tags").getAsJsonArray()) {
-				if (s.getAsString().startsWith("Cosmetics.Set.")) {
-					concat = TextUtils.concat(concat, '\n' + "Part of the ", Utils.span(setData.get(s.getAsString()).getAsJsonObject().get("DisplayName").getAsString(), new StyleSpan(Typeface.BOLD)), " set.");
-				} else if (s.getAsString().startsWith("Cosmetics.UserFacingFlags.")) {
-					concat = TextUtils.concat(concat, "\n[", Utils.span(userFacingTagsData.get(s.getAsString()).getAsJsonObject().get("DisplayName").getAsString(), new StyleSpan(Typeface.ITALIC)), "]");
+		if (defData.GameplayTags != null) {
+			for (String s : defData.GameplayTags.gameplay_tags) {
+				if (s.startsWith("Cosmetics.Set.")) {
+					concat = TextUtils.concat(concat, '\n' + "Part of the ", Utils.span(sSetData.get(s).getAsJsonObject().get("DisplayName").getAsString(), new StyleSpan(Typeface.BOLD)), " set.");
+				} else if (s.startsWith("Cosmetics.UserFacingFlags.")) {
+					concat = TextUtils.concat(concat, "\n[", Utils.span(sUserFacingTagsData.get(s).getAsJsonObject().get("DisplayName").getAsString(), new StyleSpan(Typeface.ITALIC)), "]");
 				}
 			}
 		}
 
 		TextView textItemDescription = view.findViewById(R.id.item_text3);
 
-		if (concat.length() == 0) {
+		if (concat == null || concat.length() == 0) {
 			textItemDescription.setVisibility(View.GONE);
 		} else {
 			textItemDescription.setVisibility(View.VISIBLE);

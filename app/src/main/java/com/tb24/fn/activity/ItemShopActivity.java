@@ -189,22 +189,22 @@ public class ItemShopActivity extends BaseActivity {
 
 	public void display(FortCatalogResponse data) {
 		for (FortCatalogResponse.Storefront storefront : data.storefronts) {
-			List<FortCatalogResponse.CatalogEntry> c = Arrays.asList(storefront.catalogEntries);
+			List<FortCatalogResponse.CatalogEntry> catalogEntries = Arrays.asList(storefront.catalogEntries);
 
 			if (storefront.name.equals("BRWeeklyStorefront")) {
-				Collections.sort(c, new Comparator<FortCatalogResponse.CatalogEntry>() {
+				Collections.sort(catalogEntries, new Comparator<FortCatalogResponse.CatalogEntry>() {
 					@Override
 					public int compare(FortCatalogResponse.CatalogEntry o1, FortCatalogResponse.CatalogEntry o2) {
 						return ComparisonChain.start().compare(o1.categories[0], o2.categories[0]).compare(o2.sortPriority, o1.sortPriority).result();
 					}
 				});
-				featuredItems = c;
+				featuredItems = catalogEntries;
 			} else if (storefront.name.equals("BRDailyStorefront")) {
-				Collections.sort(c, new Comparator<FortCatalogResponse.CatalogEntry>() {
+				Collections.sort(catalogEntries, new Comparator<FortCatalogResponse.CatalogEntry>() {
 					@Override
 					public int compare(FortCatalogResponse.CatalogEntry o1, FortCatalogResponse.CatalogEntry o2) {
-						FortItemDefinition defData = o1.itemGrants[0].setAndGetDefData(getThisApplication().itemRegistry);
-						FortItemDefinition defData1 = o2.itemGrants[0].setAndGetDefData(getThisApplication().itemRegistry);
+						FortItemDefinition defData = o1.itemGrants[0].getDefData();
+						FortItemDefinition defData1 = o2.itemGrants[0].getDefData();
 						EFortRarity rarity1 = EFortRarity.COMMON;
 						EFortRarity rarity2 = EFortRarity.COMMON;
 
@@ -219,7 +219,7 @@ public class ItemShopActivity extends BaseActivity {
 						return ComparisonChain.start().compare(rarity2, rarity1).compare(o2.prices[0].basePrice, o1.prices[0].basePrice).compare(o1.itemGrants[0].getIdName(), o2.itemGrants[0].getIdName()).result();
 					}
 				});
-				dailyItems = c;
+				dailyItems = catalogEntries;
 			}
 		}
 
@@ -250,7 +250,7 @@ public class ItemShopActivity extends BaseActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) getLayoutInflater().inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		updateFromProfile();
 		menu.add(0, 1, 0, "Support a Creator");
 		return super.onCreateOptionsMenu(menu);
@@ -259,7 +259,7 @@ public class ItemShopActivity extends BaseActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == 1) {
-			View view = LayoutInflater.from(this).inflate(R.layout.dialog_edit_text, null);
+			View view = getLayoutInflater().inflate(R.layout.dialog_edit_text, null);
 			final EditText editText = view.findViewById(R.id.dialog_edit_text_field);
 			DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
 				@Override
@@ -384,6 +384,7 @@ public class ItemShopActivity extends BaseActivity {
 
 			for (int i = 0; i < item.itemGrants.length; i++) {
 				FortItemStack itemStack = item.itemGrants[i];
+				FortItemDefinition defData = itemStack.getDefData();
 				JsonElement json = activity.getThisApplication().itemRegistry.get(itemStack.templateId);
 				jsons.add(json);
 
@@ -400,7 +401,7 @@ public class ItemShopActivity extends BaseActivity {
 				}
 
 				JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
-				String displayName = jsonObject.get("DisplayName").getAsString();
+				String displayName = defData.DisplayName;
 				compiledNames.add(displayName);
 
 				if (i == 0) {
@@ -408,8 +409,8 @@ public class ItemShopActivity extends BaseActivity {
 
 					try {
 						holder.itemName.setText(displayName);
-						holder.shortDescription.setText(ItemUtils.getShortDescription(itemStack, jsonObject));
-						holder.backgroundable.setBackground(ItemUtils.rarityBgSlot(activity, ItemUtils.getRarity(jsonObject)));
+						holder.shortDescription.setText(ItemUtils.getShortDescription(itemStack));
+						holder.backgroundable.setBackground(ItemUtils.rarityBgSlot(activity, EFortRarity.from(defData.Rarity)));
 					} catch (NullPointerException e) {
 						Log.w("ItemShopActivity", "Failed setting short description or rarity background for " + itemStack.templateId, e);
 					}
@@ -494,11 +495,10 @@ public class ItemShopActivity extends BaseActivity {
 
 				@Override
 				public void onClick(View v) {
-					view = (ViewGroup) LayoutInflater.from(activity).inflate(R.layout.item_shop_panel_detail, null);
+					view = (ViewGroup) activity.getLayoutInflater().inflate(R.layout.item_shop_panel_detail, null);
 					populateView();
 					AlertDialog alertDialog = new AlertDialog.Builder(activity).setView(view).create();
 					alertDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-//					alertDialog.getWindow().setWindowAnimations(R.style.ItemShopAnim);
 					alertDialog.show();
 				}
 
@@ -515,13 +515,17 @@ public class ItemShopActivity extends BaseActivity {
 					if (item.itemGrants.length > 1) {
 						for (int i = 0; i < item.itemGrants.length; i++) {
 							FortItemStack itemStackLoop = item.itemGrants[i];
-							View slotView = LayoutInflater.from(activity).inflate(R.layout.slot_view, null);
+							View slotView = activity.getLayoutInflater().inflate(R.layout.slot_view, null);
 							ItemUtils.populateSlotView(activity, slotView, itemStackLoop, jsons.get(i));
 							final int finalI = i;
-							slotView.setOnClickListener(new View.OnClickListener() {
+							slotView.setClickable(true);
+							slotView.setFocusableInTouchMode(true);
+							slotView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 								@Override
-								public void onClick(View v) {
-									updateItemInfo(finalI);
+								public void onFocusChange(View v, boolean hasFocus) {
+									if (hasFocus) {
+										updateItemInfo(finalI);
+									}
 								}
 							});
 
@@ -597,7 +601,7 @@ public class ItemShopActivity extends BaseActivity {
 					JsonElement json = jsons.get(previewingIndex);
 
 					if (json != null) {
-						ItemUtils.populateItemDetailBox(view, itemStack, json);
+						ItemUtils.populateItemDetailBox(view, itemStack);
 					} else {
 						((TextView) view.findViewById(R.id.item_text1)).setText("Unknown | " + ItemUtils.shortDescriptionFromCtg(itemStack.getIdCategory()));
 						((TextView) view.findViewById(R.id.item_text2)).setText(compiledNames.get(previewingIndex));
@@ -675,21 +679,26 @@ public class ItemShopActivity extends BaseActivity {
 						public void run() {
 							purchaseSuccess = true;
 //							activity.setResult(RESULT_OK);
-							FortItemStack firstItemGrant = item.itemGrants[0];
-							View purchasedDialogView = LayoutInflater.from(activity).inflate(R.layout.dialog_purchased, null);
+							FortItemStack purchasedItem = item.itemGrants[0];
+							View purchasedDialogView = activity.getLayoutInflater().inflate(R.layout.dialog_purchased, null);
 							View purchasedText = purchasedDialogView.findViewById(R.id.item_shop_purchased_text);
 							View purchasedCheck = purchasedDialogView.findViewById(R.id.item_shop_purchased_check);
 							TextView purchasedItemTitle = purchasedDialogView.findViewById(R.id.item_shop_purchased_item_title);
 							View slotView = purchasedDialogView.findViewById(R.id.to_set_background);
 							purchasedItemTitle.setText(compiledNames.get(0));
-							ItemUtils.populateSlotView(activity, purchasedDialogView, firstItemGrant, jsons.get(0));
+							ItemUtils.populateSlotView(activity, purchasedDialogView, purchasedItem, jsons.get(0));
+							slotView.setFocusable(false);
 							final Dialog dialog = new Dialog(activity);
 							dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-							dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-							dialog.getWindow().getDecorView().setSystemUiVisibility(0);
-							dialog.getWindow().setStatusBarColor(0);
-							dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-							dialog.setCanceledOnTouchOutside(false);
+
+							if (dialog.getWindow() != null) {
+								dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+								dialog.getWindow().getDecorView().setSystemUiVisibility(0);
+								dialog.getWindow().setStatusBarColor(0);
+								dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+							}
+
+							dialog.setCancelable(false);
 							dialog.setContentView(purchasedDialogView);
 							dialog.show();
 							dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);

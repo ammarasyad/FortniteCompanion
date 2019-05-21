@@ -87,7 +87,7 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 		setupActionBar();
 		getActionBar().setTitle(PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", "").equals(id) ? "You" : name == null ? id : name);
 		final View frame = findViewById(R.id.main_content);
-		LayoutInflater.from(this).inflate(R.layout.br_stat_view, (ViewGroup) frame);
+		getLayoutInflater().inflate(R.layout.br_stat_view, (ViewGroup) frame);
 		btn1 = findViewById(R.id.br_stats_btn_platform_cycle);
 		btn2 = findViewById(R.id.br_stats_btn_mode_cycle);
 		btn1.setOnClickListener(this);

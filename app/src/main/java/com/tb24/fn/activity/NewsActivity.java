@@ -2,7 +2,6 @@ package com.tb24.fn.activity;
 
 import android.os.Bundle;
 import android.text.util.Linkify;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -47,7 +46,7 @@ public class NewsActivity extends WithBasicDataActivity {
 		List<FortBasicDataResponse.CommonUISimpleMessageBase> news = newsType.news.messages;
 
 		for (FortBasicDataResponse.CommonUISimpleMessageBase entry : news) {
-			View view = LayoutInflater.from(this).inflate(R.layout.news_entry, mainLayout, false);
+			View view = getLayoutInflater().inflate(R.layout.news_entry, mainLayout, false);
 			TextView adspace = view.findViewById(R.id.news_entry_adspace);
 			adspace.setVisibility(entry.adspace == null || entry.adspace.isEmpty() ? View.GONE : View.VISIBLE);
 			adspace.setText(entry.adspace);

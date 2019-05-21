@@ -2,6 +2,7 @@ package com.tb24.fn.activity;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,6 +37,16 @@ public abstract class BaseActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == android.R.id.home) finish();
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_ESCAPE && !event.isCanceled()) {
+			onBackPressed();
+			return true;
+		}
+
+		return super.onKeyUp(keyCode, event);
 	}
 
 	public FortniteCompanionApp getThisApplication() {

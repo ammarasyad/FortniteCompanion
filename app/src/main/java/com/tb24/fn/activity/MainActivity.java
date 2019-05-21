@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -339,7 +338,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		menuVbucks = menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		menuVbucks = menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) getLayoutInflater().inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		menuVbucks.setVisible(false);
 		menu.add(0, 901, 0, "Settings");
 		return super.onCreateOptionsMenu(menu);

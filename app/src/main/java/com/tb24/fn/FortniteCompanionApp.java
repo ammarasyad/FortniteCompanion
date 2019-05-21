@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.tb24.fn.model.EventDownloadResponse;
 import com.tb24.fn.model.FortBasicDataResponse;
+import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.RarityData;
 import com.tb24.fn.model.XGameProfile;
@@ -36,7 +37,7 @@ public class FortniteCompanionApp extends Application {
 	public final Gson gson = new GsonBuilder().registerTypeAdapter(FortMcpProfile.class, new FortMcpProfile.Serializer()).create();
 	public final EventBus eventBus = new EventBus();
 	public final LruCache<String, Bitmap> bitmapCache = new LruCache<>(512);
-	public static RarityData[] rarityData;
+	public static RarityData[] sRarityData;
 	public FortniteContentWebsiteService fortniteContentWebsiteService;
 	public FortnitePublicService fortnitePublicService;
 	public AccountPublicService accountPublicService;
@@ -63,16 +64,17 @@ public class FortniteCompanionApp extends Application {
 		personaService = retrofitBuilder.baseUrl("https://persona-public-service-prod06.ol.epicgames.com").build().create(PersonaPublicService.class);
 		eventsPublicServiceLive = retrofitBuilder.baseUrl("https://events-public-service-live.ol.epicgames.com").build().create(EventsPublicServiceLive.class);
 		itemRegistry = new Registry(this);
-		ItemUtils.setData = gson.fromJson(Utils.getStringFromAssets(getAssets(), "Game/Athena/Items/Cosmetics/Metadata/CosmeticSets.json"), JsonArray.class).get(0).getAsJsonObject();
-		ItemUtils.userFacingTagsData = gson.fromJson(Utils.getStringFromAssets(getAssets(), "Game/Athena/Items/Cosmetics/Metadata/CosmeticUserFacingTags.json"), JsonArray.class).get(0).getAsJsonObject();
-		rarityData = gson.fromJson(Utils.getStringFromAssets(getAssets(), "RarityData.json"), RarityData[].class);
+		FortItemStack.sRegistry = itemRegistry;
+		ItemUtils.sSetData = gson.fromJson(Utils.getStringFromAssets(getAssets(), "Game/Athena/Items/Cosmetics/Metadata/CosmeticSets.json"), JsonArray.class).get(0).getAsJsonObject();
+		ItemUtils.sUserFacingTagsData = gson.fromJson(Utils.getStringFromAssets(getAssets(), "Game/Athena/Items/Cosmetics/Metadata/CosmeticUserFacingTags.json"), JsonArray.class).get(0).getAsJsonObject();
+		sRarityData = gson.fromJson(Utils.getStringFromAssets(getAssets(), "RarityData.json"), RarityData[].class);
 //		dbgRarityData();
 		profileManager = new ProfileManager(this);
 	}
 
 //	private void dbgRarityData() {
-//		for (int i = 0; i < rarityData.length; i++) {
-//			RarityData rarity = rarityData[i];
+//		for (int i = 0; i < sRarityData.length; i++) {
+//			RarityData rarity = sRarityData[i];
 //			System.out.printf("Rarity index %d: #%08X #%08X #%08X #%08X #%08X\n", i, rarity.Color1.asInt(), rarity.Color2.asInt(), rarity.Color3.asInt(), rarity.Color4.asInt(), rarity.Color5.asInt());
 //		}
 //	}
