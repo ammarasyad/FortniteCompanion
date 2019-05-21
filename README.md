@@ -1,5 +1,9 @@
 # FortniteCompanion
-Extremely experimantal Mini Fortnite Client Android app.
+A mini Fortnite client for Android.
+
+## Permissions used
+* Contacts: to autocomplete the email field in the log in screen
+* Network: required for this app to work
 
 ## Features
 * View BR profile
