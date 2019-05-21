@@ -34,7 +34,6 @@
 			android:gravity="center_horizontal"
 			android:text="Check your connection"
 			android:textAppearance="?android:textAppearanceListItem" />
-		<!--android:textAppearance="@android:style/TextAppearance.DeviceDefault.Subhead" />-->
 
 		<Button
 			android:id="@+id/reload_btn"

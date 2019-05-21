@@ -2,6 +2,7 @@ package com.tb24.fn.model;
 
 import android.util.Log;
 
+import com.google.gson.annotations.Expose;
 import com.tb24.fn.util.Utils;
 
 import java.io.IOException;
@@ -15,9 +16,13 @@ public class EpicError {
 	public Integer numericErrorCode;
 	public String originatingService;
 	public String intent;
+	@Expose(serialize = false, deserialize = false)
+	public Response<?> response;
 
 	public static EpicError parse(Response<?> response) {
-		return parse(response, EpicError.class);
+		EpicError out = parse(response, EpicError.class);
+		out.response = response;
+		return out;
 	}
 
 	public static <T extends EpicError> T parse(Response<?> response, Class<T> toErrorClass) {

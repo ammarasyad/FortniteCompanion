@@ -7,6 +7,7 @@ import android.widget.TextView;
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.R;
 import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
@@ -81,10 +82,12 @@ public class ProfileActivity extends BaseActivity {
 			((TextView) findViewById(R.id.profile_br_account_level)).setText(String.valueOf(attributes.accountLevel));
 			((TextView) findViewById(R.id.profile_br_xp_boost)).setText(String.valueOf(attributes.season_match_boost) + '%');
 			((TextView) findViewById(R.id.profile_br_xp_boost_friend)).setText(String.valueOf(attributes.season_friend_match_boost) + '%');
+			// TODO make a real layout for this
 			((TextView) findViewById(R.id.profile_br_past_season_data)).setText(Joiner.on('\n').join(Lists.transform(Arrays.asList(attributes.past_seasons), new Function<AthenaProfileAttributes.AthenaPastSeasonData, String>() {
 				@Override
 				public String apply(AthenaProfileAttributes.AthenaPastSeasonData input) {
-					return String.format("Season %d:\n Lvl %d @ %d XP, %s Tier %d; %d Wins", input.seasonNumber, input.seasonLevel, input.seasonXp, input.purchasedVIP ? "Battle Pass" : "Free Pass", input.bookLevel, input.numWins);
+					// TODO max xp prior to season 8 is different
+					return String.format("Season %,d:\n Lvl %,d @ %s, %s Tier %,d; %,d Wins", input.seasonNumber, input.seasonLevel, input.seasonLevel == 100 ? "MAX" : String.format("%,d/%,d XP", input.seasonXp, FortniteCompanionApp.MAX_XPS_S8[input.seasonLevel - 1]), input.purchasedVIP ? "Battle Pass" : "Free Pass", input.bookLevel, input.numWins);
 				}
 			})));
 		}

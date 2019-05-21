@@ -31,9 +31,8 @@
 			android:title="Simulate purchases" />
 
 		<Preference
-			android:key="dump_login_data"
-			android:summary="Display login data on the app log"
-			android:title="Dump login data" />
+			android:key="view_login_data"
+			android:title="View login data" />
 	</PreferenceCategory>
 
 	<!-- Layout preference doesn't obey allowDividerAbove, so put it in a PreferenceCategory -->

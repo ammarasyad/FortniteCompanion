@@ -1,10 +1,8 @@
 package com.tb24.fn.activity;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v14.preference.PreferenceFragment;
 import android.support.v7.preference.DropDownPreference;
@@ -35,9 +33,9 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 public class SettingsActivity extends BaseActivity {
-	private static boolean isXLargeTablet(Context context) {
-		return (context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
-	}
+//	private static boolean isXLargeTablet(Context context) {
+//		return (context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_XLARGE;
+//	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +48,7 @@ public class SettingsActivity extends BaseActivity {
 		private DropDownPreference prefRegion;
 		private TwoStatePreference prefPrivacy;
 		private DropDownPreference prefMtxPlatform;
-		private Preference prefDumpLoginData;
+		private Preference prefViewLoginData;
 		private LayoutPreference prefLogOut;
 		private AccountPrivacyResponse privacyData;
 
@@ -119,8 +117,8 @@ public class SettingsActivity extends BaseActivity {
 				updateMtxPlatformPreference(null);
 			}
 
-			prefDumpLoginData = findPreference("dump_login_data");
-			prefDumpLoginData.setVisible(getPreferenceManager().getSharedPreferences().getBoolean("is_logged_in", false));
+			prefViewLoginData = findPreference("view_login_data");
+			prefViewLoginData.setVisible(getPreferenceManager().getSharedPreferences().getBoolean("is_logged_in", false));
 
 			prefLogOut = (LayoutPreference) findPreference("log_out");
 			prefLogOut.setVisible(getPreferenceManager().getSharedPreferences().getBoolean("is_logged_in", false));
@@ -273,10 +271,13 @@ public class SettingsActivity extends BaseActivity {
 
 		@Override
 		public boolean onPreferenceTreeClick(Preference preference) {
-			if (preference.getKey() != null & preference.getKey().equals("dump_login_data")) {
+			if (preference.getKey() != null & preference.getKey().equals("view_login_data")) {
 				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-				Log.d("LoginDump", "Access Token: " + prefs.getString("epic_account_token_type", null) + " " + prefs.getString("epic_account_access_token", null));
-				Log.d("LoginDump", "Refresh Token: " + prefs.getString("epic_account_refresh_token", null));
+				String s = "Account ID: " + prefs.getString("epic_account_id", null)
+						+ '\n' + "Access Token: " + prefs.getString("epic_account_token_type", null) + " " + prefs.getString("epic_account_access_token", null)
+						+ '\n' + "Refresh Token: " + prefs.getString("epic_account_refresh_token", null);
+				Utils.dialogOkNonMain(getActivity(), null, s);
+				Log.d("LoginDump", s);
 			}
 
 			return super.onPreferenceTreeClick(preference);

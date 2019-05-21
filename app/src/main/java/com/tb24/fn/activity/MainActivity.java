@@ -34,22 +34,18 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 import retrofit2.Call;
 import retrofit2.Response;
 
 public class MainActivity extends BaseActivity implements View.OnClickListener, View.OnLongClickListener {
-	private static final int[] MAX_XPS = new int[]{100, 200, 300, 400, 500, 650, 800, 950, 1100, 1250, 1400, 1550, 1700, 1850, 2000, 2150, 2300, 2450, 2600, 2750, 2900, 3050, 3200, 3350, 3500, 3650, 3800, 3950, 4100, 4250, 4400, 4550, 4700, 4850, 5000, 5150, 5300, 5450, 5600, 5800, 6000, 6200, 6400, 6600, 6800, 7000, 7200, 7400, 7600, 7800, 8100, 8400, 8700, 9000, 9300, 9600, 9900, 10200, 10500, 10800, 11200, 11600, 12000, 12400, 12800, 13200, 13600, 14000, 14400, 14800, 15300, 15800, 16300, 16800, 17300, 17800, 18300, 18800, 19300, 19800, 20800, 21800, 22800, 23800, 24800, 25800, 26800, 27800, 28800, 30800, 32800, 34800, 36800, 38800, 40800, 42800, 45800, 49800, 54800};
 	private static final int UPDATE_IF_OK_REQ_CODE = 0;
 	private SharedPreferences prefs;
 	private Button loginBtn;
 	private TextView loginText;
 	private ViewGroup vBucksView;
-	private ViewGroup profileFrame;
-	private ViewGroup profileContent;
-	private ViewGroup profileLoader;
 	private MenuItem menuVbucks;
-	private boolean loggedIn;
 	private Call<FortMcpResponse> callMcpCommonPublic;
 	private Call<FortMcpResponse> callMcpCommonCore;
 	private Call<FortMcpResponse> callMcpAthena;
@@ -57,10 +53,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	private LoadingViewController profileLc;
 
 	public static boolean checkAuthError(EpicError error) {
+		boolean isForbidden = error.response.code() == HttpURLConnection.HTTP_FORBIDDEN;
 		boolean invalidToken = error.errorCode.equals("errors.com.epicgames.common.oauth.invalid_token") || error.numericErrorCode == 1014;
 		boolean tokenVerificationFailed = error.errorCode.equals("errors.com.epicgames.common.authentication.token_verification_failed") || error.numericErrorCode == 1031;
 		boolean authenticationFailed = error.errorCode.equals("errors.com.epicgames.common.oauth.authentication_failed") || error.numericErrorCode == 1032;
-		return invalidToken || tokenVerificationFailed || authenticationFailed;
+		return isForbidden || invalidToken || tokenVerificationFailed || authenticationFailed;
 	}
 
 	@Override
@@ -81,8 +78,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		loginBtn = findViewById(R.id.main_screen_btn_login);
 		loginBtn.setOnClickListener(this);
 		loginText = findViewById(R.id.main_screen_login_username);
-		profileFrame = findViewById(R.id.profile_frame);
-		profileContent = findViewById(R.id.p_root);
+		ViewGroup profileFrame = findViewById(R.id.profile_frame);
 		DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
 		boolean sideBySide = (displayMetrics.widthPixels / displayMetrics.density) >= FortniteCompanionApp.MIN_DP_FOR_TWOCOLUMN;
 		((LinearLayout) findViewById(R.id.activity_main_root)).setOrientation(sideBySide ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
@@ -91,7 +87,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			profileFrame.getLayoutParams().width = (int) Utils.dp(getResources(), 300);
 		}
 
-		profileLc = new LoadingViewController(profileFrame, profileContent, "No profile data") {
+		profileLc = new LoadingViewController(profileFrame, findViewById(R.id.p_root), "No profile data") {
 			@Override
 			public boolean shouldShowEmpty() {
 				return !getThisApplication().profileManager.profileData.containsKey("athena");
@@ -102,7 +98,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	}
 
 	private void checkLogin() {
-		loggedIn = prefs.getBoolean("is_logged_in", false);
+		boolean loggedIn = prefs.getBoolean("is_logged_in", false);
 		findViewById(R.id.main_screen_btn_stats).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_events).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_locker).setEnabled(loggedIn);
@@ -219,7 +215,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileManager.profileData.get("athena").stats.attributesObj;
 		((TextView) findViewById(R.id.p_season)).setText("Season " + attributes.season_num);
 		((TextView) findViewById(R.id.p_level)).setText(String.valueOf(attributes.level));
-		int i = MAX_XPS[attributes.level - 1];
+		int i = FortniteCompanionApp.MAX_XPS_S8[attributes.level - 1];
 		boolean battlePassMax = attributes.book_level == 100;
 		boolean levelMax = attributes.level == 100;
 		ProgressBar progressBar = findViewById(R.id.p_xp_bar);
@@ -340,7 +336,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menuVbucks = menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) getLayoutInflater().inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		menuVbucks.setVisible(false);
-		menu.add(0, 901, 0, "Settings");
+		menu.add(0, 901, 0, R.string.title_activity_settings);
 		return super.onCreateOptionsMenu(menu);
 	}
 
