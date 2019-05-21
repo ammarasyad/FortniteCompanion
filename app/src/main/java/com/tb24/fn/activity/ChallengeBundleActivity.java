@@ -198,7 +198,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 		@NonNull
 		@Override
 		public ChallengeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-			return new ChallengeViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.test_quest, parent, false));
+			return new ChallengeViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.quest_entry, parent, false));
 		}
 
 		@Override

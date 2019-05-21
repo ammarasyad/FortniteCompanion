@@ -4,7 +4,7 @@
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:orientation="vertical"
-	tools:showIn="@layout/test_quest">
+	tools:showIn="@layout/quest_entry">
 
 	<com.tb24.fn.view.ForcedMarqueeTextView
 		android:id="@+id/quest_title"
@@ -14,6 +14,7 @@
 		android:ellipsize="marquee"
 		android:marqueeRepeatLimit="marquee_forever"
 		android:singleLine="true"
+		android:textColor="?android:textColorPrimary"
 		tools:text="Quest name" />
 
 	<LinearLayout
@@ -36,6 +37,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginStart="8dp"
+			android:textColor="?android:textColorPrimary"
 			android:textStyle="italic"
 			tools:text="0 / 200" />
 	</LinearLayout>
