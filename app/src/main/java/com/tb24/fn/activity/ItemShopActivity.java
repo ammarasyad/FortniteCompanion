@@ -44,6 +44,7 @@ import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortCatalogResponse;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpResponse;
+import com.tb24.fn.model.assetdata.FortItemDefinition;
 import com.tb24.fn.model.command.PurchaseCatalogEntry;
 import com.tb24.fn.util.EFortRarity;
 import com.tb24.fn.util.ItemUtils;
@@ -202,17 +203,17 @@ public class ItemShopActivity extends BaseActivity {
 				Collections.sort(c, new Comparator<FortCatalogResponse.CatalogEntry>() {
 					@Override
 					public int compare(FortCatalogResponse.CatalogEntry o1, FortCatalogResponse.CatalogEntry o2) {
-						JsonElement jsonElement = getThisApplication().itemRegistry.get(o1.itemGrants[0].templateId);
-						JsonElement jsonElement1 = getThisApplication().itemRegistry.get(o2.itemGrants[0].templateId);
+						FortItemDefinition defData = o1.itemGrants[0].setAndGetDefData(getThisApplication().itemRegistry);
+						FortItemDefinition defData1 = o2.itemGrants[0].setAndGetDefData(getThisApplication().itemRegistry);
 						EFortRarity rarity1 = EFortRarity.COMMON;
 						EFortRarity rarity2 = EFortRarity.COMMON;
 
-						if (jsonElement != null) {
-							rarity1 = ItemUtils.getRarity(jsonElement.getAsJsonArray().get(0).getAsJsonObject());
+						if (defData != null) {
+							rarity1 = EFortRarity.from(defData.Rarity);
 						}
 
-						if (jsonElement1 != null) {
-							rarity2 = ItemUtils.getRarity(jsonElement1.getAsJsonArray().get(0).getAsJsonObject());
+						if (defData1 != null) {
+							rarity2 = EFortRarity.from(defData1.Rarity);
 						}
 
 						return ComparisonChain.start().compare(rarity2, rarity1).compare(o2.prices[0].basePrice, o1.prices[0].basePrice).compare(o1.itemGrants[0].getIdName(), o2.itemGrants[0].getIdName()).result();

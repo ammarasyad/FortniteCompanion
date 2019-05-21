@@ -11,6 +11,10 @@ public enum EFortRarity {
 	}
 
 	public static EFortRarity from(String rarity) {
+		if (rarity == null) {
+			return UNCOMMON;
+		}
+
 		String check = rarity.substring(rarity.indexOf("::") + "::".length()).toUpperCase();
 
 		for (EFortRarity val : values()) {

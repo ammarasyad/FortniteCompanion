@@ -8,6 +8,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.tb24.fn.R;
+import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.CommonCoreProfileAttributes;
 import com.tb24.fn.model.FortMcpProfile;
@@ -15,6 +16,9 @@ import com.tb24.fn.model.WorldInfoResponse;
 import com.tb24.fn.model.XGameProfile;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
+
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Arrays;
 
@@ -35,6 +39,18 @@ public class ProfileActivity extends BaseActivity {
 		lc = new LoadingViewController(this, frame, "");
 		refreshUi();
 		lc.content();
+		getThisApplication().eventBus.register(this);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		getThisApplication().eventBus.unregister(this);
+	}
+
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onProfileUpdated(ProfileUpdatedEvent event) {
+		refreshUi();
 	}
 
 	private void refreshUi() {

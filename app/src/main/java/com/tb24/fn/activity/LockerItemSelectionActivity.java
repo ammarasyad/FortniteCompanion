@@ -34,6 +34,7 @@ import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.assetdata.AthenaPetCarrierItemDefinition;
 import com.tb24.fn.model.assetdata.FortItemDefinition;
+import com.tb24.fn.model.command.MarkItemSeen;
 import com.tb24.fn.model.command.SetItemFavoriteStatusBatch;
 import com.tb24.fn.util.EFortRarity;
 import com.tb24.fn.util.ItemUtils;
@@ -50,8 +51,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -82,6 +85,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 	private FortMcpProfile profileData;
 	private FortItemStack[] referenceData;
 	private Map<String, Boolean> favoriteChangeMap = new HashMap<>();
+	private Set<String> seenChangeSet = new HashSet<>();
 
 	public static String getItemCategoryFilterById(int id) {
 		switch (id) {
@@ -496,6 +500,25 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				}
 			}.start();
 		}
+
+		if (!seenChangeSet.isEmpty()) {
+			MarkItemSeen payload = new MarkItemSeen();
+			payload.itemIds = seenChangeSet.toArray(new String[]{});
+			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp("MarkItemSeen", PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""), "athena", -1, true, payload);
+			new Thread("Mark Item Seen Worker") {
+				@Override
+				public void run() {
+					try {
+						Response<FortMcpResponse> response = call.execute();
+
+						if (response.isSuccessful()) {
+							getThisApplication().profileManager.executeProfileChanges(response.body());
+						}
+					} catch (IOException ignored) {
+					}
+				}
+			}.start();
+		}
 	}
 
 	@Override
@@ -552,17 +575,17 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		List<FortItemStack> data = chain.toSortedList(new Comparator<FortItemStack>() {
 			@Override
 			public int compare(FortItemStack o1, FortItemStack o2) {
-				JsonElement jsonElement = getThisApplication().itemRegistry.get(o1.templateId);
-				JsonElement jsonElement1 = getThisApplication().itemRegistry.get(o2.templateId);
+				FortItemDefinition defData = o1.setAndGetDefData(getThisApplication().itemRegistry);
+				FortItemDefinition defData1 = o2.setAndGetDefData(getThisApplication().itemRegistry);
 				EFortRarity rarity1 = EFortRarity.COMMON;
 				EFortRarity rarity2 = EFortRarity.COMMON;
 
-				if (jsonElement != null) {
-					rarity1 = ItemUtils.getRarity(jsonElement.getAsJsonArray().get(0).getAsJsonObject());
+				if (defData != null) {
+					rarity1 = EFortRarity.from(defData.Rarity);
 				}
 
-				if (jsonElement1 != null) {
-					rarity2 = ItemUtils.getRarity(jsonElement1.getAsJsonArray().get(0).getAsJsonObject());
+				if (defData1 != null) {
+					rarity2 = EFortRarity.from(defData1.Rarity);
 				}
 
 				return ComparisonChain.start().compareTrueFirst(JsonUtils.getBooleanOr("favorite", o1.attributes, false), JsonUtils.getBooleanOr("favorite", o2.attributes, false)).compare(o1.getIdCategory(), o2.getIdCategory()).compare(rarity2, rarity1).compare(o1.getIdName(), o2.getIdName()).result();
@@ -665,20 +688,29 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 							.setPositiveButton(android.R.string.ok, null);
 
 					if (item.attributes != null && activity.itemTypeFilter != null) {
-						builder.setItems(new CharSequence[]{JsonUtils.getBooleanOr("favorite", item.attributes, false) ? "Unfavorite" : "Favorite", "Mark Seen"}, new DialogInterface.OnClickListener() {
+						String favorite = JsonUtils.getBooleanOr("favorite", item.attributes, false) ? "Unfavorite" : "Favorite";
+						CharSequence[] items = new CharSequence[]{favorite};
+
+						if (!JsonUtils.getBooleanOr("item_seen", item.attributes, true)) {
+							items = new CharSequence[]{favorite, "Mark as seen"};
+						}
+
+						builder.setItems(items, new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
 								if (which == 0) {
 									if (item.attributes.has("favorite")) {
 										boolean newFavValue = !item.attributes.get("favorite").getAsBoolean();
-//										item.attributes = Utils.cloneJsonObject(item.attributes);
-										// TODO new favorite property affected new AND old instances so the entry's UI wouldn't update
 										item.attributes.addProperty("favorite", newFavValue);
 										activity.favoriteChangeMap.put(activity.findItemId(item.templateId), newFavValue);
 										activity.refreshUi();
 									}
 								} else if (which == 1) {
-									// TODO mark item seen
+									if (item.attributes.has("item_seen")) {
+										item.attributes.addProperty("item_seen", true);
+										activity.seenChangeSet.add(activity.findItemId(item.templateId));
+										activity.refreshUi();
+									}
 								}
 							}
 						});
@@ -756,7 +788,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
 					JsonObject oldAttr = activity.referenceData[oldItemPosition].attributes;
 					JsonObject newAttr = newData.get(newItemPosition).attributes;
-					return (oldAttr == null || newAttr == null) || JsonUtils.getBooleanOr("favorite", oldAttr, false) == JsonUtils.getBooleanOr("favorite", newAttr, false);
+					return (oldAttr == null || newAttr == null) || JsonUtils.getBooleanOr("favorite", oldAttr, false) == JsonUtils.getBooleanOr("favorite", newAttr, false) && JsonUtils.getBooleanOr("item_seen", oldAttr, true) == JsonUtils.getBooleanOr("item_seen", newAttr, true);
 				}
 			});
 			diffResult.dispatchUpdatesTo(this);

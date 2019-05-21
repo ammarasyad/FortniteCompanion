@@ -13,10 +13,10 @@
 
 		<TextView
 			android:id="@+id/profile_name"
+			style="@style/TextAppearance.BurbankSmall.Black"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:textAppearance="@android:style/TextAppearance.Material.Title"
-			android:textStyle="bold"
 			tools:text="First Last" />
 
 		<TextView
@@ -97,12 +97,13 @@
 		</LinearLayout>
 
 		<TextView
+			style="@style/TextAppearance.BurbankSmall.Black"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="16dp"
 			android:text="General"
-			android:textAppearance="@android:style/TextAppearance.Material.Title"
-			android:textStyle="bold" />
+			android:textAllCaps="true"
+			android:textAppearance="@android:style/TextAppearance.Material.Title" />
 
 		<LinearLayout
 			android:layout_width="wrap_content"
@@ -130,7 +131,7 @@
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="Support A Creator" />
+				android:text="Support a Creator" />
 
 			<TextView
 				android:id="@+id/profile_sac"
@@ -149,7 +150,7 @@
 			<TextView
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="Support A Creator set on" />
+				android:text="Support a Creator set on" />
 
 			<TextView
 				android:id="@+id/profile_sac_set_time"
@@ -214,10 +215,12 @@
 			android:text="No data" />
 
 		<TextView
+			style="@style/TextAppearance.BurbankSmall.Black"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="16dp"
 			android:text="Battle Royale"
+			android:textAllCaps="true"
 			android:textAppearance="@android:style/TextAppearance.Material.Title"
 			android:textStyle="bold" />
 
