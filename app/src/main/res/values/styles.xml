@@ -42,7 +42,9 @@
 		<item name="android:fontFamily">@font/noto_sans</item>
 	</style>
 
-	<style name="TextAppearance.BurbankSmall" parent="android:TextAppearance">
+	<style name="TextAppearance" />
+
+	<style name="TextAppearance.BurbankSmall" parent="TextAppearance">
 		<item name="android:fontFamily">@font/burbank_small</item>
 	</style>
 

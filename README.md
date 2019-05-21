@@ -9,7 +9,7 @@ A mini Fortnite client for Android.
 * View BR profile
 * View events and its leaderboard
 * View stats of yourself or other player's
-* View BR cosmetics
+* View BR cosmetics, with filtering and set/unset favorite
 * View Item Shop, full display for unencrypted items
 * Make Battle Royale Item Shop purchases
 * Change leaderboard privacy setting

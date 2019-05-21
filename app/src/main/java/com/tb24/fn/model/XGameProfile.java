@@ -1,5 +1,7 @@
 package com.tb24.fn.model;
 
+import java.util.Date;
+
 public class XGameProfile extends GameProfile {
 	public String name;
 	public String email;
@@ -12,7 +14,7 @@ public class XGameProfile extends GameProfile {
 	public String country;
 	public String lastName;
 	public String preferredLanguage;
-	public String lastDisplayNameChange;
+	public Date lastDisplayNameChange;
 	public Boolean canUpdateDisplayName;
 	public Boolean tfaEnabled;
 }

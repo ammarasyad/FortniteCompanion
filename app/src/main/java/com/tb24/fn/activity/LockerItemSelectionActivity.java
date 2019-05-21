@@ -417,7 +417,8 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			itemFilters = getItemFilterListByItemCategory(getThisApplication().itemRegistry, itemTypeFilter);
 
 			if (getActionBar() != null) {
-				getActionBar().setTitle("Selecting");
+//				getActionBar().setTitle("Selecting");
+				getActionBar().setTitle("Viewing");
 				getActionBar().setSubtitle(getTitleTextById(id));
 			}
 

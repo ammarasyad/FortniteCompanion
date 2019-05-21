@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	tools:context=".activity.ProfileActivity">
+
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="vertical"
+		android:padding="16dp">
+
+		<TextView
+			android:id="@+id/profile_name"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textAppearance="@android:style/TextAppearance.Material.Title"
+			android:textStyle="bold"
+			tools:text="First Last" />
+
+		<TextView
+			android:id="@+id/profile_email"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textIsSelectable="true"
+			tools:text="yourname@example.com" />
+
+		<TextView
+			android:id="@+id/profile_account_id"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:textIsSelectable="true"
+			tools:text="account id" />
+
+		<TextView
+			android:id="@+id/profile_country"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			tools:text="Country: XX" />
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Display name changes" />
+
+			<TextView
+				android:id="@+id/profile_display_name_changes"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:textAppearance="?android:textAppearanceListItem"
+				android:textStyle="bold"
+				tools:text="XX" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Display name last changed" />
+
+			<TextView
+				android:id="@+id/profile_display_name_last_change"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:textAppearance="?android:textAppearanceListItem"
+				android:textStyle="bold"
+				tools:text="XX" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="2FA Enabled" />
+
+			<TextView
+				android:id="@+id/profile_2fa"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:textAppearance="?android:textAppearanceListItem"
+				android:textStyle="bold"
+				tools:text="XX" />
+		</LinearLayout>
+
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:text="General"
+			android:textAppearance="@android:style/TextAppearance.Material.Title"
+			android:textStyle="bold" />
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Account created on" />
+
+			<TextView
+				android:id="@+id/profile_created_on"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:textAppearance="?android:textAppearanceListItem"
+				android:textStyle="bold"
+				tools:text="XX" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Support A Creator" />
+
+			<TextView
+				android:id="@+id/profile_sac"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:textAppearance="?android:textAppearanceListItem"
+				android:textStyle="bold"
+				tools:text="XX" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Support A Creator set on" />
+
+			<TextView
+				android:id="@+id/profile_sac_set_time"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:textAppearance="?android:textAppearanceListItem"
+				android:textStyle="bold"
+				tools:text="XX" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Allowed to send gifts" />
+
+			<TextView
+				android:id="@+id/profile_gift_send"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:textAppearance="?android:textAppearanceListItem"
+				android:textStyle="bold"
+				tools:text="XX" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Allowed to receive gifts" />
+
+			<TextView
+				android:id="@+id/profile_gift_receive"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:textAppearance="?android:textAppearanceListItem"
+				android:textStyle="bold"
+				tools:text="XX" />
+		</LinearLayout>
+
+		<TextView
+			style="@style/TextAppearance.BurbankSmall.Bold"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:text="Gifting history"
+			android:textAppearance="?android:textAppearanceListItem" />
+
+		<TextView
+			android:id="@+id/profile_gift_history"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="No data" />
+
+		<TextView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:text="Battle Royale"
+			android:textAppearance="@android:style/TextAppearance.Material.Title"
+			android:textStyle="bold" />
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Account Level" />
+
+			<TextView
+				android:id="@+id/profile_br_account_level"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:textAppearance="?android:textAppearanceListItem"
+				android:textStyle="bold"
+				tools:text="XX" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Match XP Boost" />
+
+			<TextView
+				android:id="@+id/profile_br_xp_boost"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:textAppearance="?android:textAppearanceListItem"
+				android:textStyle="bold"
+				tools:text="XX" />
+		</LinearLayout>
+
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Match XP Boost for friends" />
+
+			<TextView
+				android:id="@+id/profile_br_xp_boost_friend"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:textAppearance="?android:textAppearanceListItem"
+				android:textStyle="bold"
+				tools:text="XX" />
+		</LinearLayout>
+
+		<TextView
+			style="@style/TextAppearance.BurbankSmall.Bold"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:text="Season history"
+			android:textAppearance="?android:textAppearanceListItem" />
+
+		<TextView
+			android:id="@+id/profile_br_past_season_data"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="No data" />
+	</LinearLayout>
+
+</ScrollView>
