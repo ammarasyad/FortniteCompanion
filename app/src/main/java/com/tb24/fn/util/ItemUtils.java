@@ -207,6 +207,7 @@ public class ItemUtils {
 		View attemptFindId = slotView.findViewById(R.id.to_set_background);
 		View rarityBackground = attemptFindId == null ? slotView : attemptFindId;
 		TextView quantity = slotView.findViewById(R.id.item_slot_quantity);
+		ImageView favorite = slotView.findViewById(R.id.item_favorite);
 		rarityBackground.setBackgroundResource(R.drawable.bg_common);
 		Bitmap bitmap = null;
 
@@ -220,5 +221,12 @@ public class ItemUtils {
 		((TextView) slotView.findViewById(R.id.item_slot_dbg_text)).setText(bitmap == null ? item.templateId : null);
 		quantity.setVisibility(item.quantity > 1 ? View.VISIBLE : View.GONE);
 		quantity.setText(String.valueOf(item.quantity));
+
+		if (item.attributes != null) {
+			favorite.setImageBitmap(Utils.loadTga(activity, "/Game/UI/Foundation/Textures/Icons/Locker/T_Icon_FavoriteTab_64.T_Icon_FavoriteTab_64"));
+			favorite.setVisibility(JsonUtils.getBooleanOr("favorite", item.attributes, false) ? View.VISIBLE : View.INVISIBLE);
+		} else {
+			favorite.setVisibility(View.GONE);
+		}
 	}
 }

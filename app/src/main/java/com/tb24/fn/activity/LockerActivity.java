@@ -83,8 +83,10 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 			case R.id.locker_slot_wrap4:
 			case R.id.locker_slot_wrap5:
 			case R.id.locker_slot_wrap6:
-			case R.id.locker_slot_wrap7:
 				path = "/Game/UI/Foundation/Textures/Icons/Locker/T_Icon_Wrap_128.T_Icon_Wrap_128";
+				break;
+			case R.id.locker_slot_wrap7:
+				path = "/Game/UI/Foundation/Textures/Icons/Locker/T-Icon-Wrap-Misc-128.T-Icon-Wrap-Misc-128";
 				break;
 			case R.id.locker_slot_musicpack:
 				path = "/Game/UI/Foundation/Textures/Icons/Locker/T_Icon_MusicTrack_128.T_Icon_MusicTrack_128";
