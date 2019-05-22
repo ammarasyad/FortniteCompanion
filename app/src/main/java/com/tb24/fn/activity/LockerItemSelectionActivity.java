@@ -321,6 +321,10 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 	}
 
 	private static boolean slotCanBeBlank(String filterId) {
+		if (filterId == null) {
+			return true;
+		}
+
 		switch (filterId) {
 			case "AthenaCharacter":
 				return true;
@@ -675,7 +679,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 
 		List<FortItemStack> data = new ArrayList<>();
 
-		if (mFilterIndex == 0 && slotCanBeBlank(itemTypeFilter)) {
+		if (itemTypeFilter != null && mFilterIndex == 0 && slotCanBeBlank(itemTypeFilter)) {
 			data.add(EMPTY_ITEM);
 		}
 
