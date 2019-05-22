@@ -3,6 +3,7 @@ package com.tb24.fn.activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -10,12 +11,15 @@ import android.support.annotation.NonNull;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -42,6 +46,7 @@ import com.tb24.fn.util.ItemUtils;
 import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
+import com.tb24.fn.view.ForcedMarqueeTextView;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.greenrobot.eventbus.Subscribe;
@@ -70,6 +75,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 	}, R.string.locker_filter_all, null);
 
 	private ViewGroup mPinnedHeaderFrameLayout;
+	private ViewGroup mPinnedFooterFrameLayout;
 	private ViewGroup mSpinnerHeader;
 	private Spinner mFilterSpinner;
 	private ArrayAdapter<String> mFilterAdapter;
@@ -447,6 +453,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		setContentView(R.layout.common_loadable_recycler_view);
 		setupActionBar();
 		mPinnedHeaderFrameLayout = findViewById(R.id.pinned_header);
+		mPinnedFooterFrameLayout = findViewById(R.id.pinned_footer);
 
 		if (getIntent().hasExtra("a")) {
 			int id = getIntent().getIntExtra("a", 0);
@@ -471,12 +478,28 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			mFilterSpinner.setAdapter(mFilterAdapter);
 			mFilterSpinner.setSelection(mFilterIndex = savedInstanceState != null ? savedInstanceState.getInt(ARG_FILTER_INDEX) : 0);
 			mFilterSpinner.setOnItemSelectedListener(this);
+
+			if (getResources().getConfiguration().keyboard == Configuration.KEYBOARD_QWERTY) {
+				TextView footer = new ForcedMarqueeTextView(this);
+				footer.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+				footer.setEllipsize(TextUtils.TruncateAt.MARQUEE);
+				footer.setGravity(Gravity.CENTER);
+				footer.setMarqueeRepeatLimit(-1);
+				footer.setSingleLine();
+				footer.setText("(F) Toggle Favorite \u2022 ([) Previous Filter \u2022 (]) Next Filter");
+				setPinnedFooterView(footer);
+			}
 		}
 
 		list = findViewById(R.id.main_recycler_view);
 		int p = (int) Utils.dp(getResources(), 4);
 		list.setPadding(p, p, p, p);
 		list.setClipToPadding(false);
+
+		if (!PreferenceManager.getDefaultSharedPreferences(this).getBoolean("locker_item_animations", true)) {
+			list.setItemAnimator(null);
+		}
+
 		list.post(new Runnable() {
 			@Override
 			public void run() {
@@ -552,6 +575,27 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				}
 			}.start();
 		}
+	}
+
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_F || keyCode == KeyEvent.KEYCODE_BUTTON_THUMBR) {
+			if (adapter.focusedItem != null) {
+				adapter.toggleFavoriteItem(adapter.focusedItem);
+			}
+
+			return true;
+		} else if (itemTypeFilter != null) {
+			if (keyCode == KeyEvent.KEYCODE_LEFT_BRACKET || keyCode == KeyEvent.KEYCODE_BUTTON_L2) {
+				mFilterSpinner.setSelection(Math.max(0, mFilterIndex - 1));
+				return true;
+			} else if (keyCode == KeyEvent.KEYCODE_RIGHT_BRACKET || keyCode == KeyEvent.KEYCODE_BUTTON_R2) {
+				mFilterSpinner.setSelection(Math.min(mFilterIndex + 1, itemFilters.size() - 1));
+				return true;
+			}
+		}
+
+		return super.onKeyUp(keyCode, event);
 	}
 
 	@Override
@@ -653,6 +697,18 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		mPinnedHeaderFrameLayout.setVisibility(View.VISIBLE);
 	}
 
+	public View setPinnedFooterView(int layoutResId) {
+		final LayoutInflater inflater = getLayoutInflater();
+		final View pinnedFooter = inflater.inflate(layoutResId, mPinnedFooterFrameLayout, false);
+		setPinnedFooterView(pinnedFooter);
+		return pinnedFooter;
+	}
+
+	public void setPinnedFooterView(View pinnedFooter) {
+		mPinnedFooterFrameLayout.addView(pinnedFooter);
+		mPinnedFooterFrameLayout.setVisibility(View.VISIBLE);
+	}
+
 	private String findItemId(String templateId) {
 		for (Map.Entry<String, FortItemStack> entry : profileData.items.entrySet()) {
 			if (entry.getValue().templateId.equals(templateId)) {
@@ -667,6 +723,8 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		private final LockerItemSelectionActivity activity;
 		private List<FortItemStack> data;
 		private Toast toast;
+		private ViewGroup toastView;
+		private FortItemStack focusedItem;
 
 		public LockerAdapter(LockerItemSelectionActivity activity, List<FortItemStack> data) {
 			this.activity = activity;
@@ -744,12 +802,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
 								if (which == 0) {
-									if (item.attributes.has("favorite")) {
-										boolean newFavValue = !item.attributes.get("favorite").getAsBoolean();
-										item.attributes.addProperty("favorite", newFavValue);
-										activity.favoriteChangeMap.put(activity.findItemId(item.templateId), newFavValue);
-										activity.refreshUi();
-									}
+									toggleFavoriteItem(item);
 								} else if (which == 1) {
 									if (item.attributes.has("item_seen")) {
 										item.attributes.addProperty("item_seen", true);
@@ -789,27 +842,46 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				@Override
 				public void onFocusChange(View v, boolean hasFocus) {
 					if (hasFocus) {
+						focusedItem = item;
 						showItemToast(item, json);
 					}
 				}
 			});
 		}
 
-		private void showItemToast(FortItemStack item, JsonElement json) {
-			if (json == null) {
-				return;
+		private void toggleFavoriteItem(FortItemStack item) {
+			if (activity.itemTypeFilter != null && item.attributes.has("favorite")) {
+				boolean newFavValue = !item.attributes.get("favorite").getAsBoolean();
+				item.attributes.addProperty("favorite", newFavValue);
+				activity.favoriteChangeMap.put(activity.findItemId(item.templateId), newFavValue);
+				activity.refreshUi();
 			}
+		}
 
-			ViewGroup viewGroup = (ViewGroup) activity.getLayoutInflater().inflate(R.layout.fort_item_detail_box, null);
-			ItemUtils.populateItemDetailBox(viewGroup, item);
-
+		private void showItemToast(FortItemStack item, JsonElement json) {
 			if (toast != null) {
 				toast.cancel();
 			}
 
+			if (json == null) {
+				return;
+			}
+
+			if (toastView == null) {
+				toastView = (ViewGroup) activity.getLayoutInflater().inflate(R.layout.fort_item_detail_box, null);
+			}
+
+			ItemUtils.populateItemDetailBox(toastView, item);
 			toast = new Toast(activity);
-			toast.setGravity(Gravity.FILL_HORIZONTAL | Gravity.BOTTOM, 0, 0);
-			toast.setView(viewGroup);
+			int off = 0;
+
+			if (activity.mPinnedFooterFrameLayout != null) {
+				off = activity.mPinnedFooterFrameLayout.getHeight();
+			}
+
+			// TODO this can annoyingly fill the width of the screen in landscape
+			toast.setGravity(Gravity.FILL_HORIZONTAL | Gravity.BOTTOM, 0, off);
+			toast.setView(toastView);
 			toast.setDuration(Toast.LENGTH_LONG);
 			toast.show();
 		}

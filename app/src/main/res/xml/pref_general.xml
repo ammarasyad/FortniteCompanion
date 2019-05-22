@@ -4,6 +4,10 @@
 			android:defaultValue="NAW"
 			android:key="matchmaking_region"
 			android:title="Events Region" />
+		<SwitchPreference
+			android:defaultValue="true"
+			android:key="locker_item_animations"
+			android:title="Locker item animations" />
 	</PreferenceCategory>
 
 	<PreferenceCategory

@@ -23,6 +23,7 @@ import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.util.ItemUtils;
 import com.tb24.fn.util.JsonUtils;
+import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
@@ -30,12 +31,24 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 public class LockerActivity extends BaseActivity implements View.OnClickListener, View.OnHoverListener, View.OnTouchListener, View.OnFocusChangeListener {
-	private View selected;
 	private TextView hoverText;
 	private TextView hoverText2;
+	private ViewGroup toastView;
+	private View characterSlot;
+	private View backpackSlot;
+	private View pickaxeSlot;
+	private View gliderSlot;
+	private View contrailSlot;
+	private ViewGroup emoteSlotGroup;
+	private ViewGroup wrapSlotGroup;
+	private View musicPackSlot;
+	private View loadingScreenSlot;
+	private View bannerSlot;
+	private View selected;
+	private Toast toast;
 	private FortMcpProfile profileData;
 	private SparseArray<FortItemStack> itemMap = new SparseArray<>();
-	private Toast toast;
+	private LoadingViewController lc;
 
 	private static Bitmap getEmptyIcon(BaseActivity activity, int id) {
 		String path = null;
@@ -88,21 +101,37 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_locker);
+		setContentView(R.layout.common_loadable_framed);
 		setupActionBar();
-		hoverText = findViewById(R.id.locker_hover_text);
-		hoverText2 = findViewById(R.id.locker_hover_text_2);
+		ViewGroup frame = findViewById(R.id.main_content);
+		getLayoutInflater().inflate(R.layout.activity_locker, frame);
+		hoverText = frame.findViewById(R.id.locker_hover_text);
+		hoverText2 = frame.findViewById(R.id.locker_hover_text_2);
+		characterSlot = frame.findViewById(R.id.locker_slot_character);
+		backpackSlot = frame.findViewById(R.id.locker_slot_backpack);
+		pickaxeSlot = frame.findViewById(R.id.locker_slot_pickaxe);
+		gliderSlot = frame.findViewById(R.id.locker_slot_glider);
+		contrailSlot = frame.findViewById(R.id.locker_slot_skydivecontrail);
+		emoteSlotGroup = frame.findViewById(R.id.locker_emote_slots);
+		wrapSlotGroup = frame.findViewById(R.id.locker_wrap_slots);
+		bannerSlot = frame.findViewById(R.id.locker_slot_banner);
+		musicPackSlot = frame.findViewById(R.id.locker_slot_musicpack);
+		loadingScreenSlot = frame.findViewById(R.id.locker_slot_loadingscreen);
+		lc = new LoadingViewController(this, frame, "");
+		refreshUi(getThisApplication().profileManager.profileData.get("athena"));
 		getThisApplication().eventBus.register(this);
-
-		if (getThisApplication().profileManager.profileData.containsKey("athena")) {
-			refreshUi(getThisApplication().profileManager.profileData.get("athena"));
-		}
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		getThisApplication().eventBus.unregister(this);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		refreshUi(getThisApplication().profileManager.profileData.get("athena"));
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
@@ -113,32 +142,37 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 	}
 
 	private void refreshUi(FortMcpProfile profile) {
-		profileData = profile;
+		if ((profileData = profile) == null) {
+			lc.loading();
+			return;
+		} else {
+			lc.content();
+		}
+
 		itemMap.clear();
 		AthenaProfileAttributes attributes = (AthenaProfileAttributes) profile.stats.attributesObj;
-		View characterSlot = findViewById(R.id.locker_slot_character);
 		apply(characterSlot, attributes.favorite_character);
-		select(characterSlot);
-		apply(findViewById(R.id.locker_slot_backpack), attributes.favorite_backpack);
-		apply(findViewById(R.id.locker_slot_pickaxe), attributes.favorite_pickaxe);
-		apply(findViewById(R.id.locker_slot_glider), attributes.favorite_glider);
-		apply(findViewById(R.id.locker_slot_skydivecontrail), attributes.favorite_skydivecontrail);
+		apply(backpackSlot, attributes.favorite_backpack);
+		apply(pickaxeSlot, attributes.favorite_pickaxe);
+		apply(gliderSlot, attributes.favorite_glider);
+		apply(contrailSlot, attributes.favorite_skydivecontrail);
 
-		ViewGroup group = findViewById(R.id.locker_emote_slots);
-
-		for (int i = 0; i < group.getChildCount(); ++i) {
-			apply(group.getChildAt(i), i > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[i]);
+		for (int i = 0; i < emoteSlotGroup.getChildCount(); ++i) {
+			apply(emoteSlotGroup.getChildAt(i), i > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[i]);
 		}
 
-		group = findViewById(R.id.locker_wrap_slots);
 
-		for (int i = 0; i < group.getChildCount(); ++i) {
-			apply(group.getChildAt(i), i > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[i]);
+		for (int i = 0; i < wrapSlotGroup.getChildCount(); ++i) {
+			apply(wrapSlotGroup.getChildAt(i), i > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[i]);
 		}
 
-//		apply(findViewById(R.id.locker_slot_banner), attributes.banner_icon);
-		apply(findViewById(R.id.locker_slot_musicpack), attributes.favorite_musicpack);
-		apply(findViewById(R.id.locker_slot_loadingscreen), attributes.favorite_loadingscreen);
+//		apply(bannerSlot, attributes.banner_icon);
+		apply(musicPackSlot, attributes.favorite_musicpack);
+		apply(loadingScreenSlot, attributes.favorite_loadingscreen);
+
+		if (selected == null) {
+			select(characterSlot);
+		}
 	}
 
 	private void apply(final View slot, String itemGuid) {
@@ -164,12 +198,12 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 		}
 
 		FortItemStack item = itemGuid.contains(":") ? new FortItemStack(itemGuid, 1) : profileData.items.get(itemGuid);
+		itemMap.put(slot.getId(), item);
 
 		if (item == null) {
 			return;
 		}
 
-		itemMap.put(slot.getId(), item);
 		ItemUtils.populateSlotView(this, slot, item, getThisApplication().itemRegistry.get(item.templateId));
 	}
 
@@ -236,11 +270,14 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 			return;
 		}
 
-		ViewGroup viewGroup = (ViewGroup) getLayoutInflater().inflate(R.layout.fort_item_detail_box, null);
-		ItemUtils.populateItemDetailBox(viewGroup, item);
+		if (toastView == null) {
+			toastView = (ViewGroup) getLayoutInflater().inflate(R.layout.fort_item_detail_box, null);
+		}
+
+		ItemUtils.populateItemDetailBox(toastView, item);
 		toast = new Toast(this);
 		toast.setGravity(Gravity.FILL_HORIZONTAL | Gravity.BOTTOM, 0, 0);
-		toast.setView(viewGroup);
+		toast.setView(toastView);
 		toast.setDuration(Toast.LENGTH_LONG);
 		toast.show();
 	}

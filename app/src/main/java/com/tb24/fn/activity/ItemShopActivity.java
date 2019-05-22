@@ -702,7 +702,7 @@ public class ItemShopActivity extends BaseActivity {
 							dialog.setContentView(purchasedDialogView);
 							dialog.show();
 							dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
-							long duration = 250;
+							long duration = 250L;
 							Interpolator samsungBounceInterpolator = AnimationUtils.loadInterpolator(activity, R.anim.elastic_50_menu_popup);
 							slotView.setScaleX(2.75F);
 							slotView.setScaleY(2.75F);
@@ -718,7 +718,7 @@ public class ItemShopActivity extends BaseActivity {
 							purchasedCheck.setScaleX(2.0F);
 							purchasedCheck.setScaleY(2.0F);
 							purchasedCheck.setAlpha(0.0F);
-							purchasedCheck.animate().rotation(0.0F).scaleX(1.0F).scaleY(1.0F).alpha(1.0F).setInterpolator(samsungBounceInterpolator).setDuration(375).setStartDelay(duration + duration + duration);
+							purchasedCheck.animate().rotation(0.0F).scaleX(1.0F).scaleY(1.0F).alpha(1.0F).setInterpolator(samsungBounceInterpolator).setDuration(375L).setStartDelay(duration + duration + duration);
 							activity.soundPool.play(activity.sounds[new Random().nextInt(activity.sounds.length)], 1.0F, 1.0F, 0, 0, 1.0F);
 							purchasedDialogView.postDelayed(new Runnable() {
 								@Override

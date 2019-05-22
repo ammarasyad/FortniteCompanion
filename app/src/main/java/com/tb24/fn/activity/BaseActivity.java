@@ -31,6 +31,9 @@ public abstract class BaseActivity extends Activity {
 		}
 
 		vBucksView.setVisibility(View.VISIBLE);
+		vBucksView.setTranslationX(32.0F);
+		vBucksView.setAlpha(0.0F);
+		vBucksView.animate().translationX(0.0F).alpha(1.0F).setDuration(375L);
 		((TextView) vBucksView.getChildAt(1)).setText(String.format("%,d", vBucksQty));
 		return vBucksQty;
 	}

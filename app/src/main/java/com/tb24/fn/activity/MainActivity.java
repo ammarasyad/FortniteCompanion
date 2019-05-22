@@ -99,6 +99,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
 	private void checkLogin() {
 		boolean loggedIn = prefs.getBoolean("is_logged_in", false);
+		findViewById(R.id.main_screen_btn_profile).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_stats).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_events).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_locker).setEnabled(loggedIn);
@@ -149,7 +150,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			countAndSetVbucks(MainActivity.this, vBucksView);
 			findViewById(R.id.main_screen_btn_item_shop).setEnabled(event.profileObj != null);
 		} else if (event.profileId.equals("athena")) {
-			findViewById(R.id.main_screen_btn_profile).setEnabled(event.profileObj != null);
 			displayAthenaLevelAndBattlePass();
 		}
 	}
@@ -192,8 +192,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		if (checkAuthError(error)) {
 			getThisApplication().clearLoginData();
 			new AlertDialog.Builder(MainActivity.this)
-					.setTitle("You have been logged out")
-					.setMessage("Please log in again")
+					.setTitle("Logged Out")
+					.setMessage("Your login has expired or you logged in elsewhere.\n\nPlease log in again.")
 					.setPositiveButton(android.R.string.ok, null)
 					.setOnDismissListener(new DialogInterface.OnDismissListener() {
 						@Override
@@ -215,7 +215,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileManager.profileData.get("athena").stats.attributesObj;
 		((TextView) findViewById(R.id.p_season)).setText("Season " + attributes.season_num);
 		((TextView) findViewById(R.id.p_level)).setText(String.valueOf(attributes.level));
-		int i = FortniteCompanionApp.MAX_XPS_S8[attributes.level - 1];
 		boolean battlePassMax = attributes.book_level == 100;
 		boolean levelMax = attributes.level == 100;
 		ProgressBar progressBar = findViewById(R.id.p_xp_bar);
@@ -228,13 +227,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			lvlUpReward.setVisibility(View.GONE);
 			xpProgress.setText("MAX");
 		} else {
-			progressBar.setMax(i);
+			int maxXP = FortniteCompanionApp.MAX_XPS_S8[attributes.level - 1];
+			int next = attributes.book_level + 1;
+			progressBar.setMax(maxXP);
 			Utils.progressBarSetProgressAnimateFromEmpty(progressBar, attributes.xp);
 			lvlUpReward.setVisibility(View.VISIBLE);
-			int next = attributes.book_level + 1;
 			((ImageView) findViewById(R.id.p_lvl_up_reward_img)).setImageBitmap(Utils.loadTga(this, battlePassMax ? "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-SeasonalXP.T-FNBR-SeasonalXP" : "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePoints.T-FNBR-BattlePoints"));
 			((TextView) lvlUpReward).setText(String.valueOf((next % 10 == 0 ? 10 : next % 5 == 0 ? 5 : 2) * (battlePassMax ? 100 : 1)));
-			xpProgress.setText(String.format("%,d / %,d", attributes.xp, i));
+			xpProgress.setText(String.format("%,d / %,d", attributes.xp, maxXP));
 		}
 
 		((ImageView) findViewById(R.id.p_battle_pass_img)).setImageBitmap(Utils.loadTga(this, attributes.book_purchased ? "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePass.T-FNBR-BattlePass" : "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePass-Default.T-FNBR-BattlePass-Default"));

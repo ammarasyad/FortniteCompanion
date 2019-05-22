@@ -80,7 +80,6 @@ public class SettingsActivity extends BaseActivity {
 				prefPrivacy.setOnPreferenceChangeListener(this);
 				prefPrivacy.setEnabled(false);
 				final Call<AccountPrivacyResponse> callPrivacy = getApplication_().fortnitePublicService.getAccountPrivacy(getPreferenceManager().getSharedPreferences().getString("epic_account_id", ""));
-
 				new Thread("Privacy Worker") {
 					@Override
 					public void run() {

@@ -252,7 +252,7 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 				extrasGroup.addView(inflate);
 				inflate.setScaleY(0);
 				inflate.setPivotY(0);
-				inflate.animate().setDuration(50).setStartDelay((i - 3) * 50).scaleY(1);
+				inflate.animate().setDuration(50L).setStartDelay((i - 3) * 50L).scaleY(1);
 				attachMoreStatDetails(inflate, statName);
 			}
 		}
@@ -266,13 +266,7 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 		view.setScaleX(1.5F);
 		view.setScaleY(1.5F);
 		view.setAlpha(0.0F);
-		view.animate().setStartDelay(animDelay).setDuration(125).scaleX(1).scaleY(1).alpha(1);
-//		.setListener(new AnimatorListenerAdapter() {
-//			@Override
-//			public void onAnimationEnd(Animator animation) {
-//				text1.animate().setDuration(250).alpha(1).translationY(0);
-//			}
-//		});
+		view.animate().setStartDelay(animDelay).setDuration(125L).scaleX(1).scaleY(1).alpha(1);
 		attachMoreStatDetails(view, statName);
 	}
 

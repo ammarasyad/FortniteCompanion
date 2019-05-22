@@ -87,7 +87,7 @@ public class ProfileActivity extends BaseActivity {
 				@Override
 				public String apply(AthenaProfileAttributes.AthenaPastSeasonData input) {
 					// TODO max xp prior to season 8 is different
-					return String.format("Season %,d:\n Lvl %,d @ %s, %s Tier %,d; %,d Wins", input.seasonNumber, input.seasonLevel, input.seasonLevel == 100 ? "MAX" : String.format("%,d/%,d XP", input.seasonXp, FortniteCompanionApp.MAX_XPS_S8[input.seasonLevel - 1]), input.purchasedVIP ? "Battle Pass" : "Free Pass", input.bookLevel, input.numWins);
+					return String.format("Season %,d:\n Lvl %,d @ %s, %s Tier %,d; %,d Wins", input.seasonNumber, input.seasonLevel, input.seasonLevel == 100 ? "MAX" : String.format("%,d / %,d XP", input.seasonXp, FortniteCompanionApp.MAX_XPS_S8[input.seasonLevel - 1]), input.purchasedVIP ? "Battle Pass" : "Free Pass", input.bookLevel, input.numWins);
 				}
 			})));
 		}
