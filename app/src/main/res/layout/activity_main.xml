@@ -67,6 +67,13 @@
 					android:text="@string/title_profile" />
 
 				<Button
+					android:id="@+id/main_screen_btn_challenges"
+					android:layout_width="0dp"
+					android:layout_height="100dp"
+					android:layout_columnWeight="1"
+					android:text="@string/title_challenges" />
+
+				<Button
 					android:id="@+id/main_screen_btn_events"
 					android:layout_width="0dp"
 					android:layout_height="100dp"
@@ -106,7 +113,6 @@
 					android:id="@+id/main_screen_btn_stw"
 					android:layout_width="0dp"
 					android:layout_height="100dp"
-					android:layout_columnSpan="2"
 					android:layout_columnWeight="1"
 					android:text="@string/title_stw_info" />
 			</GridLayout>

@@ -55,7 +55,7 @@ public abstract class BaseActivity extends Activity {
 
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		if (keyCode == KeyEvent.KEYCODE_ESCAPE && !event.isCanceled()) {
+		if (keyCode == KeyEvent.KEYCODE_ESCAPE && !event.isCtrlPressed() && !event.isCanceled()) {
 			onBackPressed();
 			return true;
 		}

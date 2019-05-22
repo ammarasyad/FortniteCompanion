@@ -256,16 +256,18 @@ public final class Utils {
 	}
 
 	public static void dialogOkNonMain(final Activity activity, final CharSequence title, final CharSequence message) {
-		activity.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				new AlertDialog.Builder(activity)
-						.setTitle(title)
-						.setMessage(message)
-						.setPositiveButton(android.R.string.ok, null)
-						.show();
-			}
-		});
+		if (activity != null) {
+			activity.runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					new AlertDialog.Builder(activity)
+							.setTitle(title)
+							.setMessage(message)
+							.setPositiveButton(android.R.string.ok, null)
+							.show();
+				}
+			});
+		}
 	}
 
 	public static Spanned color(CharSequence s, int color) {

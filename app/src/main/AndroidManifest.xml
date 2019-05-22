@@ -25,34 +25,37 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
-		<activity android:name=".activity.BRStatsActivity" />
+		<activity
+			android:name=".activity.LoginActivity"
+			android:label="@string/action_login" />
 		<activity
 			android:name=".activity.ProfileActivity"
 			android:label="@string/title_profile" />
 		<activity
-			android:name=".activity.LoginActivity"
-			android:label="@string/action_login" />
+			android:name=".activity.ChallengesActivity"
+			android:label="@string/title_challenges" />
 		<activity android:name=".activity.ChallengeBundleActivity" />
-		<activity
-			android:name=".activity.LockerActivity"
-			android:label="@string/title_locker" />
-		<activity
-			android:name=".activity.LockerItemSelectionActivity"
-			android:label="All Items" />
 		<activity
 			android:name=".activity.EventsActivity"
 			android:label="@string/title_events" />
 		<activity android:name=".activity.EventDetailActivity" />
 		<activity android:name=".activity.EventWindowLeaderboardActivity" />
 		<activity
+			android:name=".activity.LockerActivity"
+			android:label="@string/title_locker" />
+		<activity
+			android:name=".activity.LockerItemSelectionActivity"
+			android:label="All Items" />
+		<activity android:name=".activity.BRStatsActivity" />
+		<activity
 			android:name=".activity.ItemShopActivity"
 			android:label="@string/title_item_shop" />
 		<activity
-			android:name=".activity.NewsActivity"
-			android:label="@string/title_news" />
-		<activity
 			android:name=".activity.StwWorldInfoActivity"
 			android:label="@string/title_stw_info" />
+		<activity
+			android:name=".activity.NewsActivity"
+			android:label="@string/title_news" />
 		<activity
 			android:name=".activity.SettingsActivity"
 			android:label="@string/title_activity_settings" />

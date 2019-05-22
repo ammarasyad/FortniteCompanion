@@ -66,13 +66,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 //		Log.i("a", String.valueOf(getResources().getDisplayMetrics().density));
 		setContentView(R.layout.activity_main);
 //		getActionBar().setSubtitle("DEBUG VERSION -- by Armzyy");
+		findViewById(R.id.main_screen_btn_profile).setOnClickListener(this);
+		findViewById(R.id.main_screen_btn_challenges).setOnClickListener(this);
+		findViewById(R.id.main_screen_btn_events).setOnClickListener(this);
 		findViewById(R.id.main_screen_btn_stats).setOnClickListener(this);
+		findViewById(R.id.main_screen_btn_locker).setOnClickListener(this);
 		findViewById(R.id.main_screen_btn_item_shop).setOnClickListener(this);
 		findViewById(R.id.main_screen_btn_news).setOnClickListener(this);
 		findViewById(R.id.main_screen_btn_news).setOnLongClickListener(this);
-		findViewById(R.id.main_screen_btn_events).setOnClickListener(this);
-		findViewById(R.id.main_screen_btn_profile).setOnClickListener(this);
-		findViewById(R.id.main_screen_btn_locker).setOnClickListener(this);
 		findViewById(R.id.main_screen_btn_stw).setOnClickListener(this);
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		loginBtn = findViewById(R.id.main_screen_btn_login);
@@ -100,8 +101,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	private void checkLogin() {
 		boolean loggedIn = prefs.getBoolean("is_logged_in", false);
 		findViewById(R.id.main_screen_btn_profile).setEnabled(loggedIn);
-		findViewById(R.id.main_screen_btn_stats).setEnabled(loggedIn);
+		findViewById(R.id.main_screen_btn_challenges).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_events).setEnabled(loggedIn);
+		findViewById(R.id.main_screen_btn_stats).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_locker).setEnabled(loggedIn);
 		findViewById(R.id.main_screen_btn_stw).setEnabled(loggedIn);
 		loginBtn.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
@@ -192,7 +194,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		if (checkAuthError(error)) {
 			getThisApplication().clearLoginData();
 			new AlertDialog.Builder(MainActivity.this)
-					.setTitle("Logged Out")
+					.setTitle("Logout Occured")
 					.setMessage("Your login has expired or you logged in elsewhere.\n\nPlease log in again.")
 					.setPositiveButton(android.R.string.ok, null)
 					.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -259,6 +261,15 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	@Override
 	public void onClick(View v) {
 		switch (v.getId()) {
+			case R.id.main_screen_btn_profile:
+				startActivity(new Intent(this, ProfileActivity.class));
+				break;
+			case R.id.main_screen_btn_challenges:
+				startActivity(new Intent(this, ChallengesActivity.class));
+				break;
+			case R.id.main_screen_btn_events:
+				startActivity(new Intent(this, EventsActivity.class));
+				break;
 			case R.id.main_screen_btn_stats:
 				AlertDialog dialog = Utils.createEditTextDialog(this, "Epic Display Name or Account ID", getString(android.R.string.ok), new Utils.EditTextDialogCallback() {
 					@Override
@@ -268,7 +279,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 						}
 
 						if (s.length() != 32) {
-							final Call<GameProfile> call = getThisApplication().personaService.getAccountIdByDisplayName(s);
+							final Call<GameProfile> call = getThisApplication().personaPublicService.getAccountIdByDisplayName(s);
 							new Thread() {
 								@Override
 								public void run() {
@@ -291,7 +302,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 						BRStatsActivity.openStats(MainActivity.this, new GameProfile(s, null));
 					}
 				});
-				dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "My stats", new DialogInterface.OnClickListener() {
+				dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "My Stats", new DialogInterface.OnClickListener() {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						BRStatsActivity.openStats(MainActivity.this, new GameProfile(prefs.getString("epic_account_id", ""), null));
@@ -302,6 +313,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 				editText.setHint(null);
 				editText.setSingleLine();
 				break;
+			case R.id.main_screen_btn_locker:
+				startActivity(new Intent(this, LockerActivity.class));
+				break;
 			case R.id.main_screen_btn_item_shop:
 				startActivityForResult(new Intent(this, ItemShopActivity.class), UPDATE_IF_OK_REQ_CODE);
 				break;
@@ -310,17 +324,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 				intent.putExtra("a", 1);
 				startActivity(intent);
 				break;
-			case R.id.main_screen_btn_events:
-				startActivity(new Intent(this, EventsActivity.class));
-				break;
-			case R.id.main_screen_btn_profile:
-				startActivity(new Intent(this, ProfileActivity.class));
-				break;
 			case R.id.main_screen_btn_stw:
 				startActivity(new Intent(this, StwWorldInfoActivity.class));
-				break;
-			case R.id.main_screen_btn_locker:
-				startActivity(new Intent(this, LockerActivity.class));
 				break;
 			case R.id.main_screen_btn_login:
 				openLogin();

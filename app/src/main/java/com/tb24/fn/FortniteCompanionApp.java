@@ -42,7 +42,7 @@ public class FortniteCompanionApp extends Application {
 	public FortniteContentWebsiteService fortniteContentWebsiteService;
 	public FortnitePublicService fortnitePublicService;
 	public AccountPublicService accountPublicService;
-	public PersonaPublicService personaService;
+	public PersonaPublicService personaPublicService;
 	public EventsPublicServiceLive eventsPublicServiceLive;
 	public FortBasicDataResponse basicData;
 	public EventDownloadResponse eventData;
@@ -62,7 +62,7 @@ public class FortniteCompanionApp extends Application {
 		fortniteContentWebsiteService = retrofitBuilder.baseUrl("https://fortnitecontent-website-prod07.ol.epicgames.com").build().create(FortniteContentWebsiteService.class);
 		fortnitePublicService = retrofitBuilder.baseUrl("https://fortnite-public-service-prod11.ol.epicgames.com").build().create(FortnitePublicService.class);
 		accountPublicService = retrofitBuilder.baseUrl("https://account-public-service-prod03.ol.epicgames.com").build().create(AccountPublicService.class);
-		personaService = retrofitBuilder.baseUrl("https://persona-public-service-prod06.ol.epicgames.com").build().create(PersonaPublicService.class);
+		personaPublicService = retrofitBuilder.baseUrl("https://persona-public-service-prod06.ol.epicgames.com").build().create(PersonaPublicService.class);
 		eventsPublicServiceLive = retrofitBuilder.baseUrl("https://events-public-service-live.ol.epicgames.com").build().create(EventsPublicServiceLive.class);
 		itemRegistry = new Registry(this);
 		FortItemStack.sRegistry = itemRegistry;

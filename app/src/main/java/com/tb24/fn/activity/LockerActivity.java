@@ -120,7 +120,7 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 		musicPackSlot = frame.findViewById(R.id.locker_slot_musicpack);
 		loadingScreenSlot = frame.findViewById(R.id.locker_slot_loadingscreen);
 		lc = new LoadingViewController(this, frame, "");
-		refreshUi(getThisApplication().profileManager.profileData.get("athena"));
+		refreshUi();
 		getThisApplication().eventBus.register(this);
 	}
 
@@ -133,18 +133,20 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 	@Override
 	protected void onResume() {
 		super.onResume();
-		refreshUi(getThisApplication().profileManager.profileData.get("athena"));
+		refreshUi();
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onProfileUpdated(ProfileUpdatedEvent event) {
 		if (event.profileId.equals("athena")) {
-			refreshUi(event.profileObj);
+			refreshUi();
 		}
 	}
 
-	private void refreshUi(FortMcpProfile profile) {
-		if ((profileData = profile) == null) {
+	private void refreshUi() {
+		profileData = getThisApplication().profileManager.profileData.get("athena");
+
+		if (profileData == null) {
 			lc.loading();
 			return;
 		} else {
@@ -152,7 +154,7 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 		}
 
 		itemMap.clear();
-		AthenaProfileAttributes attributes = (AthenaProfileAttributes) profile.stats.attributesObj;
+		AthenaProfileAttributes attributes = (AthenaProfileAttributes) profileData.stats.attributesObj;
 		apply(characterSlot, attributes.favorite_character);
 		apply(backpackSlot, attributes.favorite_backpack);
 		apply(pickaxeSlot, attributes.favorite_pickaxe);
