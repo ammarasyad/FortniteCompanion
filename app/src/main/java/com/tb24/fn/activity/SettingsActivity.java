@@ -3,6 +3,7 @@ package com.tb24.fn.activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.v14.preference.PreferenceFragment;
 import android.support.v7.preference.DropDownPreference;
@@ -12,7 +13,10 @@ import android.support.v7.preference.PreferenceManager;
 import android.support.v7.preference.TwoStatePreference;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.R;
 import com.tb24.fn.model.AccountPrivacyResponse;
@@ -27,6 +31,11 @@ import com.tb24.fn.util.Utils;
 import com.tb24.fn.view.LayoutPreference;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -270,13 +279,41 @@ public class SettingsActivity extends BaseActivity {
 
 		@Override
 		public boolean onPreferenceTreeClick(Preference preference) {
-			if (preference.getKey() != null & preference.getKey().equals("view_login_data")) {
-				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-				String s = "Account ID: " + prefs.getString("epic_account_id", null)
-						+ '\n' + "Access Token: " + prefs.getString("epic_account_token_type", null) + " " + prefs.getString("epic_account_access_token", null)
-						+ '\n' + "Refresh Token: " + prefs.getString("epic_account_refresh_token", null);
-				Utils.dialogOkNonMain(getActivity(), null, s);
-				Log.d("LoginDump", s);
+			if (preference.getKey() != null) {
+				if (preference.getKey().equals("view_login_data")) {
+					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+					String s = "Account ID: " + prefs.getString("epic_account_id", null)
+							+ '\n' + "Access Token: " + prefs.getString("epic_account_token_type", null) + " " + prefs.getString("epic_account_access_token", null)
+							+ '\n' + "Refresh Token: " + prefs.getString("epic_account_refresh_token", null);
+					Utils.dialogOkNonMain(getActivity(), null, s);
+					Log.d("LoginDump", s);
+				} else if (preference.getKey().equals("test_just_for_debugging")) {
+					AssetManager assets = getActivity().getAssets();
+					List<String> notFound = new ArrayList<>();
+					Collection<JsonElement> all = getApplication_().itemRegistry.getAll();
+
+					for (JsonElement entry : all) {
+						JsonObject jsonObject = entry.getAsJsonArray().get(0).getAsJsonObject();
+
+						if (jsonObject.has("SmallPreviewImage")) {
+							String path = jsonObject.get("SmallPreviewImage").getAsJsonObject().get("asset_path_name").getAsString();
+
+							try {
+								InputStream is = assets.open(Utils.parseUPath(path) + ".tga");
+								is.close();
+							} catch (IOException e) {
+								notFound.add(path);
+							}
+						}
+
+					}
+
+					for (String s : new HashSet<>(notFound)) {
+						Log.d("NotFoundItems", s);
+					}
+
+					Toast.makeText(getActivity(), "Database verification completed.\nResult: " + (all.size() - notFound.size()) + '/' + all.size() + " items has textures.", Toast.LENGTH_LONG).show();
+				}
 			}
 
 			return super.onPreferenceTreeClick(preference);

@@ -469,6 +469,9 @@ public class ItemShopActivity extends BaseActivity {
 					case "SelectableStyles":
 						banner = "Selectable styles!";
 						break;
+					case "UnlockStyles":
+						banner = "Unlockable styles!";
+						break;
 				}
 			}
 

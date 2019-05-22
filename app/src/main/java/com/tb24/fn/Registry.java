@@ -13,6 +13,7 @@ import com.tb24.fn.util.Utils;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,5 +102,9 @@ public class Registry {
 	public JsonElement get(String namespacedString) {
 		String[] split = namespacedString.split(":");
 		return itemRegistry.get(split[0], split[1].toLowerCase());
+	}
+
+	public Collection<JsonElement> getAll() {
+		return itemRegistry.values();
 	}
 }

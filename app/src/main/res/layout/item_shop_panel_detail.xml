@@ -7,16 +7,21 @@
 
 	<include layout="@layout/fort_item_detail_box" />
 
-	<LinearLayout
-		android:id="@+id/item_shop_all_item_grants"
+	<HorizontalScrollView
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:background="@color/item_detail_box_transparent_bg_color"
-		android:gravity="center_vertical"
-		android:orientation="horizontal"
-		android:paddingStart="8dp"
-		android:paddingEnd="8dp"
-		android:paddingBottom="4dp" />
+		android:background="@color/item_detail_box_transparent_bg_color">
+
+		<LinearLayout
+			android:id="@+id/item_shop_all_item_grants"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:gravity="center_vertical"
+			android:orientation="horizontal"
+			android:paddingStart="8dp"
+			android:paddingEnd="8dp"
+			android:paddingBottom="4dp" />
+	</HorizontalScrollView>
 
 	<LinearLayout
 		android:layout_width="match_parent"
@@ -118,13 +123,13 @@
 			android:visibility="gone" />
 
 		<com.tb24.fn.view.ShineButton
-			android:id="@+id/btn_item_shop_preview_styles"
+			android:id="@+id/btn_item_shop_preview"
 			style="@style/btn_primary_m_normal"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="8dp"
 			android:minWidth="220dp"
-			android:text="Preview Styles"
+			android:text="Preview"
 			android:visibility="gone" />
 	</LinearLayout>
 

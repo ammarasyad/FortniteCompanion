@@ -37,6 +37,10 @@
 		<Preference
 			android:key="view_login_data"
 			android:title="View login data" />
+
+		<Preference
+			android:key="test_just_for_debugging"
+			android:title="Verify item images" />
 	</PreferenceCategory>
 
 	<!-- Layout preference doesn't obey allowDividerAbove, so put it in a PreferenceCategory -->

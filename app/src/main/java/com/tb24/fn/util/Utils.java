@@ -332,7 +332,7 @@ public final class Utils {
 		synchronized (activity.getThisApplication().bitmapCache) {
 			if (bitmap == null) {
 				try {
-					InputStream is = activity.getAssets().open(uPath.substring(1, uPath.lastIndexOf('.')) + ".tga");
+					InputStream is = activity.getAssets().open(parseUPath(uPath) + ".tga");
 					byte[] buffer = new byte[is.available()];
 					is.read(buffer);
 					is.close();
@@ -385,6 +385,11 @@ public final class Utils {
 //			e.printStackTrace();
 //			return null;
 //		}
+	}
+
+	public static String parseUPath(String path) {
+		String s = path.substring(1, path.lastIndexOf('.'));
+		return s.endsWith("_L") || s.endsWith("-L") ? s.substring(0, s.length() - 2) : s;
 	}
 
 	public interface EditTextDialogCallback {

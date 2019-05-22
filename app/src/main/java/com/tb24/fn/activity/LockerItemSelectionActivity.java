@@ -859,7 +859,6 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 						builder.setTitle(item.templateId);
 					}
 
-					// TODO dedicated challenges tab instead of deeply buried like this
 					if (item.getDefData() != null && item.getIdCategory().equals("Quest")) {
 						View inflate = activity.getLayoutInflater().inflate(R.layout.quest_entry, null);
 						ChallengeBundleActivity.populateQuestView(activity, inflate, item);

@@ -20,12 +20,15 @@ import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.assetdata.FortChallengeBundleItemDefinition;
+import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
+import com.tb24.fn.util.Utils;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.text.NumberFormat;
 import java.util.Comparator;
 import java.util.List;
 
@@ -115,6 +118,18 @@ public class ChallengesActivity extends BaseActivity {
 			} else {
 				holder.title.setText(def.DisplayName);
 				holder.itemView.setBackgroundColor(def.DisplayStyle.PrimaryColor.asInt());
+			}
+
+			if (entry.attributes != null) {
+				int max = def == null ? 1 : def.QuestInfos.length;
+				int progress = JsonUtils.getIntOr("num_progress_quests_completed", entry.attributes, 0);
+				holder.completionProgress.setMax(max);
+				Utils.progressBarSetProgressAnimateFromEmpty(holder.completionProgress, progress);
+				holder.completionText.setText(NumberFormat.getPercentInstance().format((float) progress / (float) max));
+			} else {
+				holder.completionProgress.setMax(1);
+				holder.completionProgress.setProgress(0);
+				holder.completionText.setText(null);
 			}
 
 			holder.itemView.setOnClickListener(new View.OnClickListener() {
