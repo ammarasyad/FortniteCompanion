@@ -6,6 +6,7 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
 import com.tb24.fn.FortniteCompanionApp;
@@ -30,14 +31,16 @@ public abstract class BaseActivity extends Activity {
 			}
 		}
 
-		if (vBucksView.getVisibility() != View.VISIBLE) {
-			vBucksView.setVisibility(View.VISIBLE);
+		vBucksView.setVisibility(View.VISIBLE);
+		TextView amountText = (TextView) vBucksView.getChildAt(1);
+
+		if (amountText.getText() == null || amountText.getText().length() == 0) {
 			vBucksView.setTranslationX(32.0F);
 			vBucksView.setAlpha(0.0F);
-			vBucksView.animate().translationX(0.0F).alpha(1.0F).setDuration(375L);
+			vBucksView.animate().translationX(0.0F).alpha(1.0F).setDuration(500L).setInterpolator(new DecelerateInterpolator());
 		}
 
-		((TextView) vBucksView.getChildAt(1)).setText(String.format("%,d", vBucksQty));
+		amountText.setText(String.format("%,d", vBucksQty));
 		return vBucksQty;
 	}
 
