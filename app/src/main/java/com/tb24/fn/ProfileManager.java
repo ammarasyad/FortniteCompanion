@@ -57,7 +57,7 @@ public class ProfileManager {
 	}
 
 	public Call<FortMcpResponse> requestFullProfileUpdate(final String profileId) {
-		final Call<FortMcpResponse> call = app.fortnitePublicService.mcp("QueryProfile", PreferenceManager.getDefaultSharedPreferences(app).getString("epic_account_id", ""), profileId, -1, true, new JsonObject());
+		final Call<FortMcpResponse> call = app.fortnitePublicService.mcp("QueryProfile", PreferenceManager.getDefaultSharedPreferences(app).getString("epic_account_id", ""), profileId, -1, new JsonObject());
 		new Thread() {
 			@Override
 			public void run() {

@@ -569,7 +569,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				++i;
 			}
 
-			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp("SetItemFavoriteStatusBatch", PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""), "athena", -1, true, payload);
+			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp("SetItemFavoriteStatusBatch", PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""), "athena", -1, payload);
 			new Thread("Set Favorite Worker") {
 				@Override
 				public void run() {
@@ -588,7 +588,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		if (!seenChangeSet.isEmpty()) {
 			MarkItemSeen payload = new MarkItemSeen();
 			payload.itemIds = seenChangeSet.toArray(new String[]{});
-			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp("MarkItemSeen", PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""), "athena", -1, true, payload);
+			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp("MarkItemSeen", PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""), "athena", -1, payload);
 			new Thread("Mark Item Seen Worker") {
 				@Override
 				public void run() {

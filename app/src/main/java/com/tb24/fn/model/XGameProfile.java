@@ -13,6 +13,7 @@ public class XGameProfile extends GameProfile {
 	public Boolean headless;
 	public String country;
 	public String lastName;
+	public String phoneNumber;
 	public String preferredLanguage;
 	public Date lastDisplayNameChange;
 	public Boolean canUpdateDisplayName;

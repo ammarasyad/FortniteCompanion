@@ -48,6 +48,7 @@ import com.tb24.fn.model.assetdata.FortItemDefinition;
 import com.tb24.fn.model.command.PurchaseCatalogEntry;
 import com.tb24.fn.util.EFortRarity;
 import com.tb24.fn.util.ItemUtils;
+import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 import com.tb24.fn.view.UpdateEverySecondTextView;
@@ -448,9 +449,7 @@ public class ItemShopActivity extends BaseActivity {
 				holder.itemSale.setVisibility(View.GONE);
 			}
 
-			if (item.meta.has("BannerOverride")) {
-				banner = item.meta.get("BannerOverride").getAsString();
-			}
+			banner = JsonUtils.getStringOr("BannerOverride", item.meta, banner);
 
 			if (banner != null) {
 				switch (banner) {
@@ -458,19 +457,19 @@ public class ItemShopActivity extends BaseActivity {
 						banner = "Animated!";
 						break;
 					case "Back":
-						banner = "It's back!";
+						banner = "It's Back!";
 						break;
 					case "CollectTheSet":
-						banner = "Collect the set!";
+						banner = "Collect the Set!";
 						break;
 					case "New":
 						banner = "New!";
 						break;
 					case "SelectableStyles":
-						banner = "Selectable styles!";
+						banner = "Selectable Styles!";
 						break;
 					case "UnlockStyles":
-						banner = "Unlockable styles!";
+						banner = "Unlock Styles!";
 						break;
 				}
 			}
@@ -635,7 +634,7 @@ public class ItemShopActivity extends BaseActivity {
 					payload.currencySubType = item.prices[0].currencySubType;
 					payload.expectedPrice = item.prices[0].basePrice;
 					payload.offerId = item.offerId;
-					final Call<FortMcpResponse> call = activity.getThisApplication().fortnitePublicService.mcp("PurchaseCatalogEntry", PreferenceManager.getDefaultSharedPreferences(activity).getString("epic_account_id", ""), "common_core", -1, true, payload);
+					final Call<FortMcpResponse> call = activity.getThisApplication().fortnitePublicService.mcp("PurchaseCatalogEntry", PreferenceManager.getDefaultSharedPreferences(activity).getString("epic_account_id", ""), "common_core", -1, payload);
 					purchasePending = true;
 					updateButtons();
 					new Thread("Purchase Worker") {

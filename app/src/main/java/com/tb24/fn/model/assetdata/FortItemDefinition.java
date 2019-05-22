@@ -10,6 +10,7 @@ import com.tb24.fn.util.Utils;
 import java.lang.reflect.Type;
 
 public class FortItemDefinition {
+	public String export_type;
 	public String[] ItemVariants;
 	public String Rarity;
 	public String DisplayName;

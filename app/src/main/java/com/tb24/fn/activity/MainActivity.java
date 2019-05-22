@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
@@ -24,6 +25,7 @@ import com.tb24.fn.event.ProfileUpdateFailedEvent;
 import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.EpicError;
+import com.tb24.fn.model.ExchangeResponse;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.GameProfile;
 import com.tb24.fn.model.XGameProfile;
@@ -50,6 +52,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	private Call<FortMcpResponse> callMcpCommonCore;
 	private Call<FortMcpResponse> callMcpAthena;
 	private Call<XGameProfile> callSelfName;
+	private Call<ExchangeResponse> callExchange;
 	private LoadingViewController profileLc;
 
 	public static boolean checkAuthError(EpicError error) {
@@ -187,6 +190,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
 		if (callSelfName != null) {
 			callSelfName.cancel();
+		}
+
+		if (callExchange != null) {
+			callExchange.cancel();
 		}
 	}
 
@@ -342,6 +349,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		menuVbucks = menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) getLayoutInflater().inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		menuVbucks.setVisible(false);
 		menu.add(0, 901, 0, R.string.title_activity_settings);
+		menu.add(0, 902, 0, "Purchase 1000 V-Bucks");
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -349,9 +357,35 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == 901) {
 			startActivity(new Intent(this, SettingsActivity.class));
+		} else if (item.getItemId() == 902) {
+			if (!prefs.getBoolean("is_logged_in", false)) {
+				return true;
+			}
+
+			callExchange = getThisApplication().accountPublicService.oauthExchange();
+			new Thread("Exchange Worker") {
+				@Override
+				public void run() {
+					try {
+						Response<ExchangeResponse> response = callExchange.execute();
+
+						if (response.isSuccessful()) {
+							startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("https://accounts.epicgames.com/exchange?exchangeCode=%s&redirectUrl=%s", response.body().code, Uri.encode(getOfferPurchaseUrl("ede05b3c97e9475a8d9be91da65750f0"))))));
+						} else {
+							Utils.dialogError(MainActivity.this, EpicError.parse(response).getDisplayText());
+						}
+					} catch (IOException e) {
+						Utils.throwableDialog(MainActivity.this, e);
+					}
+				}
+			}.start();
 		}
 
 		return super.onOptionsItemSelected(item);
+	}
+
+	private String getOfferPurchaseUrl(String offerId) {
+		return String.format("https://launcher-website-prod07.ol.epicgames.com/purchase?showNavigation=true&namespace=fn&offers=%s", offerId);
 	}
 
 	@Override

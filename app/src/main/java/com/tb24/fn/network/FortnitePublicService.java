@@ -17,7 +17,7 @@ import retrofit2.http.Query;
 
 public interface FortnitePublicService {
 	@POST("/fortnite/api/game/v2/profile/{id}/client/{command}")
-	Call<FortMcpResponse> mcp(@Path("command") String command, @Path("id") String accountId, @Query("profileId") String profileId, @Query("rvn") int rvn, @Query("leanResponse") boolean leanResponse, @Body Object payload);
+	Call<FortMcpResponse> mcp(@Path("command") String command, @Path("id") String accountId, @Query("profileId") String profileId, @Query("rvn") int rvn, @Body Object payload);
 
 	@GET("/fortnite/api/game/v2/world/info")
 	Call<WorldInfoResponse> pveWorldInfo();

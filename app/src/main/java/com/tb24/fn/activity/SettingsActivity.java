@@ -232,7 +232,7 @@ public class SettingsActivity extends BaseActivity {
 					prefMtxPlatform.setSummary(value.toString());
 					SetMtxPlatform payload = new SetMtxPlatform();
 					payload.newPlatform = EMtxPlatform.valueOf(value.toString());
-					final Call<FortMcpResponse> callSetMtxPlatform = getApplication_().fortnitePublicService.mcp("SetMtxPlatform", getPreferenceManager().getSharedPreferences().getString("epic_account_id", ""), "common_core", -1, true, payload);
+					final Call<FortMcpResponse> callSetMtxPlatform = getApplication_().fortnitePublicService.mcp("SetMtxPlatform", getPreferenceManager().getSharedPreferences().getString("epic_account_id", ""), "common_core", -1, payload);
 					new Thread("Set MTX Platform Worker") {
 						@Override
 						public void run() {
