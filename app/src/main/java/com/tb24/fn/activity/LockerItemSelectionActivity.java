@@ -73,6 +73,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			return true;
 		}
 	}, R.string.locker_filter_all, null);
+	private static final FortItemStack EMPTY_ITEM = new FortItemStack("", 1);
 
 	private ViewGroup mPinnedHeaderFrameLayout;
 	private ViewGroup mPinnedFooterFrameLayout;
@@ -317,6 +318,29 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		}
 
 		return new FortItemStack(filterId, name.toLowerCase(), 1);
+	}
+
+	private static boolean slotCanBeBlank(String filterId) {
+		switch (filterId) {
+			case "AthenaCharacter":
+				return true;
+			case "AthenaBackpack":
+				return true;
+			case "AthenaPickaxe":
+				return false;
+			case "AthenaGlider":
+				return false;
+			case "AthenaSkyDiveContrail":
+				return true;
+			case "AthenaItemWrap":
+				return true;
+			case "AthenaMusicPack":
+				return true;
+			case "AthenaLoadingScreen":
+				return true;
+			default:
+				return true;
+		}
 	}
 
 	public static String getTitleTextById(int id) {
@@ -641,7 +665,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 					}
 				}).filter(itemFilter.predicate);
 
-				if (itemFilter == ALL_FILTER) {
+				if (mFilterIndex == 0) {
 					randomItem = getRandomItemByCategory(itemTypeFilter);
 				}
 
@@ -649,7 +673,13 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			}
 		}
 
-		List<FortItemStack> data = chain.toSortedList(new Comparator<FortItemStack>() {
+		List<FortItemStack> data = new ArrayList<>();
+
+		if (mFilterIndex == 0 && slotCanBeBlank(itemTypeFilter)) {
+			data.add(EMPTY_ITEM);
+		}
+
+		data.addAll(chain.toSortedList(new Comparator<FortItemStack>() {
 			@Override
 			public int compare(FortItemStack o1, FortItemStack o2) {
 				FortItemDefinition defData = o1.getDefData();
@@ -667,13 +697,11 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 
 				return ComparisonChain.start().compareTrueFirst(JsonUtils.getBooleanOr("favorite", o1.attributes, false), JsonUtils.getBooleanOr("favorite", o2.attributes, false)).compare(o1.getIdCategory(), o2.getIdCategory()).compare(rarity2, rarity1).compare(o1.getIdName(), o2.getIdName()).result();
 			}
-		});
+		}));
 
 		if (randomItem != null) {
-			data = new ArrayList<>(data);
 			data.add(randomItem);
 		}
-
 
 		if (adapter == null) {
 			list.setAdapter(adapter = new LockerAdapter(this, data));
@@ -743,24 +771,35 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		public void onBindViewHolder(@NonNull LockerViewHolder holder, int position) {
 			final FortItemStack item = data.get(position);
 			holder.itemView.setSelected(item.templateId.equals(activity.selectedItem));
-			holder.innerSlotView.setBackgroundResource(R.drawable.bg_common);
 
 			if (item.attributes != null) {
 				holder.newIcon.setVisibility(JsonUtils.getBooleanOr("item_seen", item.attributes, false) ? View.INVISIBLE : View.VISIBLE);
 				holder.favorite.setVisibility(JsonUtils.getBooleanOr("favorite", item.attributes, false) ? View.VISIBLE : View.INVISIBLE);
+			} else {
+				holder.newIcon.setVisibility(View.GONE);
+				holder.favorite.setVisibility(View.GONE);
 			}
 
-			final JsonElement json = activity.getThisApplication().itemRegistry.get(item.templateId);
-			Bitmap bitmap = null;
+			if (item == EMPTY_ITEM) {
+				holder.innerSlotView.setBackground(null);
+				holder.displayImage.setImageResource(R.drawable.ic_close_black_24dp);
+				holder.itemName.setText(null);
+			} else {
+				final JsonElement json = activity.getThisApplication().itemRegistry.get(item.templateId);
+				Bitmap bitmap = null;
 
-			if (json != null) {
-				JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
-				bitmap = ItemUtils.getBitmapImageFromItemStackData(activity, item, jsonObject);
-				holder.innerSlotView.setBackground(ItemUtils.rarityBgSlot(activity, ItemUtils.getRarity(jsonObject)));
+				if (json != null) {
+					JsonObject jsonObject = json.getAsJsonArray().get(0).getAsJsonObject();
+					bitmap = ItemUtils.getBitmapImageFromItemStackData(activity, item, jsonObject);
+					holder.innerSlotView.setBackground(ItemUtils.rarityBgSlot(activity, ItemUtils.getRarity(jsonObject)));
+				} else {
+					holder.innerSlotView.setBackgroundResource(R.drawable.bg_common);
+				}
+
+				holder.displayImage.setImageBitmap(bitmap);
+				holder.itemName.setText(bitmap == null ? item.templateId : null);
 			}
 
-			holder.displayImage.setImageBitmap(bitmap);
-			holder.itemName.setText(bitmap == null ? item.templateId : null);
 			holder.quantity.setVisibility(item.quantity > 1 ? View.VISIBLE : View.GONE);
 			holder.quantity.setText(String.valueOf(item.quantity));
 			holder.innerSlotView.setFocusableInTouchMode(true);
@@ -774,20 +813,18 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 //					Call<FortMcpResponse> call = ...;
 				}
 			});
-			holder.innerSlotView.setOnLongClickListener(new View.OnLongClickListener() {
+			holder.innerSlotView.setOnLongClickListener(item == EMPTY_ITEM ? null : new View.OnLongClickListener() {
 				@Override
 				public boolean onLongClick(View v) {
-//					String attributesDbgString = new GsonBuilder().setPrettyPrinting().create().toJson(item.attributes);
 					ViewGroup viewGroup = null;
 
-					if (json != null) {
+					if (item.getDefData() != null) {
 						viewGroup = (ViewGroup) activity.getLayoutInflater().inflate(R.layout.fort_item_detail_box, null);
 						ItemUtils.populateItemDetailBox(viewGroup, item);
 					}
 
 					AlertDialog.Builder builder = new AlertDialog.Builder(activity)
 							.setCustomTitle(viewGroup)
-//							.setMessage(attributesDbgString)
 							.setPositiveButton("Close", null);
 
 					if (item.attributes != null && activity.itemTypeFilter != null) {
@@ -814,16 +851,16 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 						});
 					}
 
-					if (json == null) {
+					if (item.getDefData() == null) {
 						builder.setTitle(item.templateId);
 					}
 
 					// TODO dedicated challenges tab instead of deeply buried like this
-					if (json != null && item.getIdCategory().equals("Quest")) {
+					if (item.getDefData() != null && item.getIdCategory().equals("Quest")) {
 						View inflate = activity.getLayoutInflater().inflate(R.layout.quest_entry, null);
 						ChallengeBundleActivity.populateQuestView(activity, inflate, item);
 						builder.setView(inflate);
-					} else if (json != null && item.getIdCategory().equals("ChallengeBundle")) {
+					} else if (item.getDefData() != null && item.getIdCategory().equals("ChallengeBundle")) {
 						builder.setNeutralButton("More Details", new DialogInterface.OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
@@ -843,27 +880,32 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				public void onFocusChange(View v, boolean hasFocus) {
 					if (hasFocus) {
 						focusedItem = item;
-						showItemToast(item, json);
+						showItemToast(item);
 					}
 				}
 			});
 		}
 
 		private void toggleFavoriteItem(FortItemStack item) {
-			if (activity.itemTypeFilter != null && item.attributes.has("favorite")) {
+			if (activity.itemTypeFilter != null && item != EMPTY_ITEM && item.attributes != null && item.attributes.has("favorite")) {
 				boolean newFavValue = !item.attributes.get("favorite").getAsBoolean();
 				item.attributes.addProperty("favorite", newFavValue);
-				activity.favoriteChangeMap.put(activity.findItemId(item.templateId), newFavValue);
+				String itemId = activity.findItemId(item.templateId);
+
+				if (itemId != null) {
+					activity.favoriteChangeMap.put(itemId, newFavValue);
+				}
+
 				activity.refreshUi();
 			}
 		}
 
-		private void showItemToast(FortItemStack item, JsonElement json) {
+		private void showItemToast(FortItemStack item) {
 			if (toast != null) {
 				toast.cancel();
 			}
 
-			if (json == null) {
+			if (item == EMPTY_ITEM || item.getDefData() == null) {
 				return;
 			}
 

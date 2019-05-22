@@ -31,11 +31,11 @@ public class FortItemStack {
 	}
 
 	public String getIdCategory() {
-		return templateId.split(":")[0];
+		return templateId == null ? null : templateId.isEmpty() ? "" : templateId.split(":")[0];
 	}
 
 	public String getIdName() {
-		return templateId.split(":")[1];
+		return templateId == null ? null : templateId.isEmpty() ? "" : templateId.split(":")[1];
 	}
 
 	public FortItemDefinition getDefData() {
