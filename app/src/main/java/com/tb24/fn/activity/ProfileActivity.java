@@ -36,7 +36,6 @@ public class ProfileActivity extends BaseActivity {
 	private LoadingViewController lc;
 	private Call<WorldInfoResponse> callWorldInfo;
 	private WorldInfoResponse data;
-	private ExternalAuth[] externalAuthsData;
 	private Call<ExternalAuth[]> externalAuthCall;
 
 	@Override
@@ -130,10 +129,6 @@ public class ProfileActivity extends BaseActivity {
 					return String.format("Season %,d:\n Lvl %,d @ %s, %s Tier %,d; %,d Wins", input.seasonNumber, input.seasonLevel, input.seasonLevel == 100 ? "MAX" : String.format("%,d / %,d XP", input.seasonXp, FortniteCompanionApp.MAX_XPS_S8[input.seasonLevel - 1]), input.purchasedVIP ? "Battle Pass" : "Free Pass", input.bookLevel, input.numWins);
 				}
 			})));
-		}
-
-		if (externalAuthsData != null) {
-
 		}
 	}
 
