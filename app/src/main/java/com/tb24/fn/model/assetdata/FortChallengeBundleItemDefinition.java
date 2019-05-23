@@ -1,11 +1,12 @@
 package com.tb24.fn.model.assetdata;
 
-import com.google.gson.JsonObject;
-
 public class FortChallengeBundleItemDefinition extends FortItemDefinition {
 	public QuestInfo[] QuestInfos;
+	public String CalendarEventTag;
 	public BundleCompletionReward[] BundleCompletionRewards;
 	public DisplayStyle DisplayStyle;
+	public AssetReference BundleHidenImageMaterial;
+	public String UniqueLockedMessage;
 
 	public static class BundleCompletionReward {
 		public Integer CompletionCount;
@@ -17,6 +18,7 @@ public class FortChallengeBundleItemDefinition extends FortItemDefinition {
 		public FloatColor SecondaryColor;
 		public FloatColor AccentColor;
 		public AssetReference DisplayImage;
+		public AssetReference CustomBackground;
 	}
 
 	public static class QuestInfo {
@@ -29,7 +31,7 @@ public class FortChallengeBundleItemDefinition extends FortItemDefinition {
 	public static class Reward {
 		public AssetReference ItemDefinition;
 		public String TemplateId;
-		public Integer quantity;
+		public Integer Quantity;
 		public RewardGiftBox RewardGiftBox;
 		public Boolean IsChaseReward;
 		public String RewardType;
@@ -37,6 +39,11 @@ public class FortChallengeBundleItemDefinition extends FortItemDefinition {
 
 	public static class RewardGiftBox {
 		public AssetReference GiftBoxToUse;
-		public JsonObject[] GiftBoxFormatData;
+		public StringAsset[] GiftBoxFormatData;
+	}
+
+	public static class StringAsset {
+		public String StringAssetType;
+		public String StringData;
 	}
 }

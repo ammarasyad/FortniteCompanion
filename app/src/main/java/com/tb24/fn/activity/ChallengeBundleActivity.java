@@ -19,6 +19,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.R;
 import com.tb24.fn.event.ProfileUpdatedEvent;
+import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
@@ -48,6 +49,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 	private RecyclerView list;
 	private ChallengeAdapter adapter;
 	private LoadingViewController lc;
+	private FortMcpProfile profileData;
 	private JsonObject attributesFromProfile;
 	private Map<String, FortItemStack> questsFromProfile = new HashMap<>();
 	private Call<FortMcpResponse> callReroll;
@@ -148,7 +150,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 	}
 
 	private void refreshUi(FortMcpProfile profile) {
-		if (profile == null) {
+		if ((profileData = profile) == null) {
 			lc.loading();
 			return;
 		}
@@ -206,35 +208,35 @@ public class ChallengeBundleActivity extends BaseActivity {
 
 		@Override
 		public void onBindViewHolder(@NonNull final ChallengeViewHolder holder, final int position) {
-			final FortChallengeBundleItemDefinition.QuestInfo item = data.get(position);
-			List<FortQuestItemDefinition> chain = new ArrayList<>();
-			List<FortItemStack> stacks = new ArrayList<>();
-			String questItemName = item.QuestDefinition.asset_path_name.substring(item.QuestDefinition.asset_path_name.lastIndexOf('/') + 1, item.QuestDefinition.asset_path_name.lastIndexOf('.')).toLowerCase();
+			final FortChallengeBundleItemDefinition.QuestInfo entryDef = data.get(position);
+			List<FortQuestItemDefinition> questDefChain = new ArrayList<>();
+			List<FortItemStack> questItemChain = new ArrayList<>();
+			String questItemName = Utils.parseUPath(entryDef.QuestDefinition.asset_path_name).toLowerCase();
 
 			for (FortItemStack entry : activity.questsFromProfile.values()) {
 				if (entry.templateId.equals("Quest:" + questItemName)) {
-					fillItemStacksRecursive(entry, stacks);
+					fillQuestItemsRecursive(entry, questItemChain);
 					break;
 				}
 			}
 
-			FortItemStack itemStack = null;
+			FortItemStack activeQuestItem = null;
 
-			if (!stacks.isEmpty()) {
-				itemStack = stacks.get(stacks.size() - 1);
-				fillQuestDefsRecursive((FortQuestItemDefinition) stacks.get(0).getDefData(), chain);
+			if (!questItemChain.isEmpty()) {
+				activeQuestItem = questItemChain.get(questItemChain.size() - 1);
+				fillQuestDefsRecursive((FortQuestItemDefinition) questItemChain.get(0).getDefData(), questDefChain);
 			}
 
-			if (itemStack == null) {
-				itemStack = new FortItemStack("Quest", questItemName, 1);
+			if (activeQuestItem == null) {
+				activeQuestItem = new FortItemStack("Quest", questItemName, 1);
 			}
 
-			FortQuestItemDefinition quest = populateQuestView(activity, holder.itemView, itemStack);
+			FortQuestItemDefinition quest = populateQuestView(activity, holder.itemView, activeQuestItem);
 			TextView questTitle = holder.itemView.findViewById(R.id.quest_title);
-			questTitle.setText((chain.size() > 1 ? String.format("Stage %d of %d - ", stacks.size(), chain.size()) : "") + questTitle.getText());
+			questTitle.setText((questDefChain.size() > 1 ? String.format("Stage %d of %d - ", questItemChain.size(), questDefChain.size()) : "") + questTitle.getText());
 			holder.actions.setVisibility(expandedPosition == position ? View.VISIBLE : View.GONE);
-			boolean done = itemStack.attributes != null && JsonUtils.getStringOr("quest_state", itemStack.attributes, "").equals("Claimed");
-			final boolean isEligibleForReplacement = !done && quest != null && quest.export_type.equals("AthenaDailyQuestDefinition");
+			boolean done = activeQuestItem.attributes != null && JsonUtils.getStringOr("quest_state", activeQuestItem.attributes, "").equals("Claimed");
+			final boolean isEligibleForReplacement = !done && quest != null && quest.export_type.equals("AthenaDailyQuestDefinition") && ((AthenaProfileAttributes) activity.profileData.stats.attributesObj).quest_manager.dailyQuestRerolls > 0;
 			final boolean isEligibleForAssist = !done && quest != null && quest.GameplayTags != null && Arrays.binarySearch(quest.GameplayTags.gameplay_tags, "Quest.Metadata.PartyAssist") >= 0;
 			holder.btnReplace.setVisibility(isEligibleForReplacement ? View.VISIBLE : View.GONE);
 			holder.btnAssist.setVisibility(isEligibleForAssist ? View.VISIBLE : View.GONE);
@@ -255,19 +257,24 @@ public class ChallengeBundleActivity extends BaseActivity {
 								Response<FortMcpResponse> response = activity.callReroll.execute();
 
 								if (response.isSuccessful()) {
-									if (activity != null) {
-										activity.runOnUiThread(new Runnable() {
-											@Override
-											public void run() {
-												notifyDataSetChanged();
-											}
-										});
-									}
+									activity.runOnUiThread(new Runnable() {
+										@Override
+										public void run() {
+											notifyDataSetChanged();
+										}
+									});
 								} else {
 									Utils.dialogError(activity, EpicError.parse(response).getDisplayText());
 								}
 							} catch (IOException e) {
 								Utils.throwableDialog(activity, e);
+							} finally {
+								activity.runOnUiThread(new Runnable() {
+									@Override
+									public void run() {
+										v.setEnabled(true);
+									}
+								});
 							}
 						}
 					}.start();
@@ -294,7 +301,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 				@Override
 				public void onClick(View v) {
 					if (isEligibleForReplacement || isEligibleForAssist) {
-						boolean newState = expandedPosition != position;
+						boolean newState = expandedPosition != holder.getAdapterPosition();
 
 						if (expandedPosition >= 0) {
 							notifyItemChanged(expandedPosition);
@@ -332,7 +339,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 			}
 		}
 
-		private void fillItemStacksRecursive(FortItemStack chainedQuestItem, List<FortItemStack> outStacks) {
+		private void fillQuestItemsRecursive(FortItemStack chainedQuestItem, List<FortItemStack> outStacks) {
 			if (chainedQuestItem == null) {
 				return;
 			}
@@ -341,7 +348,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 			String challenge_linked_quest_given = JsonUtils.getStringOr("challenge_linked_quest_given", chainedQuestItem.attributes, null);
 
 			if (challenge_linked_quest_given != null && !challenge_linked_quest_given.isEmpty()) {
-				fillItemStacksRecursive(activity.questsFromProfile.get(challenge_linked_quest_given), outStacks);
+				fillQuestItemsRecursive(activity.questsFromProfile.get(challenge_linked_quest_given), outStacks);
 			}
 		}
 
