@@ -77,7 +77,7 @@ public class ChallengesActivity extends BaseActivity {
 			public boolean apply(@NullableDecl FortItemStack input) {
 				return input != null && input.getIdCategory().equals("ChallengeBundle");
 			}
-		}).toSortedList(new Comparator<FortItemStack>() {
+		}).append(new FortItemStack("Quest", ChallengeBundleActivity.VALUE_DAILY_CHALLENGES, 1)).toSortedList(new Comparator<FortItemStack>() {
 			@Override
 			public int compare(FortItemStack o1, FortItemStack o2) {
 				return o1.getIdName().compareToIgnoreCase(o2.getIdName());
@@ -110,26 +110,33 @@ public class ChallengesActivity extends BaseActivity {
 		@Override
 		public void onBindViewHolder(@NonNull ChallengeBundleViewHolder holder, int position) {
 			final FortItemStack entry = data.get(position);
-			FortChallengeBundleItemDefinition def = (FortChallengeBundleItemDefinition) entry.getDefData();
 
-			if (def == null) {
-				holder.title.setText(entry.getIdName());
+			if (entry.getIdName().equals(ChallengeBundleActivity.VALUE_DAILY_CHALLENGES)) {
+				holder.title.setText("Daily");
 				holder.itemView.setBackground(null);
+				holder.completionContainer.setVisibility(View.GONE);
 			} else {
-				holder.title.setText(def.DisplayName);
-				holder.itemView.setBackgroundColor(def.DisplayStyle.PrimaryColor.asInt());
-			}
 
-			if (entry.attributes != null) {
-				int max = def == null ? 1 : def.QuestInfos.length;
-				int progress = JsonUtils.getIntOr("num_progress_quests_completed", entry.attributes, 0);
-				holder.completionProgress.setMax(max);
-				Utils.progressBarSetProgressAnimateFromEmpty(holder.completionProgress, progress);
-				holder.completionText.setText(NumberFormat.getPercentInstance().format((float) progress / (float) max));
-			} else {
-				holder.completionProgress.setMax(1);
-				holder.completionProgress.setProgress(0);
-				holder.completionText.setText(null);
+				FortChallengeBundleItemDefinition def = (FortChallengeBundleItemDefinition) entry.getDefData();
+
+				if (def == null) {
+					holder.title.setText(entry.getIdName());
+					holder.itemView.setBackground(null);
+				} else {
+					holder.title.setText(def.DisplayName);
+					holder.itemView.setBackgroundColor(def.DisplayStyle.PrimaryColor.asInt());
+				}
+
+				if (entry.attributes != null) {
+					int max = def == null ? 1 : def.QuestInfos.length;
+					int progress = JsonUtils.getIntOr("num_progress_quests_completed", entry.attributes, 0);
+					holder.completionProgress.setMax(max);
+					Utils.progressBarSetProgressAnimateFromEmpty(holder.completionProgress, progress);
+					holder.completionText.setText(NumberFormat.getPercentInstance().format((float) progress / (float) max));
+					holder.completionContainer.setVisibility(View.VISIBLE);
+				} else {
+					holder.completionContainer.setVisibility(View.GONE);
+				}
 			}
 
 			holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -150,6 +157,7 @@ public class ChallengesActivity extends BaseActivity {
 		class ChallengeBundleViewHolder extends RecyclerView.ViewHolder {
 			ImageView image;
 			TextView title;
+			ViewGroup completionContainer;
 			ProgressBar completionProgress;
 			TextView completionText;
 
@@ -157,6 +165,7 @@ public class ChallengesActivity extends BaseActivity {
 				super(itemView);
 				image = itemView.findViewById(R.id.item_img);
 				title = itemView.findViewById(R.id.item_text1);
+				completionContainer = itemView.findViewById(R.id.quest_completion_container);
 				completionProgress = itemView.findViewById(R.id.progress_horizontal);
 				completionText = itemView.findViewById(R.id.item_text2);
 			}

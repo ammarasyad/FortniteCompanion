@@ -1,22 +1,15 @@
 package com.tb24.fn.model;
 
 import com.google.gson.JsonObject;
-import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
+import java.util.Map;
 
 public class CalendarTimelineResponse {
-	public Channels channels;
+	public Map<String, States> channels;
 	public Float eventsTimeOffsetHrs;
+	public Float cacheIntervalMins;
 	public Date currentTime;
-
-	public static class Channels {
-		@SerializedName("client-matchmaking")
-		public States clientMatchmaking;
-		public States tk;
-		@SerializedName("client-events")
-		public States clientEvents;
-	}
 
 	public static class States {
 		public State[] states;

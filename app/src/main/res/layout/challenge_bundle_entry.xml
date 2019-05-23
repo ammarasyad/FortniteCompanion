@@ -28,6 +28,7 @@
 		tools:text="Bundle name" />
 
 	<LinearLayout
+		android:id="@+id/quest_completion_container"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_weight="0.4"

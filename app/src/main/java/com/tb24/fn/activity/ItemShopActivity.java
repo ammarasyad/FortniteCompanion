@@ -37,6 +37,8 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ComparisonChain;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
+import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.R;
 import com.tb24.fn.model.CalendarTimelineResponse;
 import com.tb24.fn.model.CommonCoreProfileAttributes;
@@ -63,6 +65,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
+import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -82,7 +85,7 @@ public class ItemShopActivity extends BaseActivity {
 	private List<FortCatalogResponse.CatalogEntry> featuredItems;
 	private List<FortCatalogResponse.CatalogEntry> dailyItems;
 	private Call<FortCatalogResponse> catalogCall;
-	private Call<CalendarTimelineResponse> calendarCall;
+	private okhttp3.Call calendarCall;
 	private Handler handler = new Handler();
 	private Runnable scheduleRunnable;
 
@@ -154,15 +157,17 @@ public class ItemShopActivity extends BaseActivity {
 		}).start();
 
 		if (calendarData == null) {
-			calendarCall = getThisApplication().fortnitePublicService.calendarTimeline();
+//			calendarCall = getThisApplication().fortnitePublicService.calendarTimeline();
+			// Escape retrofit because it glitched the cache resulting item shop timer not updating right after UTC midnight
+			calendarCall = getThisApplication().okHttpClient.newCall(new Request.Builder().url(FortniteCompanionApp.FORTNITE_PUBLIC_SERVICE + "/fortnite/api/calendar/v1/timeline").build());
 			new Thread() {
 				@Override
 				public void run() {
 					try {
-						final Response<CalendarTimelineResponse> response = calendarCall.execute();
+						final okhttp3.Response response = calendarCall.execute();
 
 						if (response.isSuccessful()) {
-							calendarData = getThisApplication().gson.fromJson(response.body().channels.clientEvents.states[0].state, CalendarTimelineResponse.ClientEventState.class);
+							calendarData = getThisApplication().gson.fromJson(((CalendarTimelineResponse) getThisApplication().gson.fromJson(new JsonReader(response.body().charStream()), CalendarTimelineResponse.class)).channels.get("client-events").states[0].state, CalendarTimelineResponse.ClientEventState.class);
 							scheduleRefresh();
 						}
 					} catch (IOException ignored) {
@@ -571,7 +576,8 @@ public class ItemShopActivity extends BaseActivity {
 									((EditText) dialog.findViewById(R.id.dialog_edit_text_field)).setHint(CONFIRM_PHRASE);
 								}
 							} else if (v == btnGift) {
-								Toast.makeText(activity, "Will make it later!", Toast.LENGTH_SHORT).show();
+								// TODO gifting: firstly you have to add friends endpoint
+								Toast.makeText(activity, "Gifting not available yet", Toast.LENGTH_SHORT).show();
 							}
 						}
 					};

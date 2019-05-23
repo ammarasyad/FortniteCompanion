@@ -48,7 +48,7 @@ public class EventDetailActivity extends BaseActivity {
 		setTitle(displayInfo.long_format_title);
 		boolean started = new Date().after(thisEventData.beginTime);
 		boolean ended = new Date().after(thisEventData.endTime);
-		((TextView) findViewById(R.id.event_is_started)).setText(!started && !ended ? String.format("This event starts %s!", DateUtils.isToday(thisEventData.beginTime.getTime()) ? "today" : "in " + TimeUnit.MILLISECONDS.toDays(thisEventData.beginTime.getTime() - System.currentTimeMillis()) + " days") : started && !ended ? TextUtils.concat("This event is ", Utils.color("live now!", 0xFFFFFFFF)) : started && ended ? "This event has ended." : "???");
+		((TextView) findViewById(R.id.event_is_started)).setText(!started && !ended ? String.format("This event starts %s!", DateUtils.isToday(thisEventData.beginTime.getTime()) ? "today" : "in " + TimeUnit.MILLISECONDS.toDays(thisEventData.beginTime.getTime() - System.currentTimeMillis()) + " days") : started && !ended ? TextUtils.concat("This event is ", Utils.color("live now!", Utils.getTextColorPrimary(this))) : started && ended ? "This event has ended." : "???");
 		((TextView) findViewById(R.id.event_details_description)).setText(displayInfo.details_description);
 		((TextView) findViewById(R.id.event_flavor_description)).setText(displayInfo.flavor_description);
 		SpannableStringBuilder ssb = new SpannableStringBuilder("");

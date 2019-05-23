@@ -26,6 +26,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -63,10 +64,10 @@ public final class Utils {
 	private static final int SECONDS_PER_MINUTE = 60;
 	private static final int SECONDS_PER_HOUR = 60 * 60;
 	private static final int SECONDS_PER_DAY = 24 * 60 * 60;
-	private static final Joiner JOINER = Joiner.on(' ');
+	private static final Joiner SPACE_JOINER = Joiner.on(' ');
 	private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat();
-	private static boolean darkSet;
-	private static int dark;
+	private static Integer sColorPrimaryDark;
+	private static Integer sTextColorPrimary;
 
 	private Utils() {
 	}
@@ -146,7 +147,7 @@ public final class Utils {
 				// Everything addable was zero, so nothing was added. We add a zero.
 				list.add(0 + (withSeconds ? "s" : "m"));
 			}
-			sb.append(JOINER.join(list));
+			sb.append(SPACE_JOINER.join(list));
 		}
 		return sb;
 	}
@@ -285,17 +286,25 @@ public final class Utils {
 			return null;
 		}
 
-		if (!darkSet) {
-			darkSet = true;
+		if (sColorPrimaryDark == null) {
 			TypedValue typedValue = new TypedValue();
-//			ctx.getTheme().resolveAttribute(android.R.attr.colorPrimaryDark, typedValue, true);
 			TypedArray arr = ctx.obtainStyledAttributes(typedValue.data, new int[]{android.R.attr.colorPrimaryDark});
-			dark = arr.getColor(0, 0);
-			Log.d("Utils", "colorPrimaryDark == " + dark);
+			sColorPrimaryDark = arr.getColor(0, 0xFFFF00FF);
 			arr.recycle();
 		}
 
-		return color(s, dark);
+		return color(s, sColorPrimaryDark);
+	}
+
+	public static int getTextColorPrimary(Context ctx) {
+		if (sTextColorPrimary == null) {
+			TypedValue typedValue = new TypedValue();
+			TypedArray arr = ctx.obtainStyledAttributes(typedValue.data, new int[]{android.R.attr.textColorPrimary});
+			sTextColorPrimary = arr.getColor(0, 0xFFFF00FF);
+			arr.recycle();
+		}
+
+		return sTextColorPrimary;
 	}
 
 	public static String formatDateSimple(Date time) {
@@ -390,6 +399,18 @@ public final class Utils {
 	public static String parseUPath(String path) {
 		String s = path.substring(1, path.lastIndexOf('.'));
 		return s.endsWith("_L") || s.endsWith("-L") ? s.substring(0, s.length() - 2) : s;
+	}
+
+	public static void hideKeyboard(Activity activity) {
+		InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+
+		View view = activity.getCurrentFocus();
+
+		if (view == null) {
+			view = new View(activity);
+		}
+
+		imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 	}
 
 	public interface EditTextDialogCallback {

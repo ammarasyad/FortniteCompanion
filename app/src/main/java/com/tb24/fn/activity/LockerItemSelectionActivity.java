@@ -810,7 +810,12 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			holder.innerSlotView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
+					if (activity.itemTypeFilter == null) {
+						return;
+					}
+
 					// TODO apply item
+					Toast.makeText(activity, "Applying locker item not available yet", Toast.LENGTH_SHORT).show();
 //					EquipBattleRoyaleCustomization payload = new EquipBattleRoyaleCustomization();
 //					payload.slotName = EquipBattleRoyaleCustomization.ECustomizationSlot.Dance;
 //					payload.WHATISTHIS = activity.findItemId(item.templateId);

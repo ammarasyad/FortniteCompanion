@@ -29,6 +29,9 @@ public class FortItemDefinition {
 				case "AthenaCharacterItemDefinition":
 					type = AthenaCharacterItemDefinition.class;
 					break;
+				case "AthenaDailyQuestDefinition":
+					type = FortQuestItemDefinition.class;
+					break;
 				case "AthenaPetCarrierItemDefinition":
 					type = AthenaPetCarrierItemDefinition.class;
 					break;

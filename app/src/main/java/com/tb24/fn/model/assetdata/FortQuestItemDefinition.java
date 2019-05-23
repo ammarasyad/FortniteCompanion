@@ -11,6 +11,7 @@ public class FortQuestItemDefinition extends FortItemDefinition {
 	public Integer ObjectiveCompletionCount;
 	public Reward[] Rewards;
 	public Objective[] Objectives;
+	public DataTableRowReference Category;
 	public Float Weight;
 	public String CompletionText;
 	public String GrantToProfileType;
@@ -18,9 +19,10 @@ public class FortQuestItemDefinition extends FortItemDefinition {
 	public static class Reward {
 		public ItemAsset ItemPrimaryAssetId;
 		public Integer Quantity;
+		private FortItemStack stack;
 
 		public FortItemStack asItemStack() {
-			return new FortItemStack(ItemPrimaryAssetId.PrimaryAssetType.Name, ItemPrimaryAssetId.PrimaryAssetName, Quantity);
+			return stack == null ? stack = new FortItemStack(ItemPrimaryAssetId.PrimaryAssetType.Name, ItemPrimaryAssetId.PrimaryAssetName, Quantity) : stack;
 		}
 	}
 

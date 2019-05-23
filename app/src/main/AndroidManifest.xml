@@ -34,7 +34,9 @@
 		<activity
 			android:name=".activity.ChallengesActivity"
 			android:label="@string/title_challenges" />
-		<activity android:name=".activity.ChallengeBundleActivity" />
+		<activity
+			android:name=".activity.ChallengeBundleActivity"
+			android:label="@string/title_challenges" />
 		<activity
 			android:name=".activity.EventsActivity"
 			android:label="@string/title_events" />
