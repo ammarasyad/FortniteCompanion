@@ -149,7 +149,8 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				String errorText = "";
+				CharSequence errorText = "";
+
 				try {
 					Response<FortStatsV2Response> response = call.execute();
 
@@ -169,14 +170,14 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 						errorText = EpicError.parse(response).getDisplayText();
 					}
 				} catch (IOException e) {
-					errorText = e.toString();
+					errorText = Utils.userFriendlyNetError(e);
 				}
 
-				final String finalText = errorText;
+				final CharSequence finalText = errorText;
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						if (!finalText.isEmpty()) {
+						if (finalText.length() > 0) {
 							lc.error(finalText);
 						}
 					}

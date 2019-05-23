@@ -1,15 +1,17 @@
 package com.tb24.fn.model;
 
+import java.util.Date;
+
 public class ExternalAuth {
 	public String accountId;
 	public String type;
 	public AuthId[] authIds;
 	public String externalAuthId;
 	public String externalAuthSecondaryId;
-	public String dateAdded;
+	public Date dateAdded;
 	public String externalDisplayName;
 	public String externalAuthIdType;
-	public String lastLogin;
+	public Date lastLogin;
 
 	public static class AuthId {
 		public String id;

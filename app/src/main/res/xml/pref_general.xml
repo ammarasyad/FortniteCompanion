@@ -8,6 +8,11 @@
 			android:defaultValue="true"
 			android:key="locker_item_animations"
 			android:title="Locker item animations" />
+		<SwitchPreference
+			android:defaultValue="false"
+			android:key="mtx_check_bypass"
+			android:summary="The Purchase button will stay being enabled regardless of your displayed V-Bucks value. The validation will be performed on Epic's servers."
+			android:title="Item Shop: Bypass V-Bucks check" />
 	</PreferenceCategory>
 
 	<PreferenceCategory
@@ -31,7 +36,7 @@
 		<SwitchPreference
 			android:defaultValue="false"
 			android:key="fake_purchases"
-			android:summary="Simulated items will be marked as dummy and removed after the next profile refresh"
+			android:summary="Simulated items will be marked as dummy and removed after the next profile refresh."
 			android:title="Simulate purchases" />
 
 		<Preference
@@ -39,8 +44,12 @@
 			android:title="View login data" />
 
 		<Preference
-			android:key="test_just_for_debugging"
-			android:title="Verify item images" />
+			android:key="copy_profile"
+			android:title="Copy core profile data" />
+
+		<!--<Preference-->
+		<!--android:key="test_just_for_debugging"-->
+		<!--android:title="Verify item images" />-->
 	</PreferenceCategory>
 
 	<!-- Layout preference doesn't obey allowDividerAbove, so put it in a PreferenceCategory -->

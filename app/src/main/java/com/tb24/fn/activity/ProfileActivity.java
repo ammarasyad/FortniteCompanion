@@ -1,6 +1,7 @@
 package com.tb24.fn.activity;
 
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -12,23 +13,31 @@ import com.tb24.fn.R;
 import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.CommonCoreProfileAttributes;
+import com.tb24.fn.model.EpicError;
+import com.tb24.fn.model.ExternalAuth;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.WorldInfoResponse;
 import com.tb24.fn.model.XGameProfile;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import retrofit2.Call;
+import retrofit2.Response;
 
 public class ProfileActivity extends BaseActivity {
+	private static final Joiner NEWLINE = Joiner.on('\n');
 	private LoadingViewController lc;
 	private Call<WorldInfoResponse> callWorldInfo;
 	private WorldInfoResponse data;
+	private ExternalAuth[] externalAuthsData;
+	private Call<ExternalAuth[]> externalAuthCall;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,12 +50,43 @@ public class ProfileActivity extends BaseActivity {
 		refreshUi();
 		lc.content();
 		getThisApplication().eventBus.register(this);
+		externalAuthCall = getThisApplication().accountPublicService.accountExternalAuths(PreferenceManager.getDefaultSharedPreferences(ProfileActivity.this).getString("epic_account_id", ""));
+		new Thread("External Auths Worker") {
+			@Override
+			public void run() {
+				try {
+					final Response<ExternalAuth[]> response = externalAuthCall.execute();
+
+					if (response.isSuccessful()) {
+						runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								((TextView) findViewById(R.id.profile_external_auths)).setText(NEWLINE.join(Lists.transform(Arrays.asList(response.body()), new Function<ExternalAuth, String>() {
+									@Override
+									public String apply(@NullableDecl ExternalAuth input) {
+										return input == null ? "" : input.type + ":\n\u2022 Name: " + input.externalDisplayName + "\n\u2022 Added: " + Utils.formatDateSimple(input.dateAdded) + "\n\u2022 Last login: " + (input.lastLogin == null ? "N/A" : Utils.formatDateSimple(input.lastLogin));
+									}
+								})));
+							}
+						});
+					} else {
+						Utils.dialogError(ProfileActivity.this, EpicError.parse(response).getDisplayText());
+					}
+				} catch (IOException e) {
+					Utils.throwableDialog(ProfileActivity.this, e);
+				}
+			}
+		}.start();
 	}
 
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		getThisApplication().eventBus.unregister(this);
+
+		if (externalAuthCall != null) {
+			externalAuthCall.cancel();
+		}
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
@@ -83,13 +123,17 @@ public class ProfileActivity extends BaseActivity {
 			((TextView) findViewById(R.id.profile_br_xp_boost)).setText(String.valueOf(attributes.season_match_boost) + '%');
 			((TextView) findViewById(R.id.profile_br_xp_boost_friend)).setText(String.valueOf(attributes.season_friend_match_boost) + '%');
 			// TODO make a real layout for this
-			((TextView) findViewById(R.id.profile_br_past_season_data)).setText(Joiner.on('\n').join(Lists.transform(Arrays.asList(attributes.past_seasons), new Function<AthenaProfileAttributes.AthenaPastSeasonData, String>() {
+			((TextView) findViewById(R.id.profile_br_past_season_data)).setText(NEWLINE.join(Lists.transform(Arrays.asList(attributes.past_seasons), new Function<AthenaProfileAttributes.AthenaPastSeasonData, String>() {
 				@Override
 				public String apply(AthenaProfileAttributes.AthenaPastSeasonData input) {
 					// TODO max xp prior to season 8 is different
 					return String.format("Season %,d:\n Lvl %,d @ %s, %s Tier %,d; %,d Wins", input.seasonNumber, input.seasonLevel, input.seasonLevel == 100 ? "MAX" : String.format("%,d / %,d XP", input.seasonXp, FortniteCompanionApp.MAX_XPS_S8[input.seasonLevel - 1]), input.purchasedVIP ? "Battle Pass" : "Free Pass", input.bookLevel, input.numWins);
 				}
 			})));
+		}
+
+		if (externalAuthsData != null) {
+
 		}
 	}
 

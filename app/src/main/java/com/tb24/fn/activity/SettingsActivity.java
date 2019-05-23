@@ -1,6 +1,9 @@
 package com.tb24.fn.activity;
 
 import android.app.AlertDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
@@ -15,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.FortniteCompanionApp;
@@ -82,7 +86,9 @@ public class SettingsActivity extends BaseActivity {
 			bindPreferenceSummaryToValue(prefRegion);
 
 			Preference ctgAccount = findPreference("account_ctg");
-			ctgAccount.setVisible(getPreferenceManager().getSharedPreferences().getBoolean("is_logged_in", false));
+			boolean loggedIn = getPreferenceManager().getSharedPreferences().getBoolean("is_logged_in", false);
+			ctgAccount.setVisible(loggedIn);
+			findPreference("copy_profile").setVisible(loggedIn);
 
 			if (ctgAccount.isVisible()) {
 				prefPrivacy = (TwoStatePreference) findPreference("leaderboard_privacy");
@@ -126,10 +132,10 @@ public class SettingsActivity extends BaseActivity {
 			}
 
 			prefViewLoginData = findPreference("view_login_data");
-			prefViewLoginData.setVisible(getPreferenceManager().getSharedPreferences().getBoolean("is_logged_in", false));
+			prefViewLoginData.setVisible(loggedIn);
 
 			prefLogOut = (LayoutPreference) findPreference("log_out");
-			prefLogOut.setVisible(getPreferenceManager().getSharedPreferences().getBoolean("is_logged_in", false));
+			prefLogOut.setVisible(loggedIn);
 			prefLogOut.findViewById(R.id.log_out_button).setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
@@ -287,6 +293,13 @@ public class SettingsActivity extends BaseActivity {
 							+ '\n' + "Refresh Token: " + prefs.getString("epic_account_refresh_token", null);
 					Utils.dialogOkNonMain(getActivity(), null, s);
 					Log.d("LoginDump", s);
+				} else if (preference.getKey().equals("copy_profile")) {
+					FortMcpProfile profile = getApplication_().profileManager.profileData.get("common_core");
+
+					if (profile != null) {
+						((ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("Profile Data", new GsonBuilder().setPrettyPrinting().create().toJson(profile)));
+						Toast.makeText(getActivity(), "Core profile data copied to clipboard.", Toast.LENGTH_SHORT).show();
+					}
 				} else if (preference.getKey().equals("test_just_for_debugging")) {
 					AssetManager assets = getActivity().getAssets();
 					List<String> notFound = new ArrayList<>();

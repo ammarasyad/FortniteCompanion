@@ -52,5 +52,5 @@ public interface AccountPublicService {
 	Call<XGameProfile> account(@Path("id") String id);
 
 	@GET("/account/api/public/account/{id}/externalAuths")
-	Call<ExternalAuth[]> accountExternalAuths(@Query("id") String id);
+	Call<ExternalAuth[]> accountExternalAuths(@Path("id") String id);
 }

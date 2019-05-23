@@ -29,7 +29,7 @@ public class EpicError {
 		try {
 			String s = response.errorBody().string();
 			Log.e("EpicError", s);
-			return Utils.GSON.fromJson(s, toErrorClass);
+			return Utils.DEFAULT_GSON.fromJson(s, toErrorClass);
 		} catch (IOException e) {
 			throw new RuntimeException("Unexpected error whilst parsing error data", e);
 		}

@@ -126,7 +126,8 @@ public class ItemShopActivity extends BaseActivity {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				String errorText = "";
+				CharSequence errorText = "";
+
 				try {
 					final Response<FortCatalogResponse> response = catalogCall.execute();
 
@@ -141,14 +142,14 @@ public class ItemShopActivity extends BaseActivity {
 						errorText = EpicError.parse(response).getDisplayText();
 					}
 				} catch (IOException e) {
-					errorText = e.toString();
+					errorText = Utils.userFriendlyNetError(e);
 				}
 
-				final String finalText = errorText;
+				final CharSequence finalText = errorText;
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						if (!finalText.isEmpty()) {
+						if (finalText.length() > 0) {
 							lc.error(finalText);
 						}
 					}
@@ -625,7 +626,7 @@ public class ItemShopActivity extends BaseActivity {
 					btnPurchase.setVisibility(finallyOwned ? View.GONE : View.VISIBLE);
 					boolean notEnough = activity.vBucksQty < price.basePrice;
 
-					if (notEnough) {
+					if (notEnough && !PreferenceManager.getDefaultSharedPreferences(activity).getBoolean("mtx_check_bypass", false)) {
 						btnPurchase.setEnabled(false);
 						// TODO "Get V-Bucks"
 						btnPurchase.setText("Not enough V-Bucks");

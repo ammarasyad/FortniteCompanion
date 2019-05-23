@@ -26,7 +26,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
@@ -52,7 +51,7 @@ import java.util.Locale;
 import java.util.Random;
 
 public final class Utils {
-	public static final Gson GSON = new Gson();
+	public static final Gson DEFAULT_GSON = new Gson();
 	public static final String[] STRINGS = {"That wasn't supposed to happen", "There was an error", "We hit a roadblock", "Not the llama you're looking for", "Whoops!", "Uh oh! Something goofed"};
 	public static final Random RANDOM = new Random();
 	public static final DialogInterface.OnClickListener LISTENER_TO_CANCEL = new DialogInterface.OnClickListener() {
@@ -389,7 +388,7 @@ public final class Utils {
 
 	public static <T> T cloneObjectUsingJson(T object, Type typeOfT) {
 //		try {
-		return GSON.fromJson(GSON.toJson(object, typeOfT), typeOfT);
+		return DEFAULT_GSON.fromJson(DEFAULT_GSON.toJson(object, typeOfT), typeOfT);
 //		} catch (JsonSyntaxException e) {
 //			e.printStackTrace();
 //			return null;
@@ -399,18 +398,6 @@ public final class Utils {
 	public static String parseUPath(String path) {
 		String s = path.substring(1, path.lastIndexOf('.'));
 		return s.endsWith("_L") || s.endsWith("-L") ? s.substring(0, s.length() - 2) : s;
-	}
-
-	public static void hideKeyboard(Activity activity) {
-		InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
-
-		View view = activity.getCurrentFocus();
-
-		if (view == null) {
-			view = new View(activity);
-		}
-
-		imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 	}
 
 	public interface EditTextDialogCallback {

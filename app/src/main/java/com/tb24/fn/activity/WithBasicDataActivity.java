@@ -3,6 +3,7 @@ package com.tb24.fn.activity;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortBasicDataResponse;
 import com.tb24.fn.util.LoadingViewController;
+import com.tb24.fn.util.Utils;
 
 import java.io.IOException;
 
@@ -21,7 +22,8 @@ public abstract class WithBasicDataActivity extends BaseActivity {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				String errorText = "";
+				CharSequence errorText = "";
+
 				try {
 					final Response<FortBasicDataResponse> response = call.execute();
 
@@ -37,14 +39,14 @@ public abstract class WithBasicDataActivity extends BaseActivity {
 						errorText = EpicError.parse(response).getDisplayText();
 					}
 				} catch (IOException e) {
-					errorText = e.toString();
+					errorText = Utils.userFriendlyNetError(e);
 				}
 
-				final String finalText = errorText;
+				final CharSequence finalText = errorText;
 				runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						if (!finalText.isEmpty()) {
+						if (finalText.length() > 0) {
 							lc.error(finalText);
 						}
 					}

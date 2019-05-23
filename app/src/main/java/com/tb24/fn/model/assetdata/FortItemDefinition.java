@@ -43,7 +43,7 @@ public class FortItemDefinition {
 					break;
 			}
 
-			return Utils.GSON.fromJson(json, type);
+			return Utils.DEFAULT_GSON.fromJson(json, type);
 		}
 	}
 }

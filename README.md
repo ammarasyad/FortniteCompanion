@@ -7,14 +7,13 @@ A mini Fortnite client for Android.
 
 ## Features
 * View BR profile, account creation date, and other hidden account info
-* View events and its leaderboard
-* View stats of yourself or other player’s
-* View BR cosmetics, with filtering, set/unset favorite, and marking as seen
-* View Item Shop, full display for unencrypted items
-* Make Battle Royale Item Shop purchases
-* Change leaderboard privacy setting
 * View challenges
 * Replace daily challenges
+* View events and its leaderboard
+* View stats of yourself or other player’s, with playlist breakdown
+* View BR cosmetics/locker, with filtering, set/unset favorite, and marking as seen
+* View BR Item Shop and purchase items, full display for unencrypted items
+* Change leaderboard privacy setting
 
 ## FAQ
 * **Q: Is this app totally safe? Will my account get banned for using this?**

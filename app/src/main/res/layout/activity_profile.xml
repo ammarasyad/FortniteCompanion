@@ -110,6 +110,20 @@
 		</LinearLayout>
 
 		<TextView
+			style="@style/TextAppearance.BurbankSmall.Bold"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:text="Account Linking"
+			android:textAppearance="?android:textAppearanceListItem" />
+
+		<TextView
+			android:id="@+id/profile_external_auths"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:text="No data" />
+
+		<TextView
 			style="@style/TextAppearance.BurbankSmall.Black"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
@@ -218,14 +232,16 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="16dp"
-			android:text="Gifting history"
-			android:textAppearance="?android:textAppearanceListItem" />
+			android:text="Gifting History"
+			android:textAppearance="?android:textAppearanceListItem"
+			android:visibility="gone" />
 
 		<TextView
 			android:id="@+id/profile_gift_history"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:text="No data" />
+			android:text="No data"
+			android:visibility="gone" />
 
 		<TextView
 			style="@style/TextAppearance.BurbankSmall.Black"
@@ -299,7 +315,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="16dp"
-			android:text="Season history"
+			android:text="Season History"
 			android:textAppearance="?android:textAppearanceListItem" />
 
 		<TextView

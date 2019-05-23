@@ -168,6 +168,10 @@ public class ChallengeBundleActivity extends BaseActivity {
 	public void onDestroy() {
 		super.onDestroy();
 		getThisApplication().eventBus.unregister(this);
+
+		if (callReroll != null) {
+			callReroll.cancel();
+		}
 	}
 
 	private void refreshUi(FortMcpProfile profile) {
@@ -346,7 +350,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 					}
 
 					// TODO set party assist quest
-					Toast.makeText(activity, "Setting party assist quest not available yet", Toast.LENGTH_SHORT).show();
+					Toast.makeText(activity, "Setting party assist challenge not available yet", Toast.LENGTH_SHORT).show();
 //					SetPartyAssistQuest payload = new SetPartyAssistQuest();
 //					Call<FortMcpResponse> call = activity.getThisApplication().fortnitePublicService.mcp("SetPartyAssistQuest", PreferenceManager.getDefaultSharedPreferences(activity).getString("epic_account_id", ""), "athena", -1, payload);
 //					new Thread("Set Party Assist Worker") {
