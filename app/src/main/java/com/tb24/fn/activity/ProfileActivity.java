@@ -16,7 +16,6 @@ import com.tb24.fn.model.CommonCoreProfileAttributes;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.ExternalAuth;
 import com.tb24.fn.model.FortMcpProfile;
-import com.tb24.fn.model.WorldInfoResponse;
 import com.tb24.fn.model.XGameProfile;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
@@ -34,8 +33,6 @@ import retrofit2.Response;
 public class ProfileActivity extends BaseActivity {
 	private static final Joiner NEWLINE = Joiner.on('\n');
 	private LoadingViewController lc;
-	private Call<WorldInfoResponse> callWorldInfo;
-	private WorldInfoResponse data;
 	private Call<ExternalAuth[]> externalAuthCall;
 
 	@Override
