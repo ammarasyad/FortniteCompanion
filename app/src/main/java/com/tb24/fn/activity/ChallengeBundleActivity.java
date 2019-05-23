@@ -211,7 +211,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 			final FortChallengeBundleItemDefinition.QuestInfo entryDef = data.get(position);
 			List<FortQuestItemDefinition> questDefChain = new ArrayList<>();
 			List<FortItemStack> questItemChain = new ArrayList<>();
-			String questItemName = Utils.parseUPath(entryDef.QuestDefinition.asset_path_name).toLowerCase();
+			String questItemName = entryDef.QuestDefinition.asset_path_name.substring(entryDef.QuestDefinition.asset_path_name.lastIndexOf('/') + 1, entryDef.QuestDefinition.asset_path_name.lastIndexOf('.')).toLowerCase();
 
 			for (FortItemStack entry : activity.questsFromProfile.values()) {
 				if (entry.templateId.equals("Quest:" + questItemName)) {
