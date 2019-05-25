@@ -86,7 +86,6 @@ public class ItemShopActivity extends BaseActivity {
 	private List<FortCatalogResponse.CatalogEntry> featuredItems;
 	private List<FortCatalogResponse.CatalogEntry> dailyItems;
 	private Call<FortCatalogResponse> catalogCall;
-	private okhttp3.Call calendarCall;
 	private Handler handler = new Handler();
 	private Runnable scheduleRunnable;
 
@@ -317,10 +316,6 @@ public class ItemShopActivity extends BaseActivity {
 
 		if (catalogCall != null) {
 			catalogCall.cancel();
-		}
-
-		if (calendarCall != null) {
-			calendarCall.cancel();
 		}
 	}
 
@@ -692,8 +687,8 @@ public class ItemShopActivity extends BaseActivity {
 							dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
 							long duration = 250L;
 							Interpolator samsungBounceInterpolator = AnimationUtils.loadInterpolator(activity, R.anim.elastic_50_menu_popup);
-							slotView.setScaleX(2.75F);
-							slotView.setScaleY(2.75F);
+							slotView.setScaleX(2.5F);
+							slotView.setScaleY(2.5F);
 							slotView.setAlpha(0.0F);
 							slotView.animate().scaleX(1.0F).scaleY(1.0F).alpha(1.0F).setInterpolator(samsungBounceInterpolator).setDuration(duration);
 							purchasedItemTitle.setTranslationX(400.0F);
@@ -713,7 +708,7 @@ public class ItemShopActivity extends BaseActivity {
 								public void run() {
 									dialog.dismiss();
 								}
-							}, 4000);
+							}, 4000L);
 							activity.updateFromProfile();
 						}
 					});

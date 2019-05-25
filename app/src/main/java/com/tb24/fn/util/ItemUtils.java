@@ -60,6 +60,32 @@ public class ItemUtils {
 		return null;
 	}
 
+//	public static Bitmap getBitmapImageFromItemStackData(BaseActivity activity, FortItemStack item) {
+//		FortItemDefinition def = item.getDefData();
+//
+//		if (def == null) {
+//			return null;
+//		}
+//
+//		if (def.SmallPreviewImage != null) {
+//			return Utils.loadTga(activity, def.SmallPreviewImage.asset_path_name);
+//		} else if (def.HeroDefinition != null) {
+//			JsonElement json1 = activity.getThisApplication().itemRegistry.get("AthenaHero_:" + def.HeroDefinition);
+//
+//			if (json1 != null) {
+//				return getBitmapImageFromItemStackData(activity, item, json1.getAsJsonArray().get(0).getAsJsonObject());
+//			}
+//		} else if (def.WeaponDefinition != null) {
+//			JsonElement json1 = activity.getThisApplication().itemRegistry.get("AthenaWeapon_:" + def.WeaponDefinition);
+//
+//			if (json1 != null) {
+//				return getBitmapImageFromItemStackData(activity, item, json1.getAsJsonArray().get(0).getAsJsonObject());
+//			}
+//		}
+//
+//		return null;
+//	}
+
 	public static Drawable rarityBgSlot(Context ctx, EFortRarity rarity) {
 		if (rarity != EFortRarity.MYTHIC) {
 			return ctx.getDrawable(rarity == EFortRarity.COMMON ? R.drawable.bg_common : rarity == EFortRarity.UNCOMMON ? R.drawable.bg_uncommon : rarity == EFortRarity.RARE ? R.drawable.bg_rare : rarity == EFortRarity.EPIC ? R.drawable.bg_epic : rarity == EFortRarity.LEGENDARY ? R.drawable.bg_legendary : R.drawable.bg_common);

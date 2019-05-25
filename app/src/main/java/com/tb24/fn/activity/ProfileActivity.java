@@ -2,7 +2,6 @@ package com.tb24.fn.activity;
 
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.google.common.base.Function;
@@ -17,7 +16,6 @@ import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.ExternalAuth;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.XGameProfile;
-import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
@@ -32,19 +30,20 @@ import retrofit2.Response;
 
 public class ProfileActivity extends BaseActivity {
 	private static final Joiner NEWLINE = Joiner.on('\n');
-	private LoadingViewController lc;
+//	private LoadingViewController lc;
 	private Call<ExternalAuth[]> externalAuthCall;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.common_loadable_framed);
+//		setContentView(R.layout.common_loadable_framed);
+		setContentView(R.layout.activity_profile);
 		setupActionBar();
-		ViewGroup frame = findViewById(R.id.main_content);
-		getLayoutInflater().inflate(R.layout.activity_profile, frame);
-		lc = new LoadingViewController(this, frame, "");
+//		ViewGroup frame = findViewById(R.id.main_content);
+//		getLayoutInflater().inflate(R.layout.activity_profile, frame);
+//		lc = new LoadingViewController(this, frame, "");
 		refreshUi();
-		lc.content();
+//		lc.content();
 		getThisApplication().eventBus.register(this);
 		externalAuthCall = getThisApplication().accountPublicService.accountExternalAuths(PreferenceManager.getDefaultSharedPreferences(ProfileActivity.this).getString("epic_account_id", ""));
 		new Thread("External Auths Worker") {

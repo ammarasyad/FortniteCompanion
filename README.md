@@ -30,11 +30,13 @@ A mini Fortnite client for Android.
 * Set Support a Creator code
 * Set party assist
 * Add creative map code
-* Apply cosmetic item
+* View friends, their activity, and whispering them via Epic Chat
 * [STW info in user friendly view](https://www.stormshield.one/save-the-world) (to see if there’s a 25-30 V-Bucks mission without opening big screen Fortnite)
 * __Manually__ collect STW research points and daily rewards (Manually because if it’s automatic it breaks the purpose of the word "Daily" and I have no purpose to cheat the game using this app)
-* Most importantly, finding out a way to mitm HTTP POST requests on the actual Fortnite client
 
 ## Credits
-* [Umodel](https://www.gildor.org/en/projects/umodel) for extracting/exporting the .uassets from the PAKs
-* [John Wick Parse](https://github.com/SirWaddles/JohnWickParse) for parsing the item data from the .uassets
+* [@cryotus](https://www.instagram.com/cryotus/): for the app name and icon
+* [u/easkate](https://www.reddit.com/user/easkate): for the [concept and idea of this app](https://www.reddit.com/r/FortNiteBR/comments/b5wlwg/fortnite_retail_row_app_a_ui_concept_for_a/)
+* [Kysune](https://github.com/SzymonLisowiec), [Roberto Graham](https://github.com/RobertoGraham), and [Vrekt](https://github.com/Vrekt): for the network endpoints and its usage, from their libraries
+* [Umodel](https://www.gildor.org/en/projects/umodel) by Gildor: for extracting/exporting the .uassets from the PAKs
+* [John Wick Parse](https://github.com/SirWaddles/JohnWickParse) by [Waddlesworth](https://github.com/SirWaddles): for parsing the item data from the .uassets
