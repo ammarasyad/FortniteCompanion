@@ -31,7 +31,6 @@ A mini Fortnite client for Android.
 * Set party assist
 * Add creative map code
 * Apply cosmetic item
-* Integrate Squatingdog’s cheatsheets
 * [STW info in user friendly view](https://www.stormshield.one/save-the-world) (to see if there’s a 25-30 V-Bucks mission without opening big screen Fortnite)
 * __Manually__ collect STW research points and daily rewards (Manually because if it’s automatic it breaks the purpose of the word "Daily" and I have no purpose to cheat the game using this app)
 * Most importantly, finding out a way to mitm HTTP POST requests on the actual Fortnite client

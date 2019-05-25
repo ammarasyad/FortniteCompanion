@@ -256,7 +256,7 @@ public final class Utils {
 	}
 
 	public static void dialogOkNonMain(final Activity activity, final CharSequence title, final CharSequence message) {
-		if (activity != null) {
+		if (activity != null && !activity.isDestroyed()) {
 			activity.runOnUiThread(new Runnable() {
 				@Override
 				public void run() {

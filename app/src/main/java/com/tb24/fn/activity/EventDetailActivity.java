@@ -2,11 +2,9 @@ package com.tb24.fn.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.format.DateUtils;
-import android.text.style.StrikethroughSpan;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +17,7 @@ import com.tb24.fn.R;
 import com.tb24.fn.model.EventDownloadResponse;
 import com.tb24.fn.model.FortBasicDataResponse;
 import com.tb24.fn.util.Utils;
+import com.tb24.fn.view.StrikeTextView;
 
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -48,26 +47,55 @@ public class EventDetailActivity extends BaseActivity {
 		setTitle(displayInfo.long_format_title);
 		boolean started = new Date().after(thisEventData.beginTime);
 		boolean ended = new Date().after(thisEventData.endTime);
-		((TextView) findViewById(R.id.event_is_started)).setText(!started && !ended ? String.format("This event starts %s!", DateUtils.isToday(thisEventData.beginTime.getTime()) ? "today" : "in " + TimeUnit.MILLISECONDS.toDays(thisEventData.beginTime.getTime() - System.currentTimeMillis()) + " days") : started && !ended ? TextUtils.concat("This event is ", Utils.color("live now!", Utils.getTextColorPrimary(this))) : started && ended ? "This event has ended." : "???");
-		((TextView) findViewById(R.id.event_details_description)).setText(displayInfo.details_description);
-		((TextView) findViewById(R.id.event_flavor_description)).setText(displayInfo.flavor_description);
-		SpannableStringBuilder ssb = new SpannableStringBuilder("");
-		EventDownloadResponse.EventWindow[] eventWindows = thisEventData.eventWindows;
+		CharSequence startText = "???";
 
-		for (int i = 0; i < eventWindows.length; i++) {
-			EventDownloadResponse.EventWindow input = eventWindows[i];
-			CharSequence cs;
+		if (!started && !ended) {
+			CharSequence in;
 
-			if (Utils.isSameDay(input.beginTime, input.endTime)) {
-				cs = dateFormat.format(input.beginTime) + ' ' + timeFormat.format(input.beginTime) + " - " + timeFormat.format(input.endTime);
+			if (DateUtils.isToday(thisEventData.beginTime.getTime())) {
+				in = "today";
 			} else {
-				cs = Utils.formatDateSimple(input.beginTime) + " - " + Utils.formatDateSimple(input.endTime);
+				long delta = thisEventData.beginTime.getTime() - System.currentTimeMillis();
+				long days = TimeUnit.MILLISECONDS.toDays(delta);
+
+				if (days < 1L) {
+					in = TextUtils.concat("in ", Utils.formatElapsedTime(this, delta, false));
+				} else if (days == 1L) {
+					in = "tomorrow";
+				} else {
+					in = "in " + days + " days";
+				}
 			}
 
-			ssb.append(cs, new Date().after(input.endTime) ? new StrikethroughSpan() : null, 0).append(i == eventWindows.length - 1 ? "" : "\n");
+			startText = TextUtils.replace("This event starts %s!", new String[]{"%s"}, new CharSequence[]{in});
+		} else if (started && !ended) {
+			startText = TextUtils.concat("This event is ", Utils.color("live now!", Utils.getTextColorPrimary(this)));
+		} else if (started && ended) {
+			startText = "This event has ended.";
 		}
 
-		((TextView) findViewById(R.id.event_dates)).setText(ssb);
+		((TextView) findViewById(R.id.event_is_started)).setText(startText);
+		((TextView) findViewById(R.id.event_details_description)).setText(displayInfo.details_description);
+		((TextView) findViewById(R.id.event_flavor_description)).setText(displayInfo.flavor_description);
+		EventDownloadResponse.EventWindow[] eventWindows = thisEventData.eventWindows;
+		ViewGroup eventDates = findViewById(R.id.event_dates);
+		eventDates.removeAllViews();
+
+		for (EventDownloadResponse.EventWindow eventWindow : eventWindows) {
+			CharSequence timeRange;
+
+			if (Utils.isSameDay(eventWindow.beginTime, eventWindow.endTime)) {
+				timeRange = dateFormat.format(eventWindow.beginTime) + ' ' + timeFormat.format(eventWindow.beginTime) + " - " + timeFormat.format(eventWindow.endTime);
+			} else {
+				timeRange = Utils.formatDateSimple(eventWindow.beginTime) + " - " + Utils.formatDateSimple(eventWindow.endTime);
+			}
+
+			StrikeTextView strikeTextView = (StrikeTextView) getLayoutInflater().inflate(R.layout.event_date_entry, eventDates, false);
+			strikeTextView.setText(timeRange);
+			strikeTextView.setStrikeColor(new Date().after(eventWindow.endTime) ? strikeTextView.getCurrentTextColor() : 0);
+			eventDates.addView(strikeTextView);
+		}
+
 		((TextView) findViewById(R.id.event_short_format_title)).setText(displayInfo.short_format_title);
 		ViewGroup session = findViewById(R.id.event_sessions);
 

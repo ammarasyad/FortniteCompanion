@@ -1,4 +1,4 @@
-package com.tb24.fn.activity;
+package com.tb24.fn.event;
 
 public class LoggedOutEvent {
 }

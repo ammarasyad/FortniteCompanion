@@ -7,18 +7,16 @@
 	android:orientation="vertical"
 	tools:showIn="@layout/quest_entry">
 
-	<com.tb24.fn.view.ForcedMarqueeTextView
+	<TextView
 		android:id="@+id/quest_title"
 		style="@style/TextAppearance.BurbankSmall.Bold"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:ellipsize="marquee"
-		android:marqueeRepeatLimit="1"
-		android:singleLine="true"
 		android:textColor="#99CCFF"
 		tools:text="Quest title" />
 
 	<LinearLayout
+		android:id="@+id/quest_progress_parent"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="2dp"

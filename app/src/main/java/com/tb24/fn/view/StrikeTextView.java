@@ -38,6 +38,8 @@ public class StrikeTextView extends TextView {
 
 	public void setStrikeColor(int strikeColor) {
 		this.strikeColor = strikeColor;
+		paint.setColor(strikeColor);
+		invalidate();
 	}
 
 	public void init(Context context) {

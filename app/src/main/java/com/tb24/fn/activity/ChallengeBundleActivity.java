@@ -1,7 +1,9 @@
 package com.tb24.fn.activity;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -23,6 +25,7 @@ import com.google.gson.JsonObject;
 import com.tb24.fn.R;
 import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
+import com.tb24.fn.model.CalendarTimelineResponse;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
@@ -42,25 +45,40 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import retrofit2.Call;
 import retrofit2.Response;
 
 public class ChallengeBundleActivity extends BaseActivity {
 	public static final String VALUE_DAILY_CHALLENGES = "_daily__challenges";
+	private static final Map<String, String> cheatsheetUrls = new HashMap<>();
+
+	static {
+		// credit to u/thesquatingdog for the original cheatsheets
+		cheatsheetUrls.put("ChallengeBundle:questbundle_s9_week_001", "https://i.redd.it/eoa6qwoe8fx21.jpg");
+		cheatsheetUrls.put("ChallengeBundle:questbundle_s9_week_002", "https://i.redd.it/s5o3wgbqdly21.jpg");
+		cheatsheetUrls.put("ChallengeBundle:questbundle_s9_week_003", "https://i.redd.it/hkczsox5pyz21.jpg");
+	}
+
 	private RecyclerView list;
 	private ChallengeAdapter adapter;
 	private LoadingViewController lc;
 	private FortMcpProfile profileData;
 	private Map<String, FortItemStack> questsFromProfile = new HashMap<>();
 	private Call<FortMcpResponse> callReroll;
+	private String cheatsheetUrl;
+	private FortChallengeBundleItemDefinition challengeBundleDef;
+	private CalendarTimelineResponse.ActiveEvent calendarEventTag;
 
 	public static FortQuestItemDefinition populateQuestView(BaseActivity activity, View view, FortItemStack item) {
-		ProgressBar questProgressBar = view.findViewById(R.id.quest_progress_bar);
 		TextView questTitle = view.findViewById(R.id.quest_title);
+		View questProgressParent = view.findViewById(R.id.quest_progress_parent);
+		ProgressBar questProgressBar = view.findViewById(R.id.quest_progress_bar);
 		TextView questProgressText = view.findViewById(R.id.quest_progress_text);
 		View questRewardParent = view.findViewById(R.id.quest_reward_parent);
 		boolean done = item.attributes != null && JsonUtils.getStringOr("quest_state", item.attributes, "").equals("Claimed");
@@ -69,16 +87,21 @@ public class ChallengeBundleActivity extends BaseActivity {
 		FortQuestItemDefinition quest = (FortQuestItemDefinition) item.getDefData();
 
 		if (quest == null) {
+			questProgressParent.setVisibility(View.GONE);
+			questRewardParent.setVisibility(View.GONE);
+		} else if (done) {
+			questProgressParent.setVisibility(View.GONE);
+			questRewardParent.setVisibility(View.VISIBLE);
+		} else {
+			questProgressParent.setVisibility(View.VISIBLE);
+			questRewardParent.setVisibility(View.VISIBLE);
+		}
+
+		if (quest == null) {
 			questTitle.setText("Currently unavailable");
-			questProgressBar.setVisibility(View.INVISIBLE);
-			questProgressText.setVisibility(View.INVISIBLE);
-			questRewardParent.setVisibility(View.INVISIBLE);
 			return null;
 		}
 
-		questProgressBar.setVisibility(View.VISIBLE);
-		questProgressText.setVisibility(View.VISIBLE);
-		questRewardParent.setVisibility(View.VISIBLE);
 		questTitle.setText(quest.DisplayName);
 		int completion = 0;
 		int max = 0;
@@ -222,11 +245,24 @@ public class ChallengeBundleActivity extends BaseActivity {
 				questsFromProfile.put(s, profile.items.get(s));
 			}
 
-			FortChallengeBundleItemDefinition def = getThisApplication().gson.fromJson(a.getAsJsonArray().get(0).getAsJsonObject(), FortChallengeBundleItemDefinition.class);
-			setTitle(Utils.color(def.DisplayName, def.DisplayStyle.AccentColor.asInt()));
-			getWindow().setStatusBarColor(def.DisplayStyle.PrimaryColor.asInt());
-			getActionBar().setBackgroundDrawable(new ColorDrawable(def.DisplayStyle.PrimaryColor.asInt()));
-			data = Arrays.asList(def.QuestInfos);
+			challengeBundleDef = getThisApplication().gson.fromJson(a.getAsJsonArray().get(0), FortChallengeBundleItemDefinition.class);
+			setTitle(Utils.color(challengeBundleDef.DisplayName, challengeBundleDef.DisplayStyle.AccentColor.asInt()));
+			getWindow().setStatusBarColor(challengeBundleDef.DisplayStyle.PrimaryColor.asInt());
+			getActionBar().setBackgroundDrawable(new ColorDrawable(challengeBundleDef.DisplayStyle.PrimaryColor.asInt()));
+			data = Arrays.asList(challengeBundleDef.QuestInfos);
+
+			if (challengeBundleDef.CalendarEventTag != null) {
+				for (CalendarTimelineResponse.ActiveEvent activeEvent : getThisApplication().calendarDataBase.channels.get("client-events").states[0].activeEvents) {
+					if (activeEvent.eventType.equals(challengeBundleDef.CalendarEventTag)) {
+						calendarEventTag = activeEvent;
+						break;
+					}
+				}
+			}
+
+			if (cheatsheetUrls.containsKey(bundleTemplateId)) {
+				cheatsheetUrl = cheatsheetUrls.get(bundleTemplateId);
+			}
 		}
 
 		if (adapter == null) {
@@ -261,11 +297,28 @@ public class ChallengeBundleActivity extends BaseActivity {
 		@NonNull
 		@Override
 		public ChallengeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-			return new ChallengeViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.quest_entry, parent, false));
+			View inflate = LayoutInflater.from(parent.getContext()).inflate(viewType == 1 ? R.layout.log_out_settings_button : R.layout.quest_entry, parent, false);
+
+			if (viewType == 1) {
+				inflate.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			}
+
+			return new ChallengeViewHolder(inflate);
 		}
 
 		@Override
 		public void onBindViewHolder(@NonNull final ChallengeViewHolder holder, final int position) {
+			if (getItemViewType(position) == 1) {
+				holder.btnCheatsheet.setText("Cheatsheet plz");
+				holder.btnCheatsheet.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(activity.cheatsheetUrl)));
+					}
+				});
+				return;
+			}
+
 			final FortChallengeBundleItemDefinition.QuestInfo entryDef = data.get(position);
 			List<FortQuestItemDefinition> questDefChain = new ArrayList<>();
 			List<FortItemStack> questItemChain = new ArrayList<>();
@@ -290,13 +343,50 @@ public class ChallengeBundleActivity extends BaseActivity {
 			}
 
 			FortQuestItemDefinition quest = populateQuestView(activity, holder.itemView, activeQuestItem);
+
+			if (quest == null) {
+				holder.actions.setVisibility(View.GONE);
+				holder.itemView.setOnClickListener(null);
+				return;
+			}
+
 			TextView questTitle = holder.itemView.findViewById(R.id.quest_title);
 			boolean isChain = questDefChain.size() > 1;
-			questTitle.setText(TextUtils.concat(isChain ? Utils.color(String.format("Stage %d of %d", questItemChain.size(), questDefChain.size()), Utils.getTextColorPrimary(activity)) : "", (isChain ? " - " : "") + questTitle.getText()));
-			holder.actions.setVisibility(expandedPosition == position ? View.VISIBLE : View.GONE);
 			boolean done = activeQuestItem.attributes != null && JsonUtils.getStringOr("quest_state", activeQuestItem.attributes, "").equals("Claimed");
-			final boolean isEligibleForReplacement = !done && quest != null && quest.export_type.equals("AthenaDailyQuestDefinition") && ((AthenaProfileAttributes) activity.profileData.stats.attributesObj).quest_manager.dailyQuestRerolls > 0;
-			final boolean isEligibleForAssist = !done && quest != null && quest.GameplayTags != null && Arrays.binarySearch(quest.GameplayTags.gameplay_tags, "Quest.Metadata.PartyAssist") >= 0;
+			final boolean isEligibleForReplacement = !done && quest.export_type.equals("AthenaDailyQuestDefinition") && ((AthenaProfileAttributes) activity.profileData.stats.attributesObj).quest_manager.dailyQuestRerolls > 0;
+			final boolean isEligibleForAssist = !done && quest.GameplayTags != null && Arrays.binarySearch(quest.GameplayTags.gameplay_tags, "Quest.Metadata.PartyAssist") >= 0;
+			questTitle.setText(TextUtils.concat(isChain ? Utils.color(String.format("Stage %d of %d", questItemChain.size(), questDefChain.size()), Utils.getTextColorPrimary(activity)) : "", (isChain ? " - " : "") + questTitle.getText()));
+			holder.itemView.findViewById(R.id.quest_progress_parent).setVisibility(done ? View.GONE : View.VISIBLE);
+
+			if (entryDef.QuestUnlockType != null && entryDef.QuestUnlockType.equals("EChallengeBundleQuestUnlockType::DaysFromEventStart")) {
+				if (entryDef.UnlockValue == 100) {
+					questTitle.setText(activity.challengeBundleDef.UniqueLockedMessage);
+					holder.itemView.findViewById(R.id.quest_progress_parent).setVisibility(View.GONE);
+				} else {
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(activity.calendarEventTag.activeSince);
+					calendar.add(Calendar.DAY_OF_MONTH, entryDef.UnlockValue);
+					long delta = calendar.getTimeInMillis() - System.currentTimeMillis();
+
+					if (delta > 0) {
+						long days = TimeUnit.MILLISECONDS.toDays(delta);
+						String s = "Unlocks in " + days + " day" + (days == 1L ? "" : "s");
+
+						if (days < 1L) {
+							long hours = TimeUnit.MILLISECONDS.toHours(delta % 86400000);
+							s = "Unlocks in " + hours + " hour" + (hours == 1L ? "" : "s");
+
+							if (hours < 1L) {
+								s = "Unlocking soon";
+							}
+						}
+
+						questTitle.setText(TextUtils.concat(Utils.color(s, 0xFFE1564B), " - " + questTitle.getText()));
+					}
+				}
+			}
+
+			holder.actions.setVisibility(expandedPosition == position ? View.VISIBLE : View.GONE);
 			holder.btnReplace.setVisibility(isEligibleForReplacement ? View.VISIBLE : View.GONE);
 			holder.btnAssist.setVisibility(isEligibleForAssist ? View.VISIBLE : View.GONE);
 			final FortItemStack finalActiveQuestItem = activeQuestItem;
@@ -379,12 +469,6 @@ public class ChallengeBundleActivity extends BaseActivity {
 					}
 				}
 			});
-			holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-				@Override
-				public boolean onLongClick(View v) {
-					return false;
-				}
-			});
 		}
 
 		private void fillQuestDefsRecursive(FortQuestItemDefinition questDef, List<FortQuestItemDefinition> outQuestDefs) {
@@ -408,16 +492,21 @@ public class ChallengeBundleActivity extends BaseActivity {
 			}
 
 			outStacks.add(chainedQuestItem);
-			String challenge_linked_quest_given = JsonUtils.getStringOr("challenge_linked_quest_given", chainedQuestItem.attributes, null);
+			String challengeLinkedQuestGiven = JsonUtils.getStringOr("challenge_linked_quest_given", chainedQuestItem.attributes, null);
 
-			if (challenge_linked_quest_given != null && !challenge_linked_quest_given.isEmpty()) {
-				fillQuestItemsRecursive(activity.questsFromProfile.get(challenge_linked_quest_given), outStacks);
+			if (challengeLinkedQuestGiven != null && !challengeLinkedQuestGiven.isEmpty()) {
+				fillQuestItemsRecursive(activity.questsFromProfile.get(challengeLinkedQuestGiven), outStacks);
 			}
 		}
 
 		@Override
+		public int getItemViewType(int position) {
+			return activity.cheatsheetUrl != null && position == data.size() ? 1 : 0;
+		}
+
+		@Override
 		public int getItemCount() {
-			return data.size();
+			return data.size() + (activity.cheatsheetUrl != null ? 1 : 0);
 		}
 
 		public void updateData(List<FortChallengeBundleItemDefinition.QuestInfo> data) {
@@ -429,12 +518,14 @@ public class ChallengeBundleActivity extends BaseActivity {
 			ViewGroup actions;
 			Button btnAssist;
 			Button btnReplace;
+			Button btnCheatsheet;
 
 			ChallengeViewHolder(View itemView) {
 				super(itemView);
 				actions = itemView.findViewById(R.id.quest_options);
 				btnAssist = itemView.findViewById(R.id.quest_btn_assist);
 				btnReplace = itemView.findViewById(R.id.quest_btn_replace);
+				btnCheatsheet = itemView.findViewById(R.id.log_out_button);
 			}
 		}
 	}

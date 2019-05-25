@@ -26,7 +26,8 @@ public abstract class BaseActivity extends Activity {
 		for (Map.Entry<String, FortItemStack> entry : activity.getThisApplication().profileManager.profileData.get("common_core").items.entrySet()) {
 			String templateId = entry.getValue().templateId;
 
-			if (templateId.equals("Currency:MtxComplimentary") || templateId.equals("Currency:MtxGiveaway") || templateId.equals("Currency:MtxPurchaseBonus")) {
+			// TODO v-bucks breakdown
+			if (templateId.equals("Currency:MtxComplimentary") || templateId.equals("Currency:MtxGiveaway") || templateId.equals("Currency:MtxPurchaseBonus") || templateId.equals("Currency:MtxPurchased")) {
 				vBucksQty += entry.getValue().quantity;
 			}
 		}

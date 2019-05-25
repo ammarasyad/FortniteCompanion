@@ -23,6 +23,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.R;
+import com.tb24.fn.event.LoggedOutEvent;
 import com.tb24.fn.model.AccountPrivacyResponse;
 import com.tb24.fn.model.CommonCoreProfileAttributes;
 import com.tb24.fn.model.EpicError;

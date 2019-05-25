@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
@@ -37,9 +38,8 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ComparisonChain;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
-import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.R;
+import com.tb24.fn.event.CalendarDataLoadedEvent;
 import com.tb24.fn.model.CalendarTimelineResponse;
 import com.tb24.fn.model.CommonCoreProfileAttributes;
 import com.tb24.fn.model.EpicError;
@@ -55,6 +55,9 @@ import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 import com.tb24.fn.view.UpdateEverySecondTextView;
 
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,13 +68,11 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Response;
 
 public class ItemShopActivity extends BaseActivity {
 	private static final String CONFIRM_PHRASE = "CONFIRM";
-	private static CalendarTimelineResponse.ClientEventState calendarData;
 	private boolean fakePurchases;
 	private SoundPool soundPool;
 	private int[] sounds;
@@ -106,7 +107,7 @@ public class ItemShopActivity extends BaseActivity {
 		list.post(new Runnable() {
 			@Override
 			public void run() {
-				layout = new GridLayoutManager(ItemShopActivity.this, (int) (list.getWidth() / Utils.dp(getResources(), 160)));
+				layout = new GridLayoutManager(ItemShopActivity.this, (int) (list.getWidth() / Utils.dp(getResources(), 180)));
 				layout.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
 					@Override
 					public int getSpanSize(int i) {
@@ -118,6 +119,7 @@ public class ItemShopActivity extends BaseActivity {
 		});
 		lc = new LoadingViewController(this, list, "");
 		load();
+		getThisApplication().eventBus.register(this);
 	}
 
 	private void load() {
@@ -157,37 +159,23 @@ public class ItemShopActivity extends BaseActivity {
 			}
 		}).start();
 
-		if (calendarData == null) {
-//			calendarCall = getThisApplication().fortnitePublicService.calendarTimeline();
-			// Escape retrofit because it glitched the cache resulting item shop timer not updating right after UTC midnight
-			calendarCall = getThisApplication().okHttpClient.newCall(new Request.Builder().url(FortniteCompanionApp.FORTNITE_PUBLIC_SERVICE + "/fortnite/api/calendar/v1/timeline").build());
-			new Thread() {
-				@Override
-				public void run() {
-					try {
-						final okhttp3.Response response = calendarCall.execute();
-
-						if (response.isSuccessful()) {
-							calendarData = getThisApplication().gson.fromJson(((CalendarTimelineResponse) getThisApplication().gson.fromJson(new JsonReader(response.body().charStream()), CalendarTimelineResponse.class)).channels.get("client-events").states[0].state, CalendarTimelineResponse.ClientEventState.class);
-							scheduleRefresh();
-						}
-					} catch (IOException ignored) {
-					}
-				}
-			}.start();
-		} else {
+		if (getThisApplication().calendarData != null) {
 			scheduleRefresh();
 		}
 	}
 
 	private void scheduleRefresh() {
-		long delta = calendarData.dailyStoreEnd.getTime() - System.currentTimeMillis();
+		long delta = getThisApplication().calendarData.dailyStoreEnd.getTime() - System.currentTimeMillis();
 
 		if (delta >= 0) {
+			if (scheduleRunnable != null) {
+				handler.removeCallbacks(scheduleRunnable);
+			}
+
 			handler.postDelayed(scheduleRunnable = new Runnable() {
 				@Override
 				public void run() {
-					calendarData = null;
+					getThisApplication().calendarData = null;
 					load();
 				}
 			}, delta);
@@ -255,6 +243,11 @@ public class ItemShopActivity extends BaseActivity {
 		}
 	}
 
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onCalendarDataLoaded(CalendarDataLoadedEvent event) {
+		scheduleRefresh();
+	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) getLayoutInflater().inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
@@ -320,6 +313,7 @@ public class ItemShopActivity extends BaseActivity {
 		super.onDestroy();
 		soundPool.release();
 		handler.removeCallbacks(scheduleRunnable);
+		getThisApplication().eventBus.unregister(this);
 
 		if (catalogCall != null) {
 			catalogCall.cancel();
@@ -368,6 +362,7 @@ public class ItemShopActivity extends BaseActivity {
 				((UpdateEverySecondTextView) holder.itemPrice).setTextSupplier(new Supplier<CharSequence>() {
 					@Override
 					public CharSequence get() {
+						CalendarTimelineResponse.ClientEventState calendarData = activity.getThisApplication().calendarData;
 						return calendarData == null ? "" : Utils.formatElapsedTime(activity, (isDaily ? calendarData.dailyStoreEnd : calendarData.weeklyStoreEnd).getTime() - System.currentTimeMillis(), true);
 					}
 				});
@@ -458,25 +453,9 @@ public class ItemShopActivity extends BaseActivity {
 			banner = JsonUtils.getStringOr("BannerOverride", item.meta, banner);
 
 			if (banner != null) {
-				switch (banner) {
-					case "Animated":
-						banner = "Animated!";
-						break;
-					case "Back":
-						banner = "It's Back!";
-						break;
-					case "CollectTheSet":
-						banner = "Collect the Set!";
-						break;
-					case "New":
-						banner = "New!";
-						break;
-					case "SelectableStyles":
-						banner = "Selectable Styles!";
-						break;
-					case "UnlockStyles":
-						banner = "Unlock Styles!";
-						break;
+				try {
+					banner = activity.getString(activity.getResources().getIdentifier("itemshop_banner_" + banner, "string", activity.getPackageName()));
+				} catch (Resources.NotFoundException ignored) {
 				}
 			}
 

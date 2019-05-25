@@ -60,7 +60,7 @@ public class ProfileActivity extends BaseActivity {
 								((TextView) findViewById(R.id.profile_external_auths)).setText(NEWLINE.join(Lists.transform(Arrays.asList(response.body()), new Function<ExternalAuth, String>() {
 									@Override
 									public String apply(@NullableDecl ExternalAuth input) {
-										return input == null ? "" : input.type + ":\n\u2022 Name: " + input.externalDisplayName + "\n\u2022 Added: " + Utils.formatDateSimple(input.dateAdded) + "\n\u2022 Last login: " + (input.lastLogin == null ? "N/A" : Utils.formatDateSimple(input.lastLogin));
+										return input == null ? "" : input.type + ":\n\u2022 Name: " + input.externalDisplayName + "\n\u2022 Added: " + (input.dateAdded == null ? "N/A" : Utils.formatDateSimple(input.dateAdded)) + "\n\u2022 Last login: " + (input.lastLogin == null ? "N/A" : Utils.formatDateSimple(input.lastLogin));
 									}
 								})));
 							}

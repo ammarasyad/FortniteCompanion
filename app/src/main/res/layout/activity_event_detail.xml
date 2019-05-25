@@ -52,17 +52,13 @@
 		android:textFontWeight="900"
 		android:textSize="18sp" />
 
-	<TextView
+	<LinearLayout
 		android:id="@+id/event_dates"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="16dp"
-		android:fontFamily="@font/burbank_small"
 		android:gravity="center_horizontal"
-		android:lineSpacingExtra="3dp"
-		android:textColor="?android:textColorPrimary"
-		android:textStyle="bold"
-		tools:text="Insert dates here\nNew line\nSo on..." />
+		android:orientation="vertical" />
 
 	<TextView
 		android:id="@+id/event_short_format_title"

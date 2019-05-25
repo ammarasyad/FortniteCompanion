@@ -8,6 +8,9 @@ import android.util.LruCache;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.stream.JsonReader;
+import com.tb24.fn.event.CalendarDataLoadedEvent;
+import com.tb24.fn.model.CalendarTimelineResponse;
 import com.tb24.fn.model.EventDownloadResponse;
 import com.tb24.fn.model.FortBasicDataResponse;
 import com.tb24.fn.model.FortItemStack;
@@ -26,8 +29,12 @@ import com.tb24.fn.util.Utils;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.IOException;
+
 import okhttp3.Cache;
+import okhttp3.Call;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -61,14 +68,16 @@ public class FortniteCompanionApp extends Application {
 	public ERegion eventDataRegion;
 	public Registry itemRegistry;
 	public ProfileManager profileManager;
+	public CalendarTimelineResponse calendarDataBase;
+	public CalendarTimelineResponse.ClientEventState calendarData;
+	private Call calendarCall;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		OkHttpClient.Builder builder = new OkHttpClient.Builder();
-		builder.cache(new Cache(getCacheDir(), 4 * 1024 * 1024));
-		builder.addInterceptor(new DefaultInterceptor(this));
-//		builder.addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY));
+		OkHttpClient.Builder builder = new OkHttpClient.Builder()
+				.cache(new Cache(getCacheDir(), 4 * 1024 * 1024))
+				.addInterceptor(new DefaultInterceptor(this));
 		Retrofit.Builder retrofitBuilder = new Retrofit.Builder().client(okHttpClient = builder.build()).addConverterFactory(GsonConverterFactory.create(gson));
 		fortniteContentWebsiteService = retrofitBuilder.baseUrl(FORTNITECONTENT_WEBSITE).build().create(FortniteContentWebsiteService.class);
 		fortnitePublicService = retrofitBuilder.baseUrl(FORTNITE_PUBLIC_SERVICE).build().create(FortnitePublicService.class);
@@ -103,5 +112,29 @@ public class FortniteCompanionApp extends Application {
 				.apply();
 		profileManager.profileData.clear();
 		eventData = null;
+	}
+
+	public void loadCalendarData() {
+		if (calendarData == null) {
+//			calendarCall = fortnitePublicService.calendarTimeline();
+			// Escape retrofit because it glitched the cache resulting item shop timer not updating right after UTC midnight
+			calendarCall = okHttpClient.newCall(new Request.Builder().url(FortniteCompanionApp.FORTNITE_PUBLIC_SERVICE + "/fortnite/api/calendar/v1/timeline").build());
+			new Thread() {
+				@Override
+				public void run() {
+					try {
+						final okhttp3.Response response = calendarCall.execute();
+
+						if (response.isSuccessful()) {
+							calendarDataBase = gson.fromJson(new JsonReader(response.body().charStream()), CalendarTimelineResponse.class);
+							calendarData = gson.fromJson(calendarDataBase.channels.get("client-events").states[0].state, CalendarTimelineResponse.ClientEventState.class);
+							response.body().close();
+							eventBus.post(new CalendarDataLoadedEvent(calendarData));
+						}
+					} catch (IOException ignored) {
+					}
+				}
+			}.start();
+		}
 	}
 }
