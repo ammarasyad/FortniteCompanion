@@ -1,16 +1,20 @@
 package com.tb24.fn.activity;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
@@ -43,6 +47,9 @@ import com.tb24.fn.model.ExchangeResponse;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.GameProfile;
 import com.tb24.fn.model.XGameProfile;
+import com.tb24.fn.model.assetdata.BannerColor;
+import com.tb24.fn.model.assetdata.BannerIcon;
+import com.tb24.fn.model.assetdata.FortHomebaseBannerColorMap;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
@@ -126,7 +133,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		loginBtn.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
 
 		if (loggedIn) {
-			updateLogInText("...");
+			updateLoginText("...");
 			profileLc.loading();
 			String accountId = prefs.getString("epic_account_id", "");
 			callMcpCommonPublic = getThisApplication().profileManager.requestFullProfileUpdate("common_public");
@@ -143,7 +150,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 							@Override
 							public void run() {
 								if (response.isSuccessful()) {
-									updateLogInText((getThisApplication().currentLoggedIn = response.body()).getDisplayName());
+									updateLoginText((getThisApplication().currentLoggedIn = response.body()).getDisplayName());
 								} else {
 									validateLoggedIn(EpicError.parse(response));
 								}
@@ -155,7 +162,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 				}
 			}.start();
 		} else {
-			updateLogInText(null);
+			updateLoginText(null);
 			profileLc.content();
 			openLogin();
 		}
@@ -164,7 +171,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onProfileUpdated(ProfileUpdatedEvent event) {
 		if (event.profileId.equals("common_public")) {
-			// TODO display self banner
+			// homebase name only that's unique to that profile id
 		} else if (event.profileId.equals("common_core")) {
 			menuVbucks.setVisible(true);
 			countAndSetVbucks(MainActivity.this, vBucksView);
@@ -229,6 +236,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		}
 	}
 
+	@SuppressLint("DefaultLocale")
 	private void displayAthenaLevelAndBattlePass() {
 		profileLc.content();
 
@@ -237,14 +245,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		}
 
 		TextView txtSeason = findViewById(R.id.p_season);
+		ImageView imgBanner = findViewById(R.id.p_banner);
 		ProgressBar xpBar = findViewById(R.id.p_xp_bar);
 		TextView txtLvlUpReward = findViewById(R.id.p_lvl_up_reward);
 		TextView txtXpProgress = findViewById(R.id.p_xp_progress);
 
 		AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileManager.profileData.get("athena").stats.attributesObj;
 		txtSeason.setBackground(new SeasonBackgroundDrawable(this));
-		txtSeason.setText("Season " + attributes.season_num);
-		((TextView) findViewById(R.id.p_level)).setText(String.valueOf(attributes.level));
+		txtSeason.setText(String.format("Season %,d", attributes.season_num));
+		imgBanner.setImageBitmap(makeBannerIcon(this, attributes.banner_icon, attributes.banner_color));
+		((TextView) findViewById(R.id.p_level)).setText(String.format("%,d", attributes.level));
 		boolean battlePassMax = attributes.book_level == 100;
 		boolean levelMax = attributes.level == 100;
 
@@ -260,19 +270,52 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			Utils.progressBarSetProgressAnimateFromEmpty(xpBar, attributes.xp);
 			txtLvlUpReward.setVisibility(View.VISIBLE);
 			((ImageView) findViewById(R.id.p_lvl_up_reward_img)).setImageBitmap(Utils.loadTga(this, battlePassMax ? "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-SeasonalXP.T-FNBR-SeasonalXP" : "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePoints.T-FNBR-BattlePoints"));
-			txtLvlUpReward.setText(String.valueOf((next % 10 == 0 ? 10 : next % 5 == 0 ? 5 : 2) * (battlePassMax ? 100 : 1)));
+			txtLvlUpReward.setText(String.format("%,d", (next % 10 == 0 ? 10 : next % 5 == 0 ? 5 : 2) * (battlePassMax ? 100 : 1)));
 			txtXpProgress.setText(String.format("%,d / %,d", attributes.xp, maxXP));
 		}
 
 		findViewById(R.id.p_battle_pass_container).setBackground(new BattlePassBackgroundDrawable(this));
 		((ImageView) findViewById(R.id.p_battle_pass_img)).setImageBitmap(Utils.loadTga(this, attributes.book_purchased ? "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePass.T-FNBR-BattlePass" : "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePass-Default.T-FNBR-BattlePass-Default"));
 		((TextView) findViewById(R.id.p_battle_pass_type)).setText(attributes.book_purchased ? "Battle Pass" : "Free Pass");
-		((TextView) findViewById(R.id.p_battle_pass_tier)).setText(String.valueOf(attributes.book_level));
+		((TextView) findViewById(R.id.p_battle_pass_tier)).setText(String.format("%,d", attributes.book_level));
 		((ImageView) findViewById(R.id.p_battle_pass_stars_img)).setImageBitmap(Utils.loadTga(this, "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePoints.T-FNBR-BattlePoints"));
-		((TextView) findViewById(R.id.p_battle_pass_stars)).setText(battlePassMax ? "MAX" : TextUtils.concat(Utils.color(String.valueOf(attributes.book_xp), 0xFFFFFF66), " / 10"));
+		((TextView) findViewById(R.id.p_battle_pass_stars)).setText(battlePassMax ? "MAX" : TextUtils.concat(Utils.color(String.format("%,d", attributes.book_xp), 0xFFFFFF66), " / 10"));
 	}
 
-	private void updateLogInText(String displayName) {
+	private Bitmap makeBannerIcon(BaseActivity activity, String bannerIcon, String bannerColor) {
+		BannerIcon bannerIconDef = getThisApplication().bannerIcons.get(bannerIcon);
+
+		if (bannerIconDef != null) {
+			Bitmap bitmap = Utils.loadTga(this, bannerIconDef.SmallImage.asset_path_name).copy(Bitmap.Config.ARGB_8888, true);
+
+			if (bannerColor != null) {
+				int color1 = 0xFF000000;
+				int color2 = 0xFF000000;
+				BannerColor bannerColorDef = getThisApplication().bannerColors.get(bannerColor);
+
+				if (bannerColorDef != null) {
+					FortHomebaseBannerColorMap.ColorEntry colorEntry = getThisApplication().bannerColorMap.ColorMap.get(bannerColorDef.ColorKeyName);
+
+					if (colorEntry != null) {
+						color1 = colorEntry.PrimaryColor.asInt();
+						color2 = colorEntry.SecondaryColor.asInt();
+					}
+				}
+
+				Canvas canvas = new Canvas(bitmap);
+				Paint paint = new Paint();
+				paint.setShader(new LinearGradient(0.0F, 0.0F, 0.0F, bitmap.getHeight(), color1, color2, Shader.TileMode.CLAMP));
+				paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SCREEN));
+				canvas.drawPaint(paint);
+			}
+
+			return bitmap;
+		} else {
+			return null;
+		}
+	}
+
+	private void updateLoginText(String displayName) {
 		loginText.setVisibility(displayName == null ? View.GONE : View.VISIBLE);
 		loginText.setText(displayName);
 	}
@@ -462,18 +505,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	private static class BattlePassBackgroundDrawable extends Drawable {
 		private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		private final Path path = new Path();
-		private final float indent;
+		private final float density;
 
 		public BattlePassBackgroundDrawable(Context ctx) {
-			indent = Utils.dp(ctx.getResources(), 6);
+			density = ctx.getResources().getDisplayMetrics().density;
 		}
 
 		@Override
 		public void draw(@NonNull Canvas canvas) {
 			Rect rect = getBounds();
+			float off = density * 12.0F;
 			path.reset();
-			path.moveTo(rect.width(), 0.0F + indent);
-			path.lineTo(0.0F, 0.0F);
+			path.moveTo(rect.width(), off + 0.0F + density * 4.0F);
+			path.lineTo(0.0F, off + 0.0F);
 			path.lineTo(0.0F, rect.height());
 			path.lineTo(rect.width(), rect.height());
 			path.close();

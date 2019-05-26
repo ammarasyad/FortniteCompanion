@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -59,7 +60,7 @@ public class Registry {
 						}
 
 						fileName = file;
-						itemRegistry.put(entry.getKey(), file.substring(0, dotIndex).toLowerCase(), GSON.fromJson(Utils.getStringFromAssets(assets, path + '/' + file), JsonElement.class));
+						itemRegistry.put(entry.getKey(), file.substring(0, dotIndex).toLowerCase(Locale.US), GSON.fromJson(Utils.getStringFromAssets(assets, path + '/' + file), JsonElement.class));
 					}
 				} catch (Throwable e) {
 					Log.w("Registry", "Failed registering " + fileName, e);
@@ -101,7 +102,7 @@ public class Registry {
 
 	public JsonElement get(String namespacedString) {
 		String[] split = namespacedString.split(":");
-		return itemRegistry.get(split[0], split[1].toLowerCase());
+		return itemRegistry.get(split[0], split[1].toLowerCase(Locale.US));
 	}
 
 	public Collection<JsonElement> getAll() {

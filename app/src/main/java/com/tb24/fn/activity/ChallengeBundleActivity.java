@@ -9,6 +9,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.TooltipCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,6 +82,8 @@ public class ChallengeBundleActivity extends BaseActivity {
 		ProgressBar questProgressBar = view.findViewById(R.id.quest_progress_bar);
 		TextView questProgressText = view.findViewById(R.id.quest_progress_text);
 		View questRewardParent = view.findViewById(R.id.quest_reward_parent);
+		ImageView rewardIcon = view.findViewById(R.id.quest_reward_icon);
+		TextView rewardText = view.findViewById(R.id.quest_reward_text);
 		boolean done = item.attributes != null && JsonUtils.getStringOr("quest_state", item.attributes, "").equals("Claimed");
 		view.findViewById(R.id.quest_main_container).setAlpha(done ? 0.6F : 1.0F);
 		view.findViewById(R.id.quest_done).setVisibility(done ? View.VISIBLE : View.GONE);
@@ -131,12 +134,11 @@ public class ChallengeBundleActivity extends BaseActivity {
 
 		if (quest.Rewards == null) {
 			questRewardParent.setVisibility(View.GONE);
+			questRewardParent.setOnLongClickListener(null);
 		} else {
 			questRewardParent.setVisibility(View.VISIBLE);
 			FortItemStack rewardItem = quest.Rewards[0].asItemStack();
 			JsonElement jsonElement = activity.getThisApplication().itemRegistry.get(rewardItem.templateId);
-			ImageView rewardIcon = view.findViewById(R.id.quest_reward_icon);
-			TextView rewardText = view.findViewById(R.id.quest_reward_text);
 			int size;
 
 			if (rewardItem.getIdCategory().equals("AccountResource") || rewardItem.quantity > 1) {
@@ -148,12 +150,16 @@ public class ChallengeBundleActivity extends BaseActivity {
 			}
 
 			size = (int) Utils.dp(activity.getResources(), size);
-			rewardIcon.setLayoutParams(new LinearLayout.LayoutParams(size, size));
+			rewardIcon.setLayoutParams(new LinearLayout.LayoutParams((int) Utils.dp(activity.getResources(), 56), size));
 
 			if (jsonElement != null) {
-				Bitmap bitmapImageFromItemStackData = ItemUtils.getBitmapImageFromItemStackData(activity, rewardItem, jsonElement.getAsJsonArray().get(0).getAsJsonObject());
+				JsonObject jsonObject = jsonElement.getAsJsonArray().get(0).getAsJsonObject();
+				Bitmap bitmapImageFromItemStackData = ItemUtils.getBitmapImageFromItemStackData(activity, rewardItem, jsonObject);
 				rewardIcon.setImageBitmap(bitmapImageFromItemStackData);
 				questRewardParent.setVisibility(bitmapImageFromItemStackData == null ? View.GONE : View.VISIBLE);
+				TooltipCompat.setTooltipText(questRewardParent, JsonUtils.getStringOr("DisplayName", jsonObject, ""));
+			} else {
+				TooltipCompat.setTooltipText(questRewardParent, null);
 			}
 
 			rewardText.setText(String.valueOf(rewardItem.quantity));
@@ -204,6 +210,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 		}
 
 		String bundleTemplateId = getIntent().getStringExtra("a");
+		questsFromProfile.clear();
 		List<FortChallengeBundleItemDefinition.QuestInfo> data;
 
 		if (bundleTemplateId.equals("Quest:" + VALUE_DAILY_CHALLENGES)) {
@@ -211,7 +218,8 @@ public class ChallengeBundleActivity extends BaseActivity {
 			data = new ArrayList<>();
 
 			for (Map.Entry<String, FortItemStack> entry : profile.items.entrySet()) {
-				if (entry.getValue().getIdCategory().equals("Quest") && entry.getValue().getDefData() != null && entry.getValue().getDefData().export_type.equals("AthenaDailyQuestDefinition")) {
+				if (entry.getValue().getIdCategory().equals("Quest") && entry.getValue().getDefData() != null && entry.getValue().getDefData().export_type.equals("AthenaDailyQuestDefinition") && entry.getValue().attributes != null && JsonUtils.getStringOr("quest_state", entry.getValue().attributes, "").equals("Active")) {
+					questsFromProfile.put(entry.getKey(), entry.getValue());
 					FortChallengeBundleItemDefinition.QuestInfo questInfo = new FortChallengeBundleItemDefinition.QuestInfo();
 					String name = entry.getValue().getIdName();
 					questInfo.QuestDefinition = new AssetReference("/Game/Athena/Items/Quests/DailyQuests/" + name + '.' + name, "");
@@ -352,10 +360,11 @@ public class ChallengeBundleActivity extends BaseActivity {
 
 			TextView questTitle = holder.itemView.findViewById(R.id.quest_title);
 			boolean isChain = questDefChain.size() > 1;
-			boolean done = activeQuestItem.attributes != null && JsonUtils.getStringOr("quest_state", activeQuestItem.attributes, "").equals("Claimed");
-			final boolean isEligibleForReplacement = !done && quest.export_type.equals("AthenaDailyQuestDefinition") && ((AthenaProfileAttributes) activity.profileData.stats.attributesObj).quest_manager.dailyQuestRerolls > 0;
+			String questState = activeQuestItem.attributes == null ? "" : JsonUtils.getStringOr("quest_state", activeQuestItem.attributes, "");
+			boolean done = questState.equals("Claimed");
+			final boolean isEligibleForReplacement = !done && quest.export_type.equals("AthenaDailyQuestDefinition") && questState.equals("Active") && ((AthenaProfileAttributes) activity.profileData.stats.attributesObj).quest_manager.dailyQuestRerolls > 0;
 			final boolean isEligibleForAssist = !done && quest.GameplayTags != null && Arrays.binarySearch(quest.GameplayTags.gameplay_tags, "Quest.Metadata.PartyAssist") >= 0;
-			questTitle.setText(TextUtils.concat(isChain ? Utils.color(String.format("Stage %d of %d", questItemChain.size(), questDefChain.size()), Utils.getTextColorPrimary(activity)) : "", (isChain ? " - " : "") + questTitle.getText()));
+			questTitle.setText(TextUtils.concat(isChain ? Utils.color(String.format("Stage %,d of %,d", questItemChain.size(), questDefChain.size()), Utils.getTextColorPrimary(activity)) : "", (isChain ? " - " : "") + questTitle.getText()));
 			holder.itemView.findViewById(R.id.quest_progress_parent).setVisibility(done ? View.GONE : View.VISIBLE);
 
 			if (entryDef.QuestUnlockType != null && entryDef.QuestUnlockType.equals("EChallengeBundleQuestUnlockType::DaysFromEventStart")) {
@@ -477,6 +486,10 @@ public class ChallengeBundleActivity extends BaseActivity {
 			}
 
 			outQuestDefs.add(questDef);
+
+			if (questDef.Rewards == null) {
+				return;
+			}
 
 			for (FortQuestItemDefinition.Reward reward : questDef.Rewards) {
 				FortItemStack stack = reward.asItemStack();

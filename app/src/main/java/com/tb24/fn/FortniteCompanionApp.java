@@ -8,6 +8,7 @@ import android.util.LruCache;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
 import com.tb24.fn.event.CalendarDataLoadedEvent;
 import com.tb24.fn.model.CalendarTimelineResponse;
@@ -17,6 +18,9 @@ import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.RarityData;
 import com.tb24.fn.model.XGameProfile;
+import com.tb24.fn.model.assetdata.BannerColor;
+import com.tb24.fn.model.assetdata.BannerIcon;
+import com.tb24.fn.model.assetdata.FortHomebaseBannerColorMap;
 import com.tb24.fn.network.AccountPublicService;
 import com.tb24.fn.network.DefaultInterceptor;
 import com.tb24.fn.network.EventsPublicServiceLive;
@@ -30,6 +34,9 @@ import com.tb24.fn.util.Utils;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 import okhttp3.Cache;
 import okhttp3.Call;
@@ -70,6 +77,9 @@ public class FortniteCompanionApp extends Application {
 	public ProfileManager profileManager;
 	public CalendarTimelineResponse calendarDataBase;
 	public CalendarTimelineResponse.ClientEventState calendarData;
+	public FortHomebaseBannerColorMap bannerColorMap;
+	public Map<String, BannerColor> bannerColors;
+	public Map<String, BannerIcon> bannerIcons;
 	private Call calendarCall;
 
 	@Override
@@ -90,7 +100,27 @@ public class FortniteCompanionApp extends Application {
 		ItemUtils.sUserFacingTagsData = gson.fromJson(Utils.getStringFromAssets(getAssets(), "Game/Athena/Items/Cosmetics/Metadata/CosmeticUserFacingTags.json"), JsonArray.class).get(0).getAsJsonObject();
 		sRarityData = gson.fromJson(Utils.getStringFromAssets(getAssets(), "RarityData.json"), RarityData[].class);
 //		dbgRarityData();
+		loadBannerData();
 		profileManager = new ProfileManager(this);
+	}
+
+	private void loadBannerData() {
+		bannerColorMap = FortHomebaseBannerColorMap.parse(gson.fromJson(Utils.getStringFromAssets(getAssets(), "Game/Banners/BannerColorMap.json"), JsonElement.class), gson);
+		bannerColors = new HashMap<>();
+
+		for (Map.Entry<String, JsonElement> entry : gson.fromJson(Utils.getStringFromAssets(getAssets(), "Game/Banners/BannerColors.json"), JsonArray.class).get(0).getAsJsonObject().entrySet()) {
+			if (entry.getValue().isJsonObject()) {
+				bannerColors.put(entry.getKey().toLowerCase(Locale.US), gson.fromJson(entry.getValue(), BannerColor.class));
+			}
+		}
+
+		bannerIcons = new HashMap<>();
+
+		for (Map.Entry<String, JsonElement> entry : gson.fromJson(Utils.getStringFromAssets(getAssets(), "Game/Banners/BannerIcons.json"), JsonArray.class).get(0).getAsJsonObject().entrySet()) {
+			if (entry.getValue().isJsonObject()) {
+				bannerIcons.put(entry.getKey().toLowerCase(Locale.US), gson.fromJson(entry.getValue(), BannerIcon.class));
+			}
+		}
 	}
 
 //	private void dbgRarityData() {

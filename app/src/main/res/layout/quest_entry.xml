@@ -48,7 +48,8 @@
 			<ImageView
 				android:id="@+id/quest_reward_icon"
 				android:layout_width="36dp"
-				android:layout_height="36dp" />
+				android:layout_height="36dp"
+				android:scaleType="fitCenter" />
 
 			<TextView
 				android:id="@+id/quest_reward_text"

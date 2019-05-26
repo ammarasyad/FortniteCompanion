@@ -3,6 +3,7 @@ package com.tb24.fn.model.assetdata;
 public class FortChallengeBundleItemDefinition extends FortItemDefinition {
 	public QuestInfo[] QuestInfos;
 	public String CalendarEventTag;
+	public String CalendarEventName;
 	public BundleCompletionReward[] BundleCompletionRewards;
 	public DisplayStyle DisplayStyle;
 	public AssetReference BundleHidenImageMaterial;

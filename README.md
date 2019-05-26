@@ -26,6 +26,7 @@ A mini Fortnite client for Android.
   A: I still haven’t figured out the behind the scenes of that thing, so it isn’t possible yet. If you’re a good reverse engineer you can help me find out how POST .../EquipBattleRoyaleCustomization works and make a pull request here.
 
 ## To-do
+* View all owned banners and apply them
 * Apply cosmetic item
 * Set Support a Creator code
 * Set party assist
