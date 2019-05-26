@@ -684,9 +684,9 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 		@Override
 		public void draw(Canvas canvas, Paint paint) {
 			path.reset();
-			path.moveTo(getWidth(), 0);
-			path.lineTo(indent, 0);
-			path.lineTo(0, getHeight());
+			path.moveTo(getWidth(), 0.0F);
+			path.lineTo(indent, 0.0F);
+			path.lineTo(0.0F, getHeight());
 			path.lineTo(getWidth() - indent, getHeight());
 			path.close();
 			canvas.drawPath(path, paint);

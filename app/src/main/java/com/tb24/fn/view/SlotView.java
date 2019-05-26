@@ -59,7 +59,7 @@ public class SlotView extends RelativeLayout {
 			getDrawingRect(rect);
 			int by = (int) -paint.getStrokeWidth() + one + 1;
 			rect.inset(by, by);
-			paint.setColor(isHovered() ? 0xFFFFFFFF : 0xFFFFF500);
+			paint.setColor(isPressed() ? 0xFFFFFFFF : 0xFFFFF500);
 			canvas.drawRect(rect, paint);
 		}
 	}

@@ -1,12 +1,25 @@
 package com.tb24.fn.activity;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
+import android.graphics.Shader;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -223,36 +236,40 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			return;
 		}
 
+		TextView txtSeason = findViewById(R.id.p_season);
+		ProgressBar xpBar = findViewById(R.id.p_xp_bar);
+		TextView txtLvlUpReward = findViewById(R.id.p_lvl_up_reward);
+		TextView txtXpProgress = findViewById(R.id.p_xp_progress);
+
 		AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileManager.profileData.get("athena").stats.attributesObj;
-		((TextView) findViewById(R.id.p_season)).setText("Season " + attributes.season_num);
+		txtSeason.setBackground(new SeasonBackgroundDrawable(this));
+		txtSeason.setText("Season " + attributes.season_num);
 		((TextView) findViewById(R.id.p_level)).setText(String.valueOf(attributes.level));
 		boolean battlePassMax = attributes.book_level == 100;
 		boolean levelMax = attributes.level == 100;
-		ProgressBar progressBar = findViewById(R.id.p_xp_bar);
-		View lvlUpReward = findViewById(R.id.p_lvl_up_reward);
-		TextView xpProgress = findViewById(R.id.p_xp_progress);
 
 		if (levelMax) {
-			progressBar.setMax(1);
-			progressBar.setProgress(1);
-			lvlUpReward.setVisibility(View.GONE);
-			xpProgress.setText("MAX");
+			xpBar.setMax(1);
+			xpBar.setProgress(1);
+			txtLvlUpReward.setVisibility(View.GONE);
+			txtXpProgress.setText("MAX");
 		} else {
 			int maxXP = FortniteCompanionApp.MAX_XPS_S8[attributes.level - 1];
 			int next = attributes.book_level + 1;
-			progressBar.setMax(maxXP);
-			Utils.progressBarSetProgressAnimateFromEmpty(progressBar, attributes.xp);
-			lvlUpReward.setVisibility(View.VISIBLE);
+			xpBar.setMax(maxXP);
+			Utils.progressBarSetProgressAnimateFromEmpty(xpBar, attributes.xp);
+			txtLvlUpReward.setVisibility(View.VISIBLE);
 			((ImageView) findViewById(R.id.p_lvl_up_reward_img)).setImageBitmap(Utils.loadTga(this, battlePassMax ? "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-SeasonalXP.T-FNBR-SeasonalXP" : "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePoints.T-FNBR-BattlePoints"));
-			((TextView) lvlUpReward).setText(String.valueOf((next % 10 == 0 ? 10 : next % 5 == 0 ? 5 : 2) * (battlePassMax ? 100 : 1)));
-			xpProgress.setText(String.format("%,d / %,d", attributes.xp, maxXP));
+			txtLvlUpReward.setText(String.valueOf((next % 10 == 0 ? 10 : next % 5 == 0 ? 5 : 2) * (battlePassMax ? 100 : 1)));
+			txtXpProgress.setText(String.format("%,d / %,d", attributes.xp, maxXP));
 		}
 
+		findViewById(R.id.p_battle_pass_container).setBackground(new BattlePassBackgroundDrawable(this));
 		((ImageView) findViewById(R.id.p_battle_pass_img)).setImageBitmap(Utils.loadTga(this, attributes.book_purchased ? "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePass.T-FNBR-BattlePass" : "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePass-Default.T-FNBR-BattlePass-Default"));
 		((TextView) findViewById(R.id.p_battle_pass_type)).setText(attributes.book_purchased ? "Battle Pass" : "Free Pass");
 		((TextView) findViewById(R.id.p_battle_pass_tier)).setText(String.valueOf(attributes.book_level));
 		((ImageView) findViewById(R.id.p_battle_pass_stars_img)).setImageBitmap(Utils.loadTga(this, "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePoints.T-FNBR-BattlePoints"));
-		((TextView) findViewById(R.id.p_battle_pass_stars)).setText(battlePassMax ? "MAX" : (attributes.book_xp + " / 10"));
+		((TextView) findViewById(R.id.p_battle_pass_stars)).setText(battlePassMax ? "MAX" : TextUtils.concat(Utils.color(String.valueOf(attributes.book_xp), 0xFFFFFF66), " / 10"));
 	}
 
 	private void updateLogInText(String displayName) {
@@ -400,5 +417,83 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		}
 
 		return false;
+	}
+
+	private static class SeasonBackgroundDrawable extends Drawable {
+		private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		private final Path path = new Path();
+		private final float density;
+
+		public SeasonBackgroundDrawable(Context ctx) {
+			density = ctx.getResources().getDisplayMetrics().density;
+		}
+
+		@Override
+		public void draw(@NonNull Canvas canvas) {
+			Rect rect = getBounds();
+			path.reset();
+			path.moveTo(rect.width(), 0.0F + 2.0F * density);
+			path.lineTo(rect.width() / 2.0F - density, 6.0F * density);
+			path.lineTo(rect.width() / 2.0F + density, 0);
+			path.lineTo(0.0F, 2.0F * density);
+			path.lineTo(0.0F, rect.height());
+			path.lineTo(rect.width(), rect.height() - 3.0F * density);
+			path.close();
+			paint.setShader(new LinearGradient(0.0F, 0.0F, rect.width(), 0.0F, 0xFF1D66CC, 0xFF4190E2, Shader.TileMode.CLAMP));
+			canvas.drawPath(path, paint);
+		}
+
+		@Override
+		public void setAlpha(int alpha) {
+			paint.setAlpha(alpha);
+		}
+
+		@Override
+		public void setColorFilter(@Nullable ColorFilter colorFilter) {
+			paint.setColorFilter(colorFilter);
+		}
+
+		@Override
+		public int getOpacity() {
+			return PixelFormat.OPAQUE;
+		}
+	}
+
+	private static class BattlePassBackgroundDrawable extends Drawable {
+		private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		private final Path path = new Path();
+		private final float indent;
+
+		public BattlePassBackgroundDrawable(Context ctx) {
+			indent = Utils.dp(ctx.getResources(), 6);
+		}
+
+		@Override
+		public void draw(@NonNull Canvas canvas) {
+			Rect rect = getBounds();
+			path.reset();
+			path.moveTo(rect.width(), 0.0F + indent);
+			path.lineTo(0.0F, 0.0F);
+			path.lineTo(0.0F, rect.height());
+			path.lineTo(rect.width(), rect.height());
+			path.close();
+			paint.setShader(new LinearGradient(0.0F, 0.0F, rect.width(), 0.0F, 0xFFC87E27, 0xFF863C20, Shader.TileMode.CLAMP));
+			canvas.drawPath(path, paint);
+		}
+
+		@Override
+		public void setAlpha(int alpha) {
+			paint.setAlpha(alpha);
+		}
+
+		@Override
+		public void setColorFilter(@Nullable ColorFilter colorFilter) {
+			paint.setColorFilter(colorFilter);
+		}
+
+		@Override
+		public int getOpacity() {
+			return PixelFormat.OPAQUE;
+		}
 	}
 }

@@ -197,17 +197,17 @@ public class ItemShopActivity extends BaseActivity {
 				Collections.sort(catalogEntries, new Comparator<FortCatalogResponse.CatalogEntry>() {
 					@Override
 					public int compare(FortCatalogResponse.CatalogEntry o1, FortCatalogResponse.CatalogEntry o2) {
-						FortItemDefinition defData = o1.itemGrants[0].getDefData();
-						FortItemDefinition defData1 = o2.itemGrants[0].getDefData();
+						FortItemDefinition defData1 = o1.itemGrants[0].getDefData();
+						FortItemDefinition defData2 = o2.itemGrants[0].getDefData();
 						EFortRarity rarity1 = EFortRarity.COMMON;
 						EFortRarity rarity2 = EFortRarity.COMMON;
 
-						if (defData != null) {
-							rarity1 = EFortRarity.from(defData.Rarity);
+						if (defData1 != null) {
+							rarity1 = EFortRarity.from(defData1.Rarity);
 						}
 
-						if (defData1 != null) {
-							rarity2 = EFortRarity.from(defData1.Rarity);
+						if (defData2 != null) {
+							rarity2 = EFortRarity.from(defData2.Rarity);
 						}
 
 						return ComparisonChain.start().compare(rarity2, rarity1).compare(o2.prices[0].basePrice, o1.prices[0].basePrice).compare(o1.itemGrants[0].getIdName(), o2.itemGrants[0].getIdName()).result();

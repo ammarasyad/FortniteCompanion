@@ -683,29 +683,33 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			data.add(EMPTY_ITEM);
 		}
 
-		data.addAll(chain.toSortedList(new Comparator<FortItemStack>() {
-			@Override
-			public int compare(FortItemStack o1, FortItemStack o2) {
-				FortItemDefinition defData = o1.getDefData();
-				FortItemDefinition defData1 = o2.getDefData();
-				EFortRarity rarity1 = EFortRarity.COMMON;
-				EFortRarity rarity2 = EFortRarity.COMMON;
-
-				if (defData != null) {
-					rarity1 = EFortRarity.from(defData.Rarity);
-				}
-
-				if (defData1 != null) {
-					rarity2 = EFortRarity.from(defData1.Rarity);
-				}
-
-				return ComparisonChain.start().compareTrueFirst(JsonUtils.getBooleanOr("favorite", o1.attributes, false), JsonUtils.getBooleanOr("favorite", o2.attributes, false)).compare(o1.getIdCategory(), o2.getIdCategory()).compare(rarity2, rarity1).compare(o1.getIdName(), o2.getIdName()).result();
-			}
-		}));
-
 		if (randomItem != null) {
 			data.add(randomItem);
 		}
+
+		data.addAll(chain.toSortedList(new Comparator<FortItemStack>() {
+			@Override
+			public int compare(FortItemStack o1, FortItemStack o2) {
+				FortItemDefinition defData1 = o1.getDefData();
+				FortItemDefinition defData2 = o2.getDefData();
+				EFortRarity rarity1 = EFortRarity.COMMON;
+				EFortRarity rarity2 = EFortRarity.COMMON;
+				String displayName1 = o1.getIdName();
+				String displayName2 = o1.getIdName();
+
+				if (defData1 != null) {
+					rarity1 = EFortRarity.from(defData1.Rarity);
+					displayName1 = defData1.DisplayName;
+				}
+
+				if (defData2 != null) {
+					rarity2 = EFortRarity.from(defData2.Rarity);
+					displayName2 = defData2.DisplayName;
+				}
+
+				return ComparisonChain.start().compareTrueFirst(JsonUtils.getBooleanOr("favorite", o1.attributes, false), JsonUtils.getBooleanOr("favorite", o2.attributes, false)).compare(o1.getIdCategory(), o2.getIdCategory()).compare(rarity2, rarity1).compare(displayName1, displayName2).result();
+			}
+		}));
 
 		if (adapter == null) {
 			list.setAdapter(adapter = new LockerAdapter(this, data));
