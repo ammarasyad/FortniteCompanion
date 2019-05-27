@@ -2,6 +2,12 @@ package com.tb24.fn.activity;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Shader;
 import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -21,6 +27,9 @@ import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
+import com.tb24.fn.model.assetdata.BannerColor;
+import com.tb24.fn.model.assetdata.BannerIcon;
+import com.tb24.fn.model.assetdata.FortHomebaseBannerColorMap;
 import com.tb24.fn.util.ItemUtils;
 import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
@@ -98,6 +107,39 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 
 		// TODO blend the red and green colors
 		return path == null ? null : Utils.loadTga(activity, path);
+	}
+
+	public static Bitmap makeBannerIcon(BaseActivity activity, String bannerIcon, String bannerColor) {
+		BannerIcon bannerIconDef = activity.getThisApplication().bannerIcons.get(bannerIcon);
+
+		if (bannerIconDef != null) {
+			Bitmap bitmap = Utils.loadTga(activity, bannerIconDef.SmallImage.asset_path_name).copy(Bitmap.Config.ARGB_8888, true);
+
+			if (bannerColor != null) {
+				int color1 = 0xFF000000;
+				int color2 = 0xFF000000;
+				BannerColor bannerColorDef = activity.getThisApplication().bannerColors.get(bannerColor);
+
+				if (bannerColorDef != null) {
+					FortHomebaseBannerColorMap.ColorEntry colorEntry = activity.getThisApplication().bannerColorMap.ColorMap.get(bannerColorDef.ColorKeyName);
+
+					if (colorEntry != null) {
+						color1 = colorEntry.PrimaryColor.asInt();
+						color2 = colorEntry.SecondaryColor.asInt();
+					}
+				}
+
+				Canvas canvas = new Canvas(bitmap);
+				Paint paint = new Paint();
+				paint.setShader(new LinearGradient(0.0F, 0.0F, 0.0F, bitmap.getHeight(), color1, color2, Shader.TileMode.CLAMP));
+				paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SCREEN));
+				canvas.drawPaint(paint);
+			}
+
+			return bitmap;
+		} else {
+			return null;
+		}
 	}
 
 	@Override

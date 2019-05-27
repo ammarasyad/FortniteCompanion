@@ -6,23 +6,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.Menu;
@@ -36,20 +31,21 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.R;
 import com.tb24.fn.event.LoggedOutEvent;
 import com.tb24.fn.event.ProfileUpdateFailedEvent;
 import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
+import com.tb24.fn.model.CommonPublicProfileAttributes;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.ExchangeResponse;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.GameProfile;
 import com.tb24.fn.model.XGameProfile;
-import com.tb24.fn.model.assetdata.BannerColor;
-import com.tb24.fn.model.assetdata.BannerIcon;
-import com.tb24.fn.model.assetdata.FortHomebaseBannerColorMap;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
@@ -170,14 +166,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onProfileUpdated(ProfileUpdatedEvent event) {
-		if (event.profileId.equals("common_public")) {
-			// homebase name only that's unique to that profile id
-		} else if (event.profileId.equals("common_core")) {
-			menuVbucks.setVisible(true);
-			countAndSetVbucks(MainActivity.this, vBucksView);
-			findViewById(R.id.main_screen_btn_item_shop).setEnabled(event.profileObj != null);
-		} else if (event.profileId.equals("athena")) {
-			displayAthenaLevelAndBattlePass();
+		switch (event.profileId) {
+			case "common_public":
+				// homebase name only that's unique to that profile id
+				CommonPublicProfileAttributes attributes = (CommonPublicProfileAttributes) event.profileObj.stats.attributesObj;
+				((ImageView) findViewById(R.id.p_banner)).setImageBitmap(LockerActivity.makeBannerIcon(this, attributes.banner_icon, attributes.banner_color));
+				break;
+			case "common_core":
+				menuVbucks.setVisible(true);
+				countAndSetVbucks(MainActivity.this, vBucksView);
+				findViewById(R.id.main_screen_btn_item_shop).setEnabled(event.profileObj != null);
+				break;
+			case "athena":
+				displayAthenaLevelAndBattlePass();
+				break;
 		}
 	}
 
@@ -245,7 +247,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		}
 
 		TextView txtSeason = findViewById(R.id.p_season);
-		ImageView imgBanner = findViewById(R.id.p_banner);
 		ProgressBar xpBar = findViewById(R.id.p_xp_bar);
 		TextView txtLvlUpReward = findViewById(R.id.p_lvl_up_reward);
 		TextView txtXpProgress = findViewById(R.id.p_xp_progress);
@@ -253,7 +254,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileManager.profileData.get("athena").stats.attributesObj;
 		txtSeason.setBackground(new SeasonBackgroundDrawable(this));
 		txtSeason.setText(String.format("Season %,d", attributes.season_num));
-		imgBanner.setImageBitmap(makeBannerIcon(this, attributes.banner_icon, attributes.banner_color));
 		((TextView) findViewById(R.id.p_level)).setText(String.format("%,d", attributes.level));
 		boolean battlePassMax = attributes.book_level == 100;
 		boolean levelMax = attributes.level == 100;
@@ -280,39 +280,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		((TextView) findViewById(R.id.p_battle_pass_tier)).setText(String.format("%,d", attributes.book_level));
 		((ImageView) findViewById(R.id.p_battle_pass_stars_img)).setImageBitmap(Utils.loadTga(this, "/Game/UI/Foundation/Textures/Icons/Items/T-FNBR-BattlePoints.T-FNBR-BattlePoints"));
 		((TextView) findViewById(R.id.p_battle_pass_stars)).setText(battlePassMax ? "MAX" : TextUtils.concat(Utils.color(String.format("%,d", attributes.book_xp), 0xFFFFFF66), " / 10"));
-	}
-
-	private Bitmap makeBannerIcon(BaseActivity activity, String bannerIcon, String bannerColor) {
-		BannerIcon bannerIconDef = getThisApplication().bannerIcons.get(bannerIcon);
-
-		if (bannerIconDef != null) {
-			Bitmap bitmap = Utils.loadTga(this, bannerIconDef.SmallImage.asset_path_name).copy(Bitmap.Config.ARGB_8888, true);
-
-			if (bannerColor != null) {
-				int color1 = 0xFF000000;
-				int color2 = 0xFF000000;
-				BannerColor bannerColorDef = getThisApplication().bannerColors.get(bannerColor);
-
-				if (bannerColorDef != null) {
-					FortHomebaseBannerColorMap.ColorEntry colorEntry = getThisApplication().bannerColorMap.ColorMap.get(bannerColorDef.ColorKeyName);
-
-					if (colorEntry != null) {
-						color1 = colorEntry.PrimaryColor.asInt();
-						color2 = colorEntry.SecondaryColor.asInt();
-					}
-				}
-
-				Canvas canvas = new Canvas(bitmap);
-				Paint paint = new Paint();
-				paint.setShader(new LinearGradient(0.0F, 0.0F, 0.0F, bitmap.getHeight(), color1, color2, Shader.TileMode.CLAMP));
-				paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SCREEN));
-				canvas.drawPaint(paint);
-			}
-
-			return bitmap;
-		} else {
-			return null;
-		}
 	}
 
 	private void updateLoginText(String displayName) {
@@ -432,7 +399,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 						Response<ExchangeResponse> response = callExchange.execute();
 
 						if (response.isSuccessful()) {
-							startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("https://accounts.epicgames.com/exchange?exchangeCode=%s&redirectUrl=%s", response.body().code, Uri.encode(getOfferPurchaseUrl("ede05b3c97e9475a8d9be91da65750f0"))))));
+							startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(String.format("https://accounts.epicgames.com/exchange?exchangeCode=%s&redirectUrl=%s", response.body().code, Uri.encode(StoreActivity.getOfferPurchaseUrl("ede05b3c97e9475a8d9be91da65750f0"))))));
 						} else {
 							Utils.dialogError(MainActivity.this, EpicError.parse(response).getDisplayText());
 						}
@@ -444,10 +411,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		}
 
 		return super.onOptionsItemSelected(item);
-	}
-
-	private String getOfferPurchaseUrl(String offerId) {
-		return String.format("https://launcher-website-prod07.ol.epicgames.com/purchase?showNavigation=true&namespace=fn&offers=%s", offerId);
 	}
 
 	@Override

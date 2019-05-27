@@ -56,16 +56,18 @@ public class ShineButton extends Button {
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
+		int width = getWidth();
+		int height = getHeight();
 		path.reset();
-		path.moveTo(getWidth() - indentLow, indentLow);
+		path.moveTo(width - indentLow, indentLow);
 		path.lineTo(indentHigh, indentHigh);
-		path.lineTo(indentLow, getHeight() - indentLow);
-		path.lineTo(getWidth() - indentHigh, getHeight() - indentHigh);
+		path.lineTo(indentLow, height - indentLow);
+		path.lineTo(width - indentHigh, height - indentHigh);
 		path.close();
 		canvas.save();
 		canvas.clipPath(path, Region.Op.DIFFERENCE);
 		paint.setColor(0x90FFFFFF);
-		canvas.drawRect(0, 0, getWidth(), getHeight(), paint);
+		canvas.drawRect(0, 0, width, height, paint);
 		canvas.restore();
 
 		if (!isEnabled() || !isShown()) {
@@ -75,14 +77,14 @@ public class ShineButton extends Button {
 		long a = SystemClock.uptimeMillis() % (SHINE_DURATION + SHINE_DELAY_BETWEEN);
 
 		if (a <= SHINE_DURATION) {
-			float shineWidth = 0.2F * getWidth();
-			float off = interpolator.getInterpolation((float) a / (float) SHINE_DURATION) * (shineWidth + getWidth());
+			float shineWidth = 0.25F * width;
+			float off = interpolator.getInterpolation((float) a / (float) SHINE_DURATION) * (shineWidth + width);
 			path2.reset();
 			float indentDelta = indentHigh - indentLow;
 			path2.moveTo(shineWidth, 0);
 			path2.lineTo(indentDelta, 0);
-			path2.lineTo(0, getHeight());
-			path2.lineTo(shineWidth - indentDelta, getHeight());
+			path2.lineTo(0, height);
+			path2.lineTo(shineWidth - indentDelta, height);
 			path2.close();
 			canvas.save();
 			canvas.clipPath(path);

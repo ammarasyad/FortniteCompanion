@@ -39,5 +39,5 @@ A mini Fortnite client for Android.
 * [@cryotus](https://www.instagram.com/cryotus/): for the app name and icon
 * [u/easkate](https://www.reddit.com/user/easkate): for the [concept and idea of this app](https://www.reddit.com/r/FortNiteBR/comments/b5wlwg/fortnite_retail_row_app_a_ui_concept_for_a/)
 * [Kysune](https://github.com/SzymonLisowiec), [Roberto Graham](https://github.com/RobertoGraham), and [Vrekt](https://github.com/Vrekt): for the network endpoints and its usage, from their libraries
-* [Umodel](https://www.gildor.org/en/projects/umodel) by Gildor: for extracting/exporting the .uassets from the PAKs
-* [John Wick Parse](https://github.com/SirWaddles/JohnWickParse) by [Waddlesworth](https://github.com/SirWaddles): for parsing the item data from the .uassets
+* [Umodel](https://www.gildor.org/en/projects/umodel) by Gildor: for extracting/exporting the .uassets from the .pak's
+* [John Wick Parse](https://github.com/SirWaddles/JohnWickParse) by [Waddlesworth](https://github.com/SirWaddles): for parsing the item data from the .uasset's

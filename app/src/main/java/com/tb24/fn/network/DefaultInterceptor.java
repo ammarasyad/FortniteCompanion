@@ -3,7 +3,8 @@ package com.tb24.fn.network;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.util.Utils;

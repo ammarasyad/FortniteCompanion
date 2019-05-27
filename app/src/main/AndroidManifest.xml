@@ -53,6 +53,9 @@
 			android:name=".activity.ItemShopActivity"
 			android:label="@string/title_item_shop" />
 		<activity
+			android:name=".activity.StoreActivity"
+			android:label="@string/title_store" />
+		<activity
 			android:name=".activity.StwWorldInfoActivity"
 			android:label="@string/title_stw_info" />
 		<activity

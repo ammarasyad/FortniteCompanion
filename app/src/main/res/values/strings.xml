@@ -38,4 +38,7 @@
 	<string name="itemshop_banner_SelectableStyles">Selectable Styles!</string>
 	<string name="itemshop_banner_UnlockStyles">Unlock Styles!</string>
 	<string name="copyright">Created by amrsatrio, a Fortnite player just like you.\n\nCredits:\n\u2022 IG @cryotus: for the app name and icon\n\u2022 u/easkate: for the concept of this app\n\u2022 Kysune, Roberto Graham, and Vrekt: for the network endpoints and its usage\n\u2022 John Wick Parse by Waddlesworth: for the item data reader\n\u2022 UModel by Gildor: for the image assets exporter\n\nThis app is not affiliated in any way with Epic Games.\nAssets property of Epic Games and their respective owners.\n\n© 2019, Epic Games, Inc. Epic, Epic Games, the Epic Games logo, Fortnite, the Fortnite logo, Unreal, Unreal Engine 4 and UE4 are trademarks or registered trademarks of Epic Games, Inc. in the United States of America and elsewhere. All rights reserved.</string>
+	<string name="title_store">Store</string>
+	<string name="quest_desc_party_assist">Activating %s will allow other members of your party to assist you in completing this challenge. You can only receive assistance on one challenge at a time.</string>
+	<string name="quest_desc_replace">Abandon this daily challenge and replace it with a new one. You can only do this once per day.</string>
 </resources>

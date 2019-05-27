@@ -8,15 +8,16 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.os.Bundle;
-import android.support.v14.preference.PreferenceFragment;
-import android.support.v7.preference.DropDownPreference;
-import android.support.v7.preference.ListPreference;
-import android.support.v7.preference.Preference;
-import android.support.v7.preference.PreferenceManager;
-import android.support.v7.preference.TwoStatePreference;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.preference.DropDownPreference;
+import androidx.preference.ListPreference;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceManager;
+import androidx.preference.TwoStatePreference;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;

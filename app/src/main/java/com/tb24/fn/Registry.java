@@ -100,9 +100,19 @@ public class Registry {
 		}
 	}
 
-	public JsonElement get(String namespacedString) {
-		String[] split = namespacedString.split(":");
+	public JsonElement get(String templateId) {
+		String[] split = templateId.split(":");
 		return itemRegistry.get(split[0], split[1].toLowerCase(Locale.US));
+	}
+
+	public JsonElement getWithAnyNamespace(String idName) {
+		Map<String, JsonElement> column = itemRegistry.column(idName.toLowerCase(Locale.US));
+
+		if (column.isEmpty()) {
+			return null;
+		}
+
+		return column.entrySet().iterator().next().getValue();
 	}
 
 	public Collection<JsonElement> getAll() {

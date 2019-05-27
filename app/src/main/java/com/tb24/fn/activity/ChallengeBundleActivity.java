@@ -1,29 +1,46 @@
 package com.tb24.fn.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
+import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.TooltipCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.TooltipCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.R;
+import com.tb24.fn.event.CalendarDataLoadedEvent;
 import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.CalendarTimelineResponse;
@@ -31,7 +48,6 @@ import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.FortMcpResponse;
-import com.tb24.fn.model.assetdata.AssetReference;
 import com.tb24.fn.model.assetdata.FortChallengeBundleItemDefinition;
 import com.tb24.fn.model.assetdata.FortQuestItemDefinition;
 import com.tb24.fn.model.command.FortRerollDailyQuest;
@@ -40,6 +56,7 @@ import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
+import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -75,6 +92,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 	private String cheatsheetUrl;
 	private FortChallengeBundleItemDefinition challengeBundleDef;
 	private CalendarTimelineResponse.ActiveEvent calendarEventTag;
+	private JsonObject attributesFromProfile;
 
 	public static FortQuestItemDefinition populateQuestView(BaseActivity activity, View view, FortItemStack item) {
 		TextView questTitle = view.findViewById(R.id.quest_title);
@@ -92,17 +110,12 @@ public class ChallengeBundleActivity extends BaseActivity {
 		if (quest == null) {
 			questProgressParent.setVisibility(View.GONE);
 			questRewardParent.setVisibility(View.GONE);
+			questTitle.setText("Unknown Quest: " + item.templateId);
+			return null;
 		} else if (done) {
 			questProgressParent.setVisibility(View.GONE);
-			questRewardParent.setVisibility(View.VISIBLE);
 		} else {
 			questProgressParent.setVisibility(View.VISIBLE);
-			questRewardParent.setVisibility(View.VISIBLE);
-		}
-
-		if (quest == null) {
-			questTitle.setText("Currently unavailable");
-			return null;
 		}
 
 		questTitle.setText(quest.DisplayName);
@@ -132,9 +145,9 @@ public class ChallengeBundleActivity extends BaseActivity {
 		questProgressBar.setProgress(completion);
 		questProgressText.setText(TextUtils.concat(Utils.color(String.format("%,d", completion), Utils.getTextColorPrimary(activity)), " / ", String.format("%,d", max)));
 
-		if (quest.Rewards == null) {
+		if (quest.Rewards == null || quest.Rewards.length == 0) {
 			questRewardParent.setVisibility(View.GONE);
-			questRewardParent.setOnLongClickListener(null);
+			TooltipCompat.setTooltipText(questRewardParent, null);
 		} else {
 			questRewardParent.setVisibility(View.VISIBLE);
 			FortItemStack rewardItem = quest.Rewards[0].asItemStack();
@@ -162,7 +175,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 				TooltipCompat.setTooltipText(questRewardParent, null);
 			}
 
-			rewardText.setText(String.valueOf(rewardItem.quantity));
+			rewardText.setText(String.format("%,d", rewardItem.quantity));
 		}
 
 		return quest;
@@ -182,15 +195,20 @@ public class ChallengeBundleActivity extends BaseActivity {
 				return adapter == null;
 			}
 		};
-		refreshUi(getThisApplication().profileManager.profileData.get("athena"));
+		refreshUi();
 		getThisApplication().eventBus.register(this);
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onProfileUpdated(ProfileUpdatedEvent event) {
 		if (event.profileId.equals("athena")) {
-			refreshUi(event.profileObj);
+			refreshUi();
 		}
+	}
+
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onCalendarDataLoaded(CalendarDataLoadedEvent event) {
+		refreshUi();
 	}
 
 	@Override
@@ -203,27 +221,23 @@ public class ChallengeBundleActivity extends BaseActivity {
 		}
 	}
 
-	private void refreshUi(FortMcpProfile profile) {
-		if ((profileData = profile) == null) {
+	private void refreshUi() {
+		if ((profileData = getThisApplication().profileManager.profileData.get("athena")) == null) {
 			lc.loading();
 			return;
 		}
 
 		String bundleTemplateId = getIntent().getStringExtra("a");
 		questsFromProfile.clear();
-		List<FortChallengeBundleItemDefinition.QuestInfo> data;
+		List<QuestEntry> data = new ArrayList<>();
 
 		if (bundleTemplateId.equals("Quest:" + VALUE_DAILY_CHALLENGES)) {
 			setTitle("Daily");
-			data = new ArrayList<>();
 
-			for (Map.Entry<String, FortItemStack> entry : profile.items.entrySet()) {
+			for (Map.Entry<String, FortItemStack> entry : profileData.items.entrySet()) {
 				if (entry.getValue().getIdCategory().equals("Quest") && entry.getValue().getDefData() != null && entry.getValue().getDefData().export_type.equals("AthenaDailyQuestDefinition") && entry.getValue().attributes != null && JsonUtils.getStringOr("quest_state", entry.getValue().attributes, "").equals("Active")) {
 					questsFromProfile.put(entry.getKey(), entry.getValue());
-					FortChallengeBundleItemDefinition.QuestInfo questInfo = new FortChallengeBundleItemDefinition.QuestInfo();
-					String name = entry.getValue().getIdName();
-					questInfo.QuestDefinition = new AssetReference("/Game/Athena/Items/Quests/DailyQuests/" + name + '.' + name, "");
-					data.add(questInfo);
+					data.add(new DefaultQuestEntry(this, entry.getValue().getIdName(), null));
 				}
 			}
 		} else {
@@ -234,9 +248,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 				return;
 			}
 
-			JsonObject attributesFromProfile = null;
-
-			for (Map.Entry<String, FortItemStack> entry : profile.items.entrySet()) {
+			for (Map.Entry<String, FortItemStack> entry : profileData.items.entrySet()) {
 				if (entry.getValue().templateId.equals(bundleTemplateId)) {
 					attributesFromProfile = entry.getValue().attributes;
 					break;
@@ -250,16 +262,43 @@ public class ChallengeBundleActivity extends BaseActivity {
 
 			for (JsonElement jsonElement : attributesFromProfile.get("grantedquestinstanceids").getAsJsonArray()) {
 				String s = jsonElement.getAsString();
-				questsFromProfile.put(s, profile.items.get(s));
+				questsFromProfile.put(s, profileData.items.get(s));
 			}
 
 			challengeBundleDef = getThisApplication().gson.fromJson(a.getAsJsonArray().get(0), FortChallengeBundleItemDefinition.class);
-			setTitle(Utils.color(challengeBundleDef.DisplayName, challengeBundleDef.DisplayStyle.AccentColor.asInt()));
+			setTitle(Utils.color(challengeBundleDef.DisplayName, 0xFFFFFFFF));
 			getWindow().setStatusBarColor(challengeBundleDef.DisplayStyle.PrimaryColor.asInt());
-			getActionBar().setBackgroundDrawable(new ColorDrawable(challengeBundleDef.DisplayStyle.PrimaryColor.asInt()));
-			data = Arrays.asList(challengeBundleDef.QuestInfos);
+			getActionBar().setBackgroundDrawable(new LayerDrawable(new Drawable[]{new ColorDrawable(challengeBundleDef.DisplayStyle.PrimaryColor.asInt()), new TitleBackgroundDrawable(this, challengeBundleDef.DisplayStyle)}));
+			List<CompletionRewardQuestEntry> completionRewardQuestEntries = new ArrayList<>();
 
-			if (challengeBundleDef.CalendarEventTag != null) {
+			for (FortChallengeBundleItemDefinition.BundleCompletionReward bundleCompletionReward : challengeBundleDef.BundleCompletionRewards) {
+				boolean add = false;
+
+				for (FortChallengeBundleItemDefinition.Reward reward : bundleCompletionReward.Rewards) {
+					if (!reward.RewardType.equals("EAthenaRewardItemType::HiddenReward")) {
+						add = true;
+					}
+				}
+
+				if (add) {
+					completionRewardQuestEntries.add(new CompletionRewardQuestEntry(bundleCompletionReward));
+				}
+			}
+
+			if (!completionRewardQuestEntries.isEmpty()) {
+				data.add(new HeaderQuestEntry("Completion Rewards"));
+				data.addAll(completionRewardQuestEntries);
+			}
+
+			data.add(new HeaderQuestEntry("Challenges"));
+			data.addAll(Lists.transform(Arrays.asList(challengeBundleDef.QuestInfos), new Function<FortChallengeBundleItemDefinition.QuestInfo, QuestEntry>() {
+				@Override
+				public QuestEntry apply(@NullableDecl FortChallengeBundleItemDefinition.QuestInfo input) {
+					return new DefaultQuestEntry(ChallengeBundleActivity.this, null, input);
+				}
+			}));
+
+			if (challengeBundleDef.CalendarEventTag != null && getThisApplication().calendarDataBase != null) {
 				for (CalendarTimelineResponse.ActiveEvent activeEvent : getThisApplication().calendarDataBase.channels.get("client-events").states[0].activeEvents) {
 					if (activeEvent.eventType.equals(challengeBundleDef.CalendarEventTag)) {
 						calendarEventTag = activeEvent;
@@ -292,12 +331,47 @@ public class ChallengeBundleActivity extends BaseActivity {
 		return null;
 	}
 
-	private static class ChallengeAdapter extends RecyclerView.Adapter<ChallengeAdapter.ChallengeViewHolder> {
+	private void fillQuestDefsRecursive(FortQuestItemDefinition questDef, List<FortQuestItemDefinition> outQuestDefs) {
+		if (questDef == null) {
+			return;
+		}
+
+		outQuestDefs.add(questDef);
+
+		if (questDef.Rewards == null) {
+			return;
+		}
+
+		for (FortQuestItemDefinition.Reward reward : questDef.Rewards) {
+			FortItemStack stack = reward.asItemStack();
+			if (stack.getIdCategory().equals("Quest")) {
+				fillQuestDefsRecursive((FortQuestItemDefinition) stack.getDefData(), outQuestDefs);
+			}
+		}
+	}
+
+	private void fillQuestItemsRecursive(FortItemStack chainedQuestItem, List<FortItemStack> outStacks) {
+		if (chainedQuestItem == null) {
+			return;
+		}
+
+		outStacks.add(chainedQuestItem);
+		String challengeLinkedQuestGiven = JsonUtils.getStringOr("challenge_linked_quest_given", chainedQuestItem.attributes, null);
+
+		if (challengeLinkedQuestGiven != null && !challengeLinkedQuestGiven.isEmpty()) {
+			fillQuestItemsRecursive(questsFromProfile.get(challengeLinkedQuestGiven), outStacks);
+		}
+	}
+
+	private static class ChallengeAdapter extends RecyclerView.Adapter<ChallengeViewHolder> {
+		private static final int VIEW_TYPE_HEADER = 1;
+		private static final int VIEW_TYPE_COMPLETION_REWARD = 2;
+		private static final int VIEW_TYPE_CHEATSHEET = 3;
 		private final ChallengeBundleActivity activity;
-		private List<FortChallengeBundleItemDefinition.QuestInfo> data;
+		private List<QuestEntry> data;
 		private int expandedPosition = -1;
 
-		public ChallengeAdapter(ChallengeBundleActivity activity, List<FortChallengeBundleItemDefinition.QuestInfo> data) {
+		public ChallengeAdapter(ChallengeBundleActivity activity, List<QuestEntry> data) {
 			this.activity = activity;
 			this.data = data;
 		}
@@ -305,10 +379,18 @@ public class ChallengeBundleActivity extends BaseActivity {
 		@NonNull
 		@Override
 		public ChallengeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-			View inflate = LayoutInflater.from(parent.getContext()).inflate(viewType == 1 ? R.layout.log_out_settings_button : R.layout.quest_entry, parent, false);
+			View inflate = null;
+			LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
-			if (viewType == 1) {
-				inflate.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+			if (viewType == 0 || viewType == VIEW_TYPE_COMPLETION_REWARD) {
+				inflate = inflater.inflate(R.layout.quest_entry, parent, false);
+			} else if (viewType == VIEW_TYPE_HEADER) {
+				inflate = inflater.inflate(R.layout.quest_header, parent, false);
+			} else if (viewType == VIEW_TYPE_CHEATSHEET) {
+				inflate = inflater.inflate(R.layout.log_out_settings_button, parent, false);
+				FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+				params.topMargin = (int) Utils.dp(activity.getResources(), 16);
+				inflate.setLayoutParams(params);
 			}
 
 			return new ChallengeViewHolder(inflate);
@@ -316,7 +398,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 
 		@Override
 		public void onBindViewHolder(@NonNull final ChallengeViewHolder holder, final int position) {
-			if (getItemViewType(position) == 1) {
+			if (getItemViewType(position) == VIEW_TYPE_CHEATSHEET) {
 				holder.btnCheatsheet.setText("Cheatsheet plz");
 				holder.btnCheatsheet.setOnClickListener(new View.OnClickListener() {
 					@Override
@@ -327,29 +409,186 @@ public class ChallengeBundleActivity extends BaseActivity {
 				return;
 			}
 
-			final FortChallengeBundleItemDefinition.QuestInfo entryDef = data.get(position);
-			List<FortQuestItemDefinition> questDefChain = new ArrayList<>();
-			List<FortItemStack> questItemChain = new ArrayList<>();
-			String questItemName = entryDef.QuestDefinition.asset_path_name.substring(entryDef.QuestDefinition.asset_path_name.lastIndexOf('/') + 1, entryDef.QuestDefinition.asset_path_name.lastIndexOf('.')).toLowerCase();
+			data.get(position).bindToViewHolder(activity, this, holder, position);
+		}
+
+		@Override
+		public int getItemViewType(int position) {
+			return activity.cheatsheetUrl != null && position == data.size() ? VIEW_TYPE_CHEATSHEET : data.get(position).getItemViewType();
+		}
+
+		@Override
+		public int getItemCount() {
+			return data.size() + (activity.cheatsheetUrl != null ? 1 : 0);
+		}
+
+		public void updateData(List<QuestEntry> data) {
+			this.data = data;
+			notifyDataSetChanged();
+		}
+	}
+
+	private static class ChallengeViewHolder extends RecyclerView.ViewHolder {
+		public ViewGroup questMainContainer;
+		public TextView questDone;
+		public TextView questTitle;
+		public ViewGroup questProgressParent;
+		public ProgressBar questProgressBar;
+		public TextView questProgressText;
+		public ViewGroup questRewardParent;
+		public ImageView questRewardIcon;
+		public TextView questRewardText;
+		public ViewGroup actions;
+		public Button btnAssist;
+		public Button btnReplace;
+		public Button btnCheatsheet;
+
+		public ChallengeViewHolder(View itemView) {
+			super(itemView);
+			questMainContainer = itemView.findViewById(R.id.quest_main_container);
+			questDone = itemView.findViewById(R.id.quest_done);
+			questTitle = itemView.findViewById(R.id.quest_title);
+			questProgressParent = itemView.findViewById(R.id.quest_progress_parent);
+			questProgressBar = itemView.findViewById(R.id.quest_progress_bar);
+			questProgressText = itemView.findViewById(R.id.quest_progress_text);
+			questRewardParent = itemView.findViewById(R.id.quest_reward_parent);
+			questRewardIcon = itemView.findViewById(R.id.quest_reward_icon);
+			questRewardText = itemView.findViewById(R.id.quest_reward_text);
+			actions = itemView.findViewById(R.id.quest_options);
+			btnAssist = itemView.findViewById(R.id.quest_btn_assist);
+			btnReplace = itemView.findViewById(R.id.quest_btn_replace);
+			btnCheatsheet = itemView.findViewById(R.id.log_out_button);
+		}
+	}
+
+	private static abstract class QuestEntry {
+		public abstract void bindToViewHolder(ChallengeBundleActivity activity, ChallengeAdapter adapter, RecyclerView.ViewHolder holder, int position);
+
+		public int getItemViewType() {
+			return 0;
+		}
+	}
+
+	private static class HeaderQuestEntry extends QuestEntry {
+		private final CharSequence title;
+
+		public HeaderQuestEntry(CharSequence title) {
+			this.title = title;
+		}
+
+		@Override
+		public void bindToViewHolder(ChallengeBundleActivity activity, ChallengeAdapter adapter, RecyclerView.ViewHolder holder, int position) {
+			((TextView) ((ViewGroup) holder.itemView).getChildAt(0)).setText(title);
+		}
+
+		@Override
+		public int getItemViewType() {
+			return ChallengeAdapter.VIEW_TYPE_HEADER;
+		}
+	}
+
+	private static class CompletionRewardQuestEntry extends QuestEntry {
+		private final FortChallengeBundleItemDefinition.BundleCompletionReward bundleCompletionReward;
+
+		public CompletionRewardQuestEntry(FortChallengeBundleItemDefinition.BundleCompletionReward bundleCompletionReward) {
+			this.bundleCompletionReward = bundleCompletionReward;
+		}
+
+		@Override
+		public void bindToViewHolder(ChallengeBundleActivity activity, ChallengeAdapter adapter, RecyclerView.ViewHolder holder_, int position) {
+			ChallengeViewHolder holder = (ChallengeViewHolder) holder_;
+			int completion = JsonUtils.getIntOr("num_progress_quests_completed", activity.attributesFromProfile, 0);
+			boolean done = activity.attributesFromProfile != null && completion >= bundleCompletionReward.CompletionCount;
+			holder.questMainContainer.setAlpha(done ? 0.6F : 1.0F);
+			holder.questDone.setText("Earned!");
+			holder.questDone.setVisibility(done ? View.VISIBLE : View.GONE);
+			holder.questProgressParent.setVisibility(done ? View.GONE : View.VISIBLE);
+			String s;
+
+			if (bundleCompletionReward.CompletionCount == -1 || bundleCompletionReward.CompletionCount == 1) {
+				s = "any challenge";
+			} else {
+				s = String.format((bundleCompletionReward.CompletionCount >= activity.challengeBundleDef.QuestInfos.length ? "all" : "any") + " %,d challenges", bundleCompletionReward.CompletionCount);
+			}
+
+			holder.questTitle.setText(TextUtils.replace("Complete %s to earn the reward item", new String[]{"%s"}, new CharSequence[]{Utils.color(s.toUpperCase(), Utils.getTextColorPrimary(activity))}));
+			holder.questProgressBar.setMax(bundleCompletionReward.CompletionCount == -1 ? 1 : bundleCompletionReward.CompletionCount);
+			holder.questProgressBar.setProgress(completion);
+			holder.questProgressText.setText(TextUtils.concat(Utils.color(String.format("%,d", completion), Utils.getTextColorPrimary(activity)), " / ", String.format("%,d", bundleCompletionReward.CompletionCount)));
+
+			if (bundleCompletionReward.Rewards == null || bundleCompletionReward.Rewards.length == 0) {
+				holder.questRewardParent.setVisibility(View.GONE);
+				TooltipCompat.setTooltipText(holder.questRewardParent, null);
+			} else {
+				holder.questRewardParent.setVisibility(View.VISIBLE);
+				FortChallengeBundleItemDefinition.Reward reward = bundleCompletionReward.Rewards[0];
+				JsonElement jsonElement = reward.TemplateId != null && !reward.TemplateId.isEmpty() ? activity.getThisApplication().itemRegistry.get(reward.TemplateId) : activity.getThisApplication().itemRegistry.getWithAnyNamespace(Utils.parseUPath2(reward.ItemDefinition.asset_path_name));
+				int size;
+
+				if (reward.Quantity > 1) {
+					size = 36;
+					holder.questRewardText.setVisibility(View.VISIBLE);
+				} else {
+					size = 56;
+					holder.questRewardText.setVisibility(View.GONE);
+				}
+
+				size = (int) Utils.dp(activity.getResources(), size);
+				holder.questRewardIcon.setLayoutParams(new LinearLayout.LayoutParams((int) Utils.dp(activity.getResources(), 56), size));
+
+				if (jsonElement != null) {
+					JsonObject jsonObject = jsonElement.getAsJsonArray().get(0).getAsJsonObject();
+					Bitmap bitmapImageFromItemStackData = ItemUtils.getBitmapImageFromItemStackData(activity, null, jsonObject);
+					holder.questRewardIcon.setImageBitmap(bitmapImageFromItemStackData);
+					holder.questRewardParent.setVisibility(bitmapImageFromItemStackData == null ? View.GONE : View.VISIBLE);
+					TooltipCompat.setTooltipText(holder.questRewardParent, JsonUtils.getStringOr("DisplayName", jsonObject, ""));
+				} else {
+					TooltipCompat.setTooltipText(holder.questRewardParent, null);
+				}
+
+				holder.questRewardText.setText(String.format("%,d", reward.Quantity));
+			}
+		}
+
+		@Override
+		public int getItemViewType() {
+			return ChallengeAdapter.VIEW_TYPE_COMPLETION_REWARD;
+		}
+	}
+
+	private static class DefaultQuestEntry extends QuestEntry {
+		private final FortChallengeBundleItemDefinition.QuestInfo entryDef;
+		private final List<FortQuestItemDefinition> questDefChain = new ArrayList<>();
+		private final List<FortItemStack> questItemChain = new ArrayList<>();
+		private FortItemStack activeQuestItem = null;
+
+		public DefaultQuestEntry(ChallengeBundleActivity activity, String questItemTemplateId, FortChallengeBundleItemDefinition.QuestInfo entryDef) {
+			this.entryDef = entryDef;
+
+			if (questItemTemplateId == null) {
+				questItemTemplateId = entryDef.QuestDefinition.asset_path_name.substring(entryDef.QuestDefinition.asset_path_name.lastIndexOf('/') + 1, entryDef.QuestDefinition.asset_path_name.lastIndexOf('.')).toLowerCase();
+			}
 
 			for (FortItemStack entry : activity.questsFromProfile.values()) {
-				if (entry.templateId.equals("Quest:" + questItemName)) {
-					fillQuestItemsRecursive(entry, questItemChain);
+				if (entry.templateId.equals("Quest:" + questItemTemplateId)) {
+					activity.fillQuestItemsRecursive(entry, questItemChain);
 					break;
 				}
 			}
 
-			FortItemStack activeQuestItem = null;
-
 			if (!questItemChain.isEmpty()) {
 				activeQuestItem = questItemChain.get(questItemChain.size() - 1);
-				fillQuestDefsRecursive((FortQuestItemDefinition) questItemChain.get(0).getDefData(), questDefChain);
+				activity.fillQuestDefsRecursive((FortQuestItemDefinition) questItemChain.get(0).getDefData(), questDefChain);
 			}
 
 			if (activeQuestItem == null) {
-				activeQuestItem = new FortItemStack("Quest", questItemName, 1);
+				activeQuestItem = new FortItemStack("Quest", questItemTemplateId, 1);
 			}
+		}
 
+		@Override
+		public void bindToViewHolder(final ChallengeBundleActivity activity, final ChallengeAdapter adapter, RecyclerView.ViewHolder holder_, int position) {
+			final ChallengeViewHolder holder = (ChallengeViewHolder) holder_;
 			FortQuestItemDefinition quest = populateQuestView(activity, holder.itemView, activeQuestItem);
 
 			if (quest == null) {
@@ -358,19 +597,18 @@ public class ChallengeBundleActivity extends BaseActivity {
 				return;
 			}
 
-			TextView questTitle = holder.itemView.findViewById(R.id.quest_title);
 			boolean isChain = questDefChain.size() > 1;
 			String questState = activeQuestItem.attributes == null ? "" : JsonUtils.getStringOr("quest_state", activeQuestItem.attributes, "");
 			boolean done = questState.equals("Claimed");
 			final boolean isEligibleForReplacement = !done && quest.export_type.equals("AthenaDailyQuestDefinition") && questState.equals("Active") && ((AthenaProfileAttributes) activity.profileData.stats.attributesObj).quest_manager.dailyQuestRerolls > 0;
 			final boolean isEligibleForAssist = !done && quest.GameplayTags != null && Arrays.binarySearch(quest.GameplayTags.gameplay_tags, "Quest.Metadata.PartyAssist") >= 0;
-			questTitle.setText(TextUtils.concat(isChain ? Utils.color(String.format("Stage %,d of %,d", questItemChain.size(), questDefChain.size()), Utils.getTextColorPrimary(activity)) : "", (isChain ? " - " : "") + questTitle.getText()));
-			holder.itemView.findViewById(R.id.quest_progress_parent).setVisibility(done ? View.GONE : View.VISIBLE);
+			holder.questTitle.setText(TextUtils.concat(isChain ? Utils.color(String.format("Stage %,d of %,d", questItemChain.size(), questDefChain.size()), Utils.getTextColorPrimary(activity)) : "", (isChain ? " - " : "") + holder.questTitle.getText()));
+			holder.questProgressParent.setVisibility(done ? View.GONE : View.VISIBLE);
 
-			if (entryDef.QuestUnlockType != null && entryDef.QuestUnlockType.equals("EChallengeBundleQuestUnlockType::DaysFromEventStart")) {
+			if (entryDef != null && entryDef.QuestUnlockType != null && entryDef.QuestUnlockType.equals("EChallengeBundleQuestUnlockType::DaysFromEventStart")) {
 				if (entryDef.UnlockValue == 100) {
-					questTitle.setText(activity.challengeBundleDef.UniqueLockedMessage);
-					holder.itemView.findViewById(R.id.quest_progress_parent).setVisibility(View.GONE);
+					holder.questTitle.setText(activity.challengeBundleDef.UniqueLockedMessage);
+					holder.questProgressParent.setVisibility(View.GONE);
 				} else {
 					Calendar calendar = Calendar.getInstance();
 					calendar.setTime(activity.calendarEventTag.activeSince);
@@ -390,12 +628,12 @@ public class ChallengeBundleActivity extends BaseActivity {
 							}
 						}
 
-						questTitle.setText(TextUtils.concat(Utils.color(s, 0xFFE1564B), " - " + questTitle.getText()));
+						holder.questTitle.setText(TextUtils.concat(Utils.color(s, 0xFFE1564B), " - " + holder.questTitle.getText()));
 					}
 				}
 			}
 
-			holder.actions.setVisibility(expandedPosition == position ? View.VISIBLE : View.GONE);
+			holder.actions.setVisibility(adapter.expandedPosition == position ? View.VISIBLE : View.GONE);
 			holder.btnReplace.setVisibility(isEligibleForReplacement ? View.VISIBLE : View.GONE);
 			holder.btnAssist.setVisibility(isEligibleForAssist ? View.VISIBLE : View.GONE);
 			final FortItemStack finalActiveQuestItem = activeQuestItem;
@@ -421,7 +659,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 									activity.runOnUiThread(new Runnable() {
 										@Override
 										public void run() {
-											notifyDataSetChanged();
+											adapter.notifyDataSetChanged();
 										}
 									});
 								} else {
@@ -463,84 +701,66 @@ public class ChallengeBundleActivity extends BaseActivity {
 				@Override
 				public void onClick(View v) {
 					if (isEligibleForReplacement || isEligibleForAssist) {
-						boolean newState = expandedPosition != holder.getAdapterPosition();
+						boolean newState = adapter.expandedPosition != holder.getAdapterPosition();
 
-						if (expandedPosition >= 0) {
-							notifyItemChanged(expandedPosition);
+						if (adapter.expandedPosition >= 0) {
+							adapter.notifyItemChanged(adapter.expandedPosition);
 						}
 
 						if (newState) {
-							expandedPosition = holder.getAdapterPosition();
-							notifyItemChanged(holder.getAdapterPosition());
+							adapter.expandedPosition = holder.getAdapterPosition();
+							adapter.notifyItemChanged(holder.getAdapterPosition());
 						} else {
-							expandedPosition = -1;
+							adapter.expandedPosition = -1;
 						}
 					}
 				}
 			});
 		}
-
-		private void fillQuestDefsRecursive(FortQuestItemDefinition questDef, List<FortQuestItemDefinition> outQuestDefs) {
-			if (questDef == null) {
-				return;
-			}
-
-			outQuestDefs.add(questDef);
-
-			if (questDef.Rewards == null) {
-				return;
-			}
-
-			for (FortQuestItemDefinition.Reward reward : questDef.Rewards) {
-				FortItemStack stack = reward.asItemStack();
-				if (stack.getIdCategory().equals("Quest")) {
-					fillQuestDefsRecursive((FortQuestItemDefinition) stack.getDefData(), outQuestDefs);
-				}
-			}
-		}
-
-		private void fillQuestItemsRecursive(FortItemStack chainedQuestItem, List<FortItemStack> outStacks) {
-			if (chainedQuestItem == null) {
-				return;
-			}
-
-			outStacks.add(chainedQuestItem);
-			String challengeLinkedQuestGiven = JsonUtils.getStringOr("challenge_linked_quest_given", chainedQuestItem.attributes, null);
-
-			if (challengeLinkedQuestGiven != null && !challengeLinkedQuestGiven.isEmpty()) {
-				fillQuestItemsRecursive(activity.questsFromProfile.get(challengeLinkedQuestGiven), outStacks);
-			}
-		}
-
-		@Override
-		public int getItemViewType(int position) {
-			return activity.cheatsheetUrl != null && position == data.size() ? 1 : 0;
-		}
-
-		@Override
-		public int getItemCount() {
-			return data.size() + (activity.cheatsheetUrl != null ? 1 : 0);
-		}
-
-		public void updateData(List<FortChallengeBundleItemDefinition.QuestInfo> data) {
-			this.data = data;
-			notifyDataSetChanged();
-		}
-
-		static class ChallengeViewHolder extends RecyclerView.ViewHolder {
-			ViewGroup actions;
-			Button btnAssist;
-			Button btnReplace;
-			Button btnCheatsheet;
-
-			ChallengeViewHolder(View itemView) {
-				super(itemView);
-				actions = itemView.findViewById(R.id.quest_options);
-				btnAssist = itemView.findViewById(R.id.quest_btn_assist);
-				btnReplace = itemView.findViewById(R.id.quest_btn_replace);
-				btnCheatsheet = itemView.findViewById(R.id.log_out_button);
-			}
-		}
 	}
 
+	private static class TitleBackgroundDrawable extends Drawable {
+		private static final float HEIGHT = 12.0F;
+		private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		private final Path path = new Path();
+		private final float density;
+		private final FortChallengeBundleItemDefinition.DisplayStyle displayStyle;
+
+		public TitleBackgroundDrawable(Context ctx, FortChallengeBundleItemDefinition.DisplayStyle displayStyle) {
+			density = ctx.getResources().getDisplayMetrics().density;
+			this.displayStyle = displayStyle;
+		}
+
+		@Override
+		public void draw(@NonNull Canvas canvas) {
+			Rect rect = getBounds();
+			float yoff = rect.height() - HEIGHT * density;
+			path.reset();
+			path.moveTo(rect.width(), yoff + 0.0F + HEIGHT / 3.0F * density);
+			path.lineTo(rect.width() / 2.0F - 2.0F * density, yoff);
+			path.lineTo(rect.width() / 2.0F + 2.0F * density, yoff + HEIGHT / 2.0F * density);
+			path.lineTo(0.0F, yoff + HEIGHT / 3.0F * density);
+			path.lineTo(0.0F, rect.height());
+			path.lineTo(rect.width(), rect.height());
+			path.close();
+			// TODO gradient
+			paint.setShader(new LinearGradient(0.0F, 0.0F, rect.width(), 0.0F, displayStyle.AccentColor.asInt(), displayStyle.AccentColor.asInt(), Shader.TileMode.CLAMP));
+			canvas.drawPath(path, paint);
+		}
+
+		@Override
+		public void setAlpha(int alpha) {
+			paint.setAlpha(alpha);
+		}
+
+		@Override
+		public void setColorFilter(@Nullable ColorFilter colorFilter) {
+			paint.setColorFilter(colorFilter);
+		}
+
+		@Override
+		public int getOpacity() {
+			return PixelFormat.OPAQUE;
+		}
+	}
 }

@@ -30,7 +30,7 @@ import retrofit2.Response;
 
 public class ProfileActivity extends BaseActivity {
 	private static final Joiner NEWLINE = Joiner.on('\n');
-//	private LoadingViewController lc;
+	//	private LoadingViewController lc;
 	private Call<ExternalAuth[]> externalAuthCall;
 
 	@Override

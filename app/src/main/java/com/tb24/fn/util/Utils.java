@@ -12,7 +12,6 @@ import android.icu.text.MeasureFormat;
 import android.icu.util.Measure;
 import android.icu.util.MeasureUnit;
 import android.os.Build;
-import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -30,6 +29,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
@@ -396,8 +397,24 @@ public final class Utils {
 	}
 
 	public static String parseUPath(String path) {
+		if (path == null) {
+			return null;
+		} else if (path.equals("None")) {
+			return "";
+		}
+
 		String s = path.substring(1, path.lastIndexOf('.'));
 		return s.endsWith("_L") || s.endsWith("-L") ? s.substring(0, s.length() - 2) : s;
+	}
+
+	public static String parseUPath2(String path) {
+		if (path == null) {
+			return null;
+		} else if (path.equals("None")) {
+			return "";
+		}
+
+		return path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
 	}
 
 	public interface EditTextDialogCallback {

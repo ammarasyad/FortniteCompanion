@@ -6,6 +6,7 @@ public class FortChallengeBundleItemDefinition extends FortItemDefinition {
 	public String CalendarEventName;
 	public BundleCompletionReward[] BundleCompletionRewards;
 	public DisplayStyle DisplayStyle;
+	// Epic did the typo, leave this be
 	public AssetReference BundleHidenImageMaterial;
 	public String UniqueLockedMessage;
 

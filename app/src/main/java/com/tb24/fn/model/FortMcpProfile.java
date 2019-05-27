@@ -40,6 +40,9 @@ public class FortMcpProfile {
 			ProfileAttributes profileAttributes;
 
 			switch (profile.profileId) {
+				case "common_public":
+					profileAttributes = context.deserialize(profileJson, CommonPublicProfileAttributes.class);
+					break;
 				case "common_core":
 					profileAttributes = context.deserialize(profileJson, CommonCoreProfileAttributes.class);
 					break;

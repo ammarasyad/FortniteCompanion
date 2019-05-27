@@ -35,4 +35,8 @@
 	<color name="btn_primary_l_disabled_grad_rgba1">#172854</color>
 	<color name="btn_primary_m_fadeddisabled_grad_rgba0">#6885B6</color>
 	<color name="btn_primary_m_fadeddisabled_grad_rgba1">#1F283F</color>
+	<color name="bg_party_assist_activated">#00FFD5</color>
+	<color name="bg_party_assist_pressed">#00FFD5</color>
+	<color name="bg_party_assist_hovered">#177EE6</color>
+	<color name="bg_party_assist_default">#0044CB</color>
 </resources>

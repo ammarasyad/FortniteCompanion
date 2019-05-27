@@ -54,7 +54,7 @@ public class ItemUtils {
 				}
 			}
 		} catch (Throwable e) {
-			Log.w("ItemUtils", "Failed getting image for item " + item.templateId + '\n' + e.toString());
+			Log.w("ItemUtils", "Failed getting image for item " + (item == null ? "??" : item.templateId) + '\n' + e.toString());
 		}
 
 		return null;
