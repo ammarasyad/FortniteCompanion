@@ -288,7 +288,7 @@ public final class Utils {
 
 		if (sColorPrimaryDark == null) {
 			TypedValue typedValue = new TypedValue();
-			TypedArray arr = ctx.obtainStyledAttributes(typedValue.data, new int[]{android.R.attr.colorPrimaryDark});
+			TypedArray arr = ctx.obtainStyledAttributes(typedValue.data, new int[]{android.R.attr.colorAccent});
 			sColorPrimaryDark = arr.getColor(0, 0xFFFF00FF);
 			arr.recycle();
 		}

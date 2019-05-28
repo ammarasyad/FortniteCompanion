@@ -193,7 +193,7 @@ public class SettingsActivity extends BaseActivity {
 							prefMtxPlatform.setEnabled(true);
 							String newValue = changeBackTo != null ? changeBackTo : ((CommonCoreProfileAttributes) profileData.get("common_core").stats.attributesObj).current_mtx_platform.toString();
 							prefMtxPlatform.setValue(newValue);
-							prefMtxPlatform.setSummary(newValue);
+							prefMtxPlatform.setSummary(Utils.makeItDark(newValue, getActivity()));
 						} else {
 							prefMtxPlatform.setEnabled(false);
 						}
@@ -235,7 +235,7 @@ public class SettingsActivity extends BaseActivity {
 				if (getApplication_().profileManager.profileData.containsKey("common_core") && !value.equals(((CommonCoreProfileAttributes) getApplication_().profileManager.profileData.get("common_core").stats.attributesObj).current_mtx_platform.toString())) {
 					preference.setEnabled(false);
 					final String old = prefMtxPlatform.getValue();
-					prefMtxPlatform.setSummary(value.toString());
+					prefMtxPlatform.setSummary(Utils.makeItDark(value.toString(), getActivity()));
 					SetMtxPlatform payload = new SetMtxPlatform();
 					payload.newPlatform = EMtxPlatform.valueOf(value.toString());
 					final Call<FortMcpResponse> callSetMtxPlatform = getApplication_().fortnitePublicService.mcp("SetMtxPlatform", getPreferenceManager().getSharedPreferences().getString("epic_account_id", ""), "common_core", -1, payload);
