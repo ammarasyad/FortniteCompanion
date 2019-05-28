@@ -1,5 +1,6 @@
 package com.tb24.fn.network;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -7,9 +8,12 @@ import android.provider.Settings;
 import androidx.annotation.NonNull;
 
 import com.tb24.fn.FortniteCompanionApp;
+import com.tb24.fn.activity.MainActivity;
+import com.tb24.fn.event.LoggedOutEvent;
 import com.tb24.fn.util.Utils;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Locale;
@@ -45,7 +49,14 @@ public class DefaultInterceptor implements okhttp3.Interceptor {
 
 		builder.addHeader("Accept-Language", localeToBcp47Language(Locale.getDefault()));
 		builder.addHeader("X-Epic-Device-ID", deviceId);
-		return chain.proceed(builder.build());
+		Response response = chain.proceed(builder.build());
+
+		if (response.code() == HttpURLConnection.HTTP_FORBIDDEN) {
+			app.startActivity(new Intent(app, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+			app.eventBus.post(new LoggedOutEvent(false));
+		}
+
+		return response;
 	}
 
 	/*

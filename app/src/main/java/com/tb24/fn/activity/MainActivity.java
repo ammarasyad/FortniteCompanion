@@ -71,21 +71,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	private Call<XGameProfile> callSelfName;
 	private Call<ExchangeResponse> callExchange;
 	private LoadingViewController profileLc;
+	private AlertDialog loggedOutDialog;
 
 	public static boolean checkAuthError(EpicError error) {
-		boolean isForbidden = error.response.code() == HttpURLConnection.HTTP_FORBIDDEN;
-		boolean invalidToken = error.errorCode.equals("errors.com.epicgames.common.oauth.invalid_token") || error.numericErrorCode == 1014;
-		boolean tokenVerificationFailed = error.errorCode.equals("errors.com.epicgames.common.authentication.token_verification_failed") || error.numericErrorCode == 1031;
-		boolean authenticationFailed = error.errorCode.equals("errors.com.epicgames.common.oauth.authentication_failed") || error.numericErrorCode == 1032;
-		return isForbidden || invalidToken || tokenVerificationFailed || authenticationFailed;
+//		boolean isForbidden = error.response.code() == HttpURLConnection.HTTP_FORBIDDEN;
+//		boolean invalidToken = error.errorCode.equals("errors.com.epicgames.common.oauth.invalid_token") || error.numericErrorCode == 1014;
+//		boolean tokenVerificationFailed = error.errorCode.equals("errors.com.epicgames.common.authentication.token_verification_failed") || error.numericErrorCode == 1031;
+//		boolean authenticationFailed = error.errorCode.equals("errors.com.epicgames.common.oauth.authentication_failed") || error.numericErrorCode == 1032;
+//		return isForbidden || invalidToken || tokenVerificationFailed || authenticationFailed;
+		return error.response.code() == HttpURLConnection.HTTP_FORBIDDEN;
 	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-//		Log.i("a", String.valueOf(getResources().getDisplayMetrics().density));
 		setContentView(R.layout.activity_main);
-//		getActionBar().setSubtitle("DEBUG VERSION -- by Armzyy");
 		findViewById(R.id.main_screen_btn_profile).setOnClickListener(this);
 		findViewById(R.id.main_screen_btn_challenges).setOnClickListener(this);
 		findViewById(R.id.main_screen_btn_events).setOnClickListener(this);
@@ -114,6 +114,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 				return !getThisApplication().profileManager.profileData.containsKey("athena");
 			}
 		};
+		loggedOutDialog = new AlertDialog.Builder(MainActivity.this)
+				.setTitle("Logout Occured")
+				.setMessage("Your login has expired or you logged in elsewhere.\n\nPlease log in again.")
+				.setPositiveButton(android.R.string.ok, null)
+				.setOnDismissListener(new DialogInterface.OnDismissListener() {
+					@Override
+					public void onDismiss(DialogInterface dialog) {
+						recreate();
+					}
+				})
+				.create();
 		checkLogin();
 		getThisApplication().eventBus.register(this);
 	}
@@ -147,13 +158,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 							public void run() {
 								if (response.isSuccessful()) {
 									updateLoginText((getThisApplication().currentLoggedIn = response.body()).getDisplayName());
-								} else {
-									validateLoggedIn(EpicError.parse(response));
 								}
 							}
 						});
-					} catch (IOException e) {
-						Utils.throwableDialog(MainActivity.this, e);
+					} catch (IOException ignored) {
 					}
 				}
 			}.start();
@@ -192,7 +200,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onLoggedOut(LoggedOutEvent event) {
-		recreate();
+		if (!event.bIsLoggedOutByUser) {
+			getThisApplication().clearLoginData();
+			loggedOutDialog.show();
+		}
 	}
 
 	@Override
@@ -218,23 +229,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
 		if (callExchange != null) {
 			callExchange.cancel();
-		}
-	}
-
-	private void validateLoggedIn(EpicError error) {
-		if (checkAuthError(error)) {
-			getThisApplication().clearLoginData();
-			new AlertDialog.Builder(MainActivity.this)
-					.setTitle("Logout Occured")
-					.setMessage("Your login has expired or you logged in elsewhere.\n\nPlease log in again.")
-					.setPositiveButton(android.R.string.ok, null)
-					.setOnDismissListener(new DialogInterface.OnDismissListener() {
-						@Override
-						public void onDismiss(DialogInterface dialog) {
-							recreate();
-						}
-					})
-					.show();
 		}
 	}
 

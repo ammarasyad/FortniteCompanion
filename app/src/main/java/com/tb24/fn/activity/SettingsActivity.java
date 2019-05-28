@@ -153,8 +153,7 @@ public class SettingsActivity extends BaseActivity {
 
 											try {
 												call.execute();
-												getApplication_().clearLoginData();
-												getApplication_().eventBus.post(new LoggedOutEvent());
+												getApplication_().eventBus.post(new LoggedOutEvent(true));
 												getActivity().finish();
 											} catch (IOException e) {
 												Utils.throwableDialog(getActivity(), e);
