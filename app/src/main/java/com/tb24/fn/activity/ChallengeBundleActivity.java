@@ -11,9 +11,7 @@ import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Shader;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -32,6 +30,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.TooltipCompat;
+import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -181,6 +180,14 @@ public class ChallengeBundleActivity extends BaseActivity {
 		return quest;
 	}
 
+	private static int modifyRGB(int color, Float sBy, Float vBy) {
+		float[] out = new float[3];
+		ColorUtils.colorToHSL(color, out);
+		out[1] *= sBy == null ? 1.0F : sBy;
+		out[2] *= vBy == null ? 1.0F : vBy;
+		return ColorUtils.HSLToColor(out);
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -268,7 +275,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 			challengeBundleDef = getThisApplication().gson.fromJson(a.getAsJsonArray().get(0), FortChallengeBundleItemDefinition.class);
 			setTitle(Utils.color(challengeBundleDef.DisplayName, 0xFFFFFFFF));
 			getWindow().setStatusBarColor(challengeBundleDef.DisplayStyle.PrimaryColor.asInt());
-			getActionBar().setBackgroundDrawable(new LayerDrawable(new Drawable[]{new ColorDrawable(challengeBundleDef.DisplayStyle.PrimaryColor.asInt()), new TitleBackgroundDrawable(this, challengeBundleDef.DisplayStyle)}));
+			getActionBar().setBackgroundDrawable(new TitleBackgroundDrawable(this, challengeBundleDef.DisplayStyle));
 			List<CompletionRewardQuestEntry> completionRewardQuestEntries = new ArrayList<>();
 
 			for (FortChallengeBundleItemDefinition.BundleCompletionReward bundleCompletionReward : challengeBundleDef.BundleCompletionRewards) {
@@ -719,16 +726,21 @@ public class ChallengeBundleActivity extends BaseActivity {
 		}
 	}
 
-	private static class TitleBackgroundDrawable extends Drawable {
+	public static class TitleBackgroundDrawable extends Drawable {
 		private static final float HEIGHT = 12.0F;
 		private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		private final Path path = new Path();
 		private final float density;
-		private final FortChallengeBundleItemDefinition.DisplayStyle displayStyle;
+		private final int[] colorsBackground = new int[2];
+		private final int[] colorsPath = new int[2];
 
 		public TitleBackgroundDrawable(Context ctx, FortChallengeBundleItemDefinition.DisplayStyle displayStyle) {
 			density = ctx.getResources().getDisplayMetrics().density;
-			this.displayStyle = displayStyle;
+			// TODO gradient
+			colorsBackground[0] = displayStyle.PrimaryColor.asInt();
+			colorsBackground[1] = displayStyle.PrimaryColor.asInt();
+			colorsPath[0] = 0x80000000 | modifyRGB(displayStyle.AccentColor.asInt(), 0.75F, null) & 0x00FFFFFF;
+			colorsPath[1] = 0x80000000 | modifyRGB(displayStyle.AccentColor.asInt(), 0.75F, null) & 0x00FFFFFF;
 		}
 
 		@Override
@@ -736,15 +748,16 @@ public class ChallengeBundleActivity extends BaseActivity {
 			Rect rect = getBounds();
 			float yoff = rect.height() - HEIGHT * density;
 			path.reset();
-			path.moveTo(rect.width(), yoff + 0.0F + HEIGHT / 3.0F * density);
+			path.moveTo(rect.width(), yoff + HEIGHT / 3.0F * density);
 			path.lineTo(rect.width() / 2.0F - 2.0F * density, yoff);
 			path.lineTo(rect.width() / 2.0F + 2.0F * density, yoff + HEIGHT / 2.0F * density);
 			path.lineTo(0.0F, yoff + HEIGHT / 3.0F * density);
 			path.lineTo(0.0F, rect.height());
 			path.lineTo(rect.width(), rect.height());
 			path.close();
-			// TODO gradient
-			paint.setShader(new LinearGradient(0.0F, 0.0F, rect.width(), 0.0F, displayStyle.AccentColor.asInt(), displayStyle.AccentColor.asInt(), Shader.TileMode.CLAMP));
+			paint.setShader(new LinearGradient(0.0F, 0.0F, rect.width(), 0.0F, colorsBackground, null, Shader.TileMode.CLAMP));
+			canvas.drawPaint(paint);
+			paint.setShader(new LinearGradient(0.0F, 0.0F, rect.width(), 0.0F, colorsPath, null, Shader.TileMode.CLAMP));
 			canvas.drawPath(path, paint);
 		}
 

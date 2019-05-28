@@ -1,7 +1,7 @@
 <resources>
 
 	<!-- Base application theme. -->
-	<style name="AppTheme" parent="android:Theme.DeviceDefault">
+	<style name="AppTheme" parent="android:Theme.Material">
 		<!-- Customize your theme here. -->
 		<item name="android:colorPrimary">@color/colorPrimary</item>
 		<item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -14,12 +14,12 @@
 		<item name="android:actionBarTheme">@style/ThemeOverlay.ActionBar</item>
 	</style>
 
-	<style name="TextAppearance.Widget.Button" parent="android:TextAppearance.DeviceDefault.Widget.Button">
+	<style name="TextAppearance.Widget.Button" parent="android:TextAppearance.Material.Widget.Button">
 		<item name="android:fontFamily">@font/noto_sans</item>
 		<item name="android:textStyle">bold</item>
 	</style>
 
-	<style name="Widget.ActionBar.Solid" parent="android:Widget.DeviceDefault.ActionBar.Solid">
+	<style name="Widget.ActionBar.Solid" parent="android:Widget.Material.ActionBar.Solid">
 		<item name="android:titleTextStyle">@style/TextAppearance.Widget.ActionBar.Title</item>
 		<item name="android:subtitleTextStyle">@style/TextAppearance.Widget.ActionBar.Subtitle
 		</item>
@@ -32,13 +32,13 @@
 		<item name="android:colorControlNormal">?android:colorAccent</item>
 	</style>
 
-	<style name="TextAppearance.Widget.ActionBar.Title" parent="android:TextAppearance.DeviceDefault.Widget.ActionBar.Title">
+	<style name="TextAppearance.Widget.ActionBar.Title" parent="android:TextAppearance.Material.Widget.ActionBar.Title">
 		<item name="android:fontFamily">@font/burbank_small</item>
 		<item name="android:textColor">?android:colorAccent</item>
 		<item name="android:textStyle">bold</item>
 	</style>
 
-	<style name="TextAppearance.Widget.ActionBar.Subtitle" parent="android:TextAppearance.DeviceDefault.Widget.ActionBar.Subtitle">
+	<style name="TextAppearance.Widget.ActionBar.Subtitle" parent="android:TextAppearance.Material.Widget.ActionBar.Subtitle">
 		<item name="android:fontFamily">@font/noto_sans</item>
 	</style>
 

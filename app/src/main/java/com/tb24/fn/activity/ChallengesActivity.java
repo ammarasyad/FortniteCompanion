@@ -125,7 +125,7 @@ public class ChallengesActivity extends BaseActivity {
 					holder.itemView.setBackground(null);
 				} else {
 					holder.title.setText(def.DisplayName);
-					holder.itemView.setBackgroundColor(def.DisplayStyle.PrimaryColor.asInt());
+					holder.itemView.setBackground(new ChallengeBundleActivity.TitleBackgroundDrawable(activity, def.DisplayStyle));
 				}
 
 				if (entry.attributes != null) {
