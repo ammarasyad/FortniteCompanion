@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
@@ -13,20 +14,20 @@
 
 			<TextView
 				android:layout_marginEnd="16dp"
-				android:fontFamily="@font/burbank_big_condensed"
 				android:text="Event:"
 				android:textAllCaps="true"
 				android:textColor="?android:textColorPrimary"
 				android:textFontWeight="900"
-				android:textSize="24sp" />
+				android:textSize="24sp"
+				app:fontFamily="@font/burbank_big_condensed" />
 
 			<TextView
 				android:id="@+id/lb_mh_event"
-				android:fontFamily="@font/burbank_small"
 				android:textAllCaps="true"
 				android:textColor="?android:textColorPrimary"
 				android:textSize="16sp"
 				android:textStyle="bold"
+				app:fontFamily="@font/burbank_small"
 				tools:text="Duos Week 2 - Semi-Finals" />
 		</TableRow>
 
@@ -34,20 +35,20 @@
 
 			<TextView
 				android:layout_marginEnd="16dp"
-				android:fontFamily="@font/burbank_big_condensed"
 				android:text="Team:"
 				android:textAllCaps="true"
 				android:textColor="?android:textColorPrimary"
 				android:textFontWeight="900"
-				android:textSize="24sp" />
+				android:textSize="24sp"
+				app:fontFamily="@font/burbank_big_condensed" />
 
 			<TextView
 				android:id="@+id/lb_mh_team"
-				android:fontFamily="@font/burbank_small"
 				android:textAllCaps="true"
 				android:textColor="?android:textColorPrimary"
 				android:textSize="16sp"
 				android:textStyle="bold"
+				app:fontFamily="@font/burbank_small"
 				tools:text="Duos Week 2 - Semi-Finals" />
 		</TableRow>
 	</TableLayout>

@@ -3,6 +3,7 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_marginBottom="4dp">
 
 	<LinearLayout
@@ -26,7 +27,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="12dp"
-			android:fontFamily="@font/burbank_big_condensed"
+			app:fontFamily="@font/burbank_big_condensed"
 			android:textColor="?android:textColorPrimary"
 			android:textFontWeight="900"
 			android:textSize="24sp"
@@ -38,7 +39,7 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="2dp"
-			android:fontFamily="@font/burbank_small"
+			app:fontFamily="@font/burbank_small"
 			android:lineSpacingExtra="2dp"
 			android:textFontWeight="500"
 			tools:text="body" />

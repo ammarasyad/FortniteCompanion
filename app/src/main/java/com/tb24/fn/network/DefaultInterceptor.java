@@ -1,6 +1,5 @@
 package com.tb24.fn.network;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -8,7 +7,6 @@ import android.provider.Settings;
 import androidx.annotation.NonNull;
 
 import com.tb24.fn.FortniteCompanionApp;
-import com.tb24.fn.activity.MainActivity;
 import com.tb24.fn.event.LoggedOutEvent;
 import com.tb24.fn.util.Utils;
 
@@ -51,8 +49,7 @@ public class DefaultInterceptor implements okhttp3.Interceptor {
 		builder.addHeader("X-Epic-Device-ID", deviceId);
 		Response response = chain.proceed(builder.build());
 
-		if (response.code() == HttpURLConnection.HTTP_FORBIDDEN) {
-			app.startActivity(new Intent(app, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+		if (response.code() == HttpURLConnection.HTTP_UNAUTHORIZED) {
 			app.eventBus.post(new LoggedOutEvent(false));
 		}
 

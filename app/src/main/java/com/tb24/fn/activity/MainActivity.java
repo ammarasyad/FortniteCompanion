@@ -53,7 +53,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -73,14 +72,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	private LoadingViewController profileLc;
 	private AlertDialog loggedOutDialog;
 
-	public static boolean checkAuthError(EpicError error) {
-//		boolean isForbidden = error.response.code() == HttpURLConnection.HTTP_FORBIDDEN;
+//	public static boolean checkAuthError(EpicError error) {
+//		boolean isForbidden = error.response.code() == HttpURLConnection.HTTP_UNAUTHORIZED;
 //		boolean invalidToken = error.errorCode.equals("errors.com.epicgames.common.oauth.invalid_token") || error.numericErrorCode == 1014;
 //		boolean tokenVerificationFailed = error.errorCode.equals("errors.com.epicgames.common.authentication.token_verification_failed") || error.numericErrorCode == 1031;
 //		boolean authenticationFailed = error.errorCode.equals("errors.com.epicgames.common.oauth.authentication_failed") || error.numericErrorCode == 1032;
 //		return isForbidden || invalidToken || tokenVerificationFailed || authenticationFailed;
-		return error.response.code() == HttpURLConnection.HTTP_FORBIDDEN;
-	}
+//		return error.response.code() == HttpURLConnection.HTTP_UNAUTHORIZED;
+//	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -200,8 +199,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onLoggedOut(LoggedOutEvent event) {
-		if (!event.bIsLoggedOutByUser) {
-			getThisApplication().clearLoginData();
+		startActivity(new Intent(this, MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+		getThisApplication().clearLoginData();
+
+		if (event.bIsLoggedOutByUser) {
+			recreate();
+		} else {
 			loggedOutDialog.show();
 		}
 	}
@@ -283,6 +286,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
 		if (requestCode == UPDATE_IF_OK_REQ_CODE && resultCode == RESULT_OK) {
 			checkLogin();
 		}

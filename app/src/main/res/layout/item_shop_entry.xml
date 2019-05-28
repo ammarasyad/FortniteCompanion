@@ -40,7 +40,7 @@
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="-2dp"
 				android:ellipsize="marquee"
-				android:fontFamily="@font/burbank_big_condensed"
+				app:fontFamily="@font/burbank_big_condensed"
 				android:gravity="center"
 				android:shadowColor="#000000"
 				android:shadowRadius="4.0"

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
@@ -10,11 +11,11 @@
 		android:id="@+id/event_is_started"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:fontFamily="@font/burbank_small"
 		android:textAllCaps="true"
 		android:textColor="?android:textColorPrimary"
 		android:textSize="24sp"
 		android:textStyle="bold|italic"
+		app:fontFamily="@font/burbank_small"
 		tools:text="This event has ended." />
 
 	<TextView
@@ -22,11 +23,11 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="16dp"
-		android:fontFamily="@font/burbank_small"
 		android:letterSpacing="-0.025"
 		android:lineSpacingExtra="3dp"
 		android:textColor="?android:textColorPrimary"
 		android:textStyle="bold"
+		app:fontFamily="@font/burbank_small"
 		tools:text="event_details_description. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna. Nunc viverra imperdiet enim. Fusce est. Vivamus a tellus." />
 
 	<TextView
@@ -34,9 +35,9 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="8dp"
-		android:fontFamily="@font/burbank_small"
 		android:lineSpacingExtra="3dp"
 		android:textStyle="bold"
+		app:fontFamily="@font/burbank_small"
 		tools:text="event_flavor_description. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin pharetra nonummy pede. Mauris et orci. Aenean nec lorem." />
 
 	<!--textcolor = titletextcolor-->
@@ -45,12 +46,12 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="16dp"
-		android:fontFamily="@font/burbank_small"
 		android:text="Event Dates"
 		android:textAllCaps="true"
 		android:textColor="?android:textColorPrimary"
 		android:textFontWeight="900"
-		android:textSize="18sp" />
+		android:textSize="18sp"
+		app:fontFamily="@font/burbank_small" />
 
 	<LinearLayout
 		android:id="@+id/event_dates"
@@ -65,10 +66,10 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_marginTop="16dp"
-		android:fontFamily="@font/burbank_small"
 		android:textColor="?android:textColorPrimary"
 		android:textFontWeight="900"
 		android:textSize="18sp"
+		app:fontFamily="@font/burbank_small"
 		tools:text="event_short_format_title" />
 
 	<HorizontalScrollView

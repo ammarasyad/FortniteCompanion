@@ -3,15 +3,15 @@
 	<!-- Base application theme. -->
 	<style name="AppTheme" parent="Theme.AppCompat">
 		<!-- Customize your theme here. -->
-		<item name="android:colorPrimary">@color/colorPrimary</item>
-		<item name="android:colorPrimaryDark">@color/colorPrimaryDark</item>
-		<item name="android:colorAccent">@color/btn_primary_m_hovered_grad_rgba0</item>
+		<item name="colorPrimary">@color/colorPrimary</item>
+		<item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+		<item name="colorAccent">@color/btn_primary_m_hovered_grad_rgba0</item>
 		<item name="android:statusBarColor">?android:colorPrimary</item>
 		<item name="android:windowBackground">?android:colorPrimaryDark</item>
 		<item name="fontFamily">@font/noto_sans</item>
 		<item name="android:textAppearanceButton">@style/TextAppearance.Widget.Button</item>
-		<item name="android:actionBarStyle">@style/Widget.ActionBar.Solid</item>
-		<item name="android:actionBarTheme">@style/ThemeOverlay.ActionBar</item>
+		<item name="actionBarStyle">@style/Widget.ActionBar.Solid</item>
+		<item name="actionBarTheme">@style/ThemeOverlay.ActionBar</item>
 	</style>
 
 	<style name="TextAppearance.Widget.Button" parent="TextAppearance.AppCompat.Widget.Button">
@@ -20,15 +20,13 @@
 	</style>
 
 	<style name="Widget.ActionBar.Solid" parent="Widget.AppCompat.ActionBar.Solid">
-		<item name="android:titleTextStyle">@style/TextAppearance.Widget.ActionBar.Title</item>
-		<item name="android:subtitleTextStyle">@style/TextAppearance.Widget.ActionBar.Subtitle
+		<item name="titleTextStyle">@style/TextAppearance.Widget.ActionBar.Title</item>
+		<item name="subtitleTextStyle">@style/TextAppearance.Widget.ActionBar.Subtitle
 		</item>
 		<!--<item name="android:colorControlNormal">?android:colorAccent</item>-->
 	</style>
 
 	<style name="ThemeOverlay.ActionBar" parent="ThemeOverlay.AppCompat.ActionBar">
-		<!--<item name="android:titleTextStyle">@style/TextAppearance.Widget.ActionBar.Title</item>-->
-		<!--<item name="android:subtitleTextStyle">@style/TextAppearance.Widget.ActionBar.Subtitle</item>-->
 		<item name="android:colorControlNormal">?android:colorAccent</item>
 	</style>
 
@@ -49,12 +47,10 @@
 	</style>
 
 	<style name="TextAppearance.BurbankSmall.Bold" parent="TextAppearance.BurbankSmall">
-		<item name="fontFamily">@font/burbank_small</item>
 		<item name="android:textStyle">bold</item>
 	</style>
 
 	<style name="TextAppearance.BurbankSmall.Black" parent="TextAppearance.BurbankSmall">
-		<item name="fontFamily">@font/burbank_small</item>
 		<item name="android:textFontWeight">900</item>
 	</style>
 

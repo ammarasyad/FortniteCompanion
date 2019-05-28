@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
@@ -31,7 +32,6 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:ellipsize="marquee"
-			android:fontFamily="@font/burbank_big_condensed"
 			android:shadowColor="#80FFFFFF"
 			android:shadowRadius="10.0"
 			android:singleLine="true"
@@ -39,6 +39,7 @@
 			android:textColor="#F0FFFFFF"
 			android:textFontWeight="900"
 			android:textSize="28sp"
+			app:fontFamily="@font/burbank_big_condensed"
 			tools:text="Any legendary emote out there?" />
 	</LinearLayout>
 

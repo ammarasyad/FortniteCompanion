@@ -71,7 +71,7 @@ public class SettingsActivity extends BaseActivity {
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
 			setPreferencesFromResource(R.xml.pref_general, rootKey);
 
-			prefRegion = (DropDownPreference) findPreference("matchmaking_region");
+			prefRegion = findPreference("matchmaking_region");
 			int len = ERegion.values().length;
 			String[] values = new String[len];
 			String[] names = new String[len];
@@ -93,7 +93,7 @@ public class SettingsActivity extends BaseActivity {
 			findPreference("copy_profile").setVisible(loggedIn);
 
 			if (ctgAccount.isVisible()) {
-				prefPrivacy = (TwoStatePreference) findPreference("leaderboard_privacy");
+				prefPrivacy = findPreference("leaderboard_privacy");
 				prefPrivacy.setOnPreferenceChangeListener(this);
 				prefPrivacy.setEnabled(false);
 				final Call<AccountPrivacyResponse> callPrivacy = getApplication_().fortnitePublicService.getAccountPrivacy(getPreferenceManager().getSharedPreferences().getString("epic_account_id", ""));
@@ -115,7 +115,7 @@ public class SettingsActivity extends BaseActivity {
 					}
 				}.start();
 
-				prefMtxPlatform = (DropDownPreference) findPreference("mtx_platform");
+				prefMtxPlatform = findPreference("mtx_platform");
 				int len1 = EMtxPlatform.values().length;
 				String[] values1 = new String[len1];
 				String[] names1 = new String[len1];
@@ -136,7 +136,7 @@ public class SettingsActivity extends BaseActivity {
 			prefViewLoginData = findPreference("view_login_data");
 			prefViewLoginData.setVisible(loggedIn);
 
-			prefLogOut = (LayoutPreference) findPreference("log_out");
+			prefLogOut = findPreference("log_out");
 			prefLogOut.setVisible(loggedIn);
 			prefLogOut.findViewById(R.id.log_out_button).setOnClickListener(new View.OnClickListener() {
 				@Override
@@ -154,7 +154,6 @@ public class SettingsActivity extends BaseActivity {
 											try {
 												call.execute();
 												getApplication_().eventBus.post(new LoggedOutEvent(true));
-												getActivity().finish();
 											} catch (IOException e) {
 												Utils.throwableDialog(getActivity(), e);
 											}
