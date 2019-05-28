@@ -1,18 +1,17 @@
 package com.tb24.fn.view;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.widget.TextView;
+
+import androidx.appcompat.widget.AppCompatTextView;
 
 import com.tb24.fn.R;
 
-@SuppressLint("AppCompatCustomView")
-public class OutlineTextView extends TextView {
+public class OutlineTextView extends AppCompatTextView {
 	private static final float DEFAULT_STROKE_WIDTH = 0F;
 	private boolean isDrawing = false;
 	private int strokeColor = 0;
@@ -30,11 +29,6 @@ public class OutlineTextView extends TextView {
 
 	public OutlineTextView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
-		init(context, attrs);
-	}
-
-	public OutlineTextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-		super(context, attrs, defStyleAttr, defStyleRes);
 		init(context, attrs);
 	}
 

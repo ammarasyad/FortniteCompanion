@@ -275,7 +275,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 			challengeBundleDef = getThisApplication().gson.fromJson(a.getAsJsonArray().get(0), FortChallengeBundleItemDefinition.class);
 			setTitle(Utils.color(challengeBundleDef.DisplayName, 0xFFFFFFFF));
 			getWindow().setStatusBarColor(challengeBundleDef.DisplayStyle.PrimaryColor.asInt());
-			getActionBar().setBackgroundDrawable(new TitleBackgroundDrawable(this, challengeBundleDef.DisplayStyle));
+			getSupportActionBar().setBackgroundDrawable(new TitleBackgroundDrawable(this, challengeBundleDef.DisplayStyle));
 			List<CompletionRewardQuestEntry> completionRewardQuestEntries = new ArrayList<>();
 
 			for (FortChallengeBundleItemDefinition.BundleCompletionReward bundleCompletionReward : challengeBundleDef.BundleCompletionRewards) {

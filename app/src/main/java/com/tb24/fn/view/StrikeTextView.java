@@ -1,16 +1,15 @@
 package com.tb24.fn.view;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.widget.TextView;
+
+import androidx.appcompat.widget.AppCompatTextView;
 
 import com.tb24.fn.util.Utils;
 
-@SuppressLint("AppCompatCustomView")
-public class StrikeTextView extends TextView {
+public class StrikeTextView extends AppCompatTextView {
 	public static final int Y_OFF = 4;
 	private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 	private float parsedOff;
@@ -28,11 +27,6 @@ public class StrikeTextView extends TextView {
 
 	public StrikeTextView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
-		init(context);
-	}
-
-	public StrikeTextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-		super(context, attrs, defStyleAttr, defStyleRes);
 		init(context);
 	}
 

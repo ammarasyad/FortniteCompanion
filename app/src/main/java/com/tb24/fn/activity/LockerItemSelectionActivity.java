@@ -1,6 +1,5 @@
 package com.tb24.fn.activity;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -22,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -489,10 +489,10 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			itemTypeFilter = getItemCategoryFilterById(id);
 			itemFilters = getItemFilterListByItemCategory(getThisApplication().itemRegistry, itemTypeFilter);
 
-			if (getActionBar() != null) {
+			if (getSupportActionBar() != null) {
 //				getActionBar().setTitle("Selecting");
-				getActionBar().setTitle("Viewing");
-				getActionBar().setSubtitle(getTitleTextById(id));
+				getSupportActionBar().setTitle("Viewing");
+				getSupportActionBar().setSubtitle(getTitleTextById(id));
 			}
 
 			mSpinnerHeader = (ViewGroup) setPinnedHeaderView(R.layout.apps_filter_spinner);

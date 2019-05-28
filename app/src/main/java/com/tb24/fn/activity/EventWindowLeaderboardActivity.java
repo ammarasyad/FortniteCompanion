@@ -1,6 +1,5 @@
 package com.tb24.fn.activity;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,6 +33,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Px;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.widget.TextViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -118,7 +118,7 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 		setupActionBar();
 		Intent intent = getIntent();
 		setTitle(intent.getStringExtra(ARG_TITLE));
-		getActionBar().setSubtitle(intent.getStringExtra(ARG_SUBTITLE));
+		getSupportActionBar().setSubtitle(intent.getStringExtra(ARG_SUBTITLE));
 		color = (int) Long.parseLong(intent.getStringExtra(ARG_COLOR), 16);
 		DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
 		sideBySide = (displayMetrics.widthPixels / displayMetrics.density) >= FortniteCompanionApp.MIN_DP_FOR_TWOCOLUMN;

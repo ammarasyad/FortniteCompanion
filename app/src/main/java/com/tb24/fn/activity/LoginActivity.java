@@ -1,6 +1,5 @@
 package com.tb24.fn.activity;
 
-import android.app.AlertDialog;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.CursorLoader;
 import android.content.DialogInterface;
@@ -26,6 +25,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 
 import com.google.common.collect.ImmutableMap;
 import com.tb24.fn.FortniteCompanionApp;

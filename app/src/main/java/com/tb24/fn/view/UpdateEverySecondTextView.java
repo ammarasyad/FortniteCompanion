@@ -1,16 +1,15 @@
 package com.tb24.fn.view;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.widget.TextView;
+
+import androidx.appcompat.widget.AppCompatTextView;
 
 import com.google.common.base.Supplier;
 
-@SuppressLint("AppCompatCustomView")
-public class UpdateEverySecondTextView extends TextView {
+public class UpdateEverySecondTextView extends AppCompatTextView {
 	private Handler handler = new Handler();
 	private Supplier<CharSequence> textSupplier;
 	private boolean mShouldRunTicker;
@@ -37,10 +36,6 @@ public class UpdateEverySecondTextView extends TextView {
 
 	public UpdateEverySecondTextView(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
-	}
-
-	public UpdateEverySecondTextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-		super(context, attrs, defStyleAttr, defStyleRes);
 	}
 
 	public void setTextSupplier(Supplier<CharSequence> textSupplier) {

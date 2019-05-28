@@ -1,13 +1,12 @@
 package com.tb24.fn.view;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.widget.TextView;
 
-@SuppressLint("AppCompatCustomView")
-public class ForcedMarqueeTextView extends TextView {
+import androidx.appcompat.widget.AppCompatTextView;
+
+public class ForcedMarqueeTextView extends AppCompatTextView {
 	public ForcedMarqueeTextView(Context context) {
 		super(context);
 	}

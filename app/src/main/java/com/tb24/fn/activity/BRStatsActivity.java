@@ -1,6 +1,5 @@
 package com.tb24.fn.activity;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -11,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import androidx.appcompat.app.AlertDialog;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.HashBasedTable;
@@ -85,7 +86,7 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 		String id = getIntent().getStringExtra("a");
 		String name = getIntent().getStringExtra("b");
 		setupActionBar();
-		getActionBar().setTitle(PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", "").equals(id) ? "You" : name == null ? id : name);
+		getSupportActionBar().setTitle(PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", "").equals(id) ? "You" : name == null ? id : name);
 		final View frame = findViewById(R.id.main_content);
 		getLayoutInflater().inflate(R.layout.br_stat_view, (ViewGroup) frame);
 		btn1 = findViewById(R.id.br_stats_btn_platform_cycle);

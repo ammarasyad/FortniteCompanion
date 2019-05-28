@@ -30,11 +30,6 @@ public class SlotView extends RelativeLayout {
 		init();
 	}
 
-	public SlotView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-		super(context, attrs, defStyleAttr, defStyleRes);
-		init();
-	}
-
 	protected void init() {
 		paint = new Paint();
 		paint.setStyle(Paint.Style.STROKE);

@@ -1,6 +1,5 @@
 package com.tb24.fn.view;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -10,12 +9,12 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
-import android.widget.Button;
+
+import androidx.appcompat.widget.AppCompatButton;
 
 import com.tb24.fn.util.Utils;
 
-@SuppressLint("AppCompatCustomView")
-public class ShineButton extends Button {
+public class ShineButton extends AppCompatButton {
 	private static final long SHINE_DURATION = 500;
 	private static final long SHINE_DELAY_BETWEEN = 1500;
 	private Paint paint;
@@ -37,11 +36,6 @@ public class ShineButton extends Button {
 
 	public ShineButton(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
-		init();
-	}
-
-	public ShineButton(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-		super(context, attrs, defStyleAttr, defStyleRes);
 		init();
 	}
 

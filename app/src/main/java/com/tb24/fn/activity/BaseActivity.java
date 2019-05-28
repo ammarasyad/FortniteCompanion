@@ -1,7 +1,5 @@
 package com.tb24.fn.activity;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -9,12 +7,15 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.model.FortItemStack;
 
 import java.util.Map;
 
-public abstract class BaseActivity extends Activity {
+public abstract class BaseActivity extends AppCompatActivity {
 	public static int countAndSetVbucks(BaseActivity activity, ViewGroup vBucksView) {
 		if (!activity.getThisApplication().profileManager.profileData.containsKey("common_core")) {
 			vBucksView.setVisibility(View.GONE);
@@ -69,7 +70,7 @@ public abstract class BaseActivity extends Activity {
 	}
 
 	protected void setupActionBar() {
-		ActionBar actionBar = getActionBar();
+		ActionBar actionBar = getSupportActionBar();
 
 		if (actionBar != null) {
 			actionBar.setDisplayHomeAsUpEnabled(true);
