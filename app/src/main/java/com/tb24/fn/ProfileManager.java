@@ -45,6 +45,14 @@ public class ProfileManager {
 					FortMcpProfile profile = profileData.get(response.profileId);
 					profile.items.put(obj.get("itemId").getAsString(), app.gson.fromJson(obj.get("item"), FortItemStack.class));
 					app.eventBus.post(new ProfileUpdatedEvent(response.profileId, profile));
+				} else if (changeType.equals("itemRemoved")) {
+					if (!profileData.containsKey(response.profileId)) {
+						return;
+					}
+
+					FortMcpProfile profile = profileData.get(response.profileId);
+					profile.items.remove(obj.get("itemId").getAsString());
+					app.eventBus.post(new ProfileUpdatedEvent(response.profileId, profile));
 				}
 			}
 		}

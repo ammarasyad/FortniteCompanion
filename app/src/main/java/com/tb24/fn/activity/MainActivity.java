@@ -113,7 +113,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 				return !getThisApplication().profileManager.profileData.containsKey("athena");
 			}
 		};
-		loggedOutDialog = new AlertDialog.Builder(MainActivity.this)
+		loggedOutDialog = new AlertDialog.Builder(this)
 				.setTitle("Logout Occured")
 				.setMessage("Your login has expired or you logged in elsewhere.\n\nPlease log in again.")
 				.setPositiveButton(android.R.string.ok, null)
@@ -124,6 +124,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 					}
 				})
 				.create();
+		loggedOutDialog.setCanceledOnTouchOutside(false);
 		checkLogin();
 		getThisApplication().eventBus.register(this);
 	}

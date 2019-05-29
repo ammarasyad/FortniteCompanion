@@ -2,7 +2,10 @@ package com.tb24.fn.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -16,10 +19,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonObject;
 import com.tb24.fn.R;
 import com.tb24.fn.event.ProfileUpdatedEvent;
+import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
+import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.assetdata.FortChallengeBundleItemDefinition;
 import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
@@ -29,9 +35,13 @@ import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Comparator;
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Response;
 
 public class ChallengesActivity extends BaseActivity {
 	private RecyclerView list;
@@ -54,6 +64,37 @@ public class ChallengesActivity extends BaseActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		getThisApplication().eventBus.unregister(this);
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		menu.add(0, 500, 0, "Refresh challenges");
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == 500) {
+			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp("ClientQuestLogin", PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""), "athena", -1, new JsonObject());
+			new Thread("Client Quest Login Worker") {
+				@Override
+				public void run() {
+					try {
+						Response<FortMcpResponse> response = call.execute();
+
+						if (response.isSuccessful()) {
+							getThisApplication().profileManager.executeProfileChanges(response.body());
+						} else {
+							Utils.dialogError(ChallengesActivity.this, EpicError.parse(response).getDisplayText());
+						}
+					} catch (IOException e) {
+						Utils.throwableDialog(ChallengesActivity.this, e);
+					}
+				}
+			}.start();
+		}
+
+		return super.onOptionsItemSelected(item);
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
