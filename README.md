@@ -1,6 +1,6 @@
 # FortniteCompanion
 A mini Fortnite client for Android.\
-Download: [releases page](https://github.com/FortniteCompanion/releases)\
+Download: [releases page](https://github.com/Amrsatrio/FortniteCompanion/releases)\
 For Android 5.0 Lollipop (API 21) and up.
 
 ## Features
