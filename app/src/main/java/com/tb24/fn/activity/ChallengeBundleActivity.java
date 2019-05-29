@@ -616,7 +616,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 				if (entryDef.UnlockValue == 100) {
 					holder.questTitle.setText(activity.challengeBundleDef.UniqueLockedMessage);
 					holder.questProgressParent.setVisibility(View.GONE);
-				} else {
+				} else if (activity.calendarEventTag != null) {
 					Calendar calendar = Calendar.getInstance();
 					calendar.setTime(activity.calendarEventTag.activeSince);
 					calendar.add(Calendar.DAY_OF_MONTH, entryDef.UnlockValue);

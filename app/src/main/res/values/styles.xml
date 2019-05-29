@@ -27,7 +27,7 @@
 	</style>
 
 	<style name="ThemeOverlay.ActionBar" parent="ThemeOverlay.AppCompat.ActionBar">
-		<item name="android:colorControlNormal">?android:colorAccent</item>
+		<item name="colorControlNormal">?android:colorAccent</item>
 	</style>
 
 	<style name="TextAppearance.Widget.ActionBar.Title" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">

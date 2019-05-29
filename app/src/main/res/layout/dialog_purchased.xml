@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:layout_gravity="center"
 	android:gravity="center"
 	android:orientation="vertical"
@@ -19,7 +19,6 @@
 			android:id="@+id/item_shop_purchased_text"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			app:fontFamily="@font/burbank_big_condensed"
 			android:shadowColor="#80FFFFFF"
 			android:shadowRadius="15.0"
 			android:singleLine="true"
@@ -27,7 +26,8 @@
 			android:textAllCaps="true"
 			android:textColor="#FFFFFF"
 			android:textFontWeight="900"
-			android:textSize="36sp" />
+			android:textSize="36sp"
+			app:fontFamily="@font/burbank_big_condensed" />
 
 		<ImageView
 			android:id="@+id/item_shop_purchased_check"
@@ -42,14 +42,14 @@
 		android:id="@+id/item_shop_purchased_item_title"
 		android:layout_width="match_parent"
 		android:layout_height="52sp"
-		android:autoSizeTextType="uniform"
-		app:fontFamily="@font/burbank_big_condensed"
 		android:gravity="center"
 		android:shadowColor="#80FFFFFF"
 		android:shadowRadius="15.0"
 		android:textAllCaps="true"
 		android:textColor="#FFFFFF"
 		android:textFontWeight="900"
+		app:autoSizeTextType="uniform"
+		app:fontFamily="@font/burbank_big_condensed"
 		tools:text="Renegade Raider" />
 
 	<include

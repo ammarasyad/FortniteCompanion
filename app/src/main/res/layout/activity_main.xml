@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:id="@+id/activity_main_root"
 	android:layout_width="match_parent"
@@ -53,69 +54,69 @@
 			android:layout_height="wrap_content"
 			android:orientation="vertical">
 
-			<GridLayout
+			<androidx.gridlayout.widget.GridLayout
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
-				android:columnCount="2">
+				app:columnCount="2">
 
 				<Button
 					android:id="@+id/main_screen_btn_profile"
 					android:layout_width="0dp"
 					android:layout_height="100dp"
-					android:layout_columnWeight="1"
 					android:enabled="false"
-					android:text="@string/title_profile" />
+					android:text="@string/title_profile"
+					app:layout_columnWeight="1" />
 
 				<Button
 					android:id="@+id/main_screen_btn_challenges"
 					android:layout_width="0dp"
 					android:layout_height="100dp"
-					android:layout_columnWeight="1"
-					android:text="@string/title_challenges" />
+					android:text="@string/title_challenges"
+					app:layout_columnWeight="1" />
 
 				<Button
 					android:id="@+id/main_screen_btn_events"
 					android:layout_width="0dp"
 					android:layout_height="100dp"
-					android:layout_columnWeight="1"
-					android:text="@string/title_events" />
+					android:text="@string/title_events"
+					app:layout_columnWeight="1" />
 
 				<Button
 					android:id="@+id/main_screen_btn_stats"
 					android:layout_width="0dp"
 					android:layout_height="100dp"
-					android:layout_columnWeight="1"
-					android:text="@string/title_stats" />
+					android:text="@string/title_stats"
+					app:layout_columnWeight="1" />
 
 				<Button
 					android:id="@+id/main_screen_btn_locker"
 					android:layout_width="0dp"
 					android:layout_height="100dp"
-					android:layout_columnWeight="1"
-					android:text="@string/title_locker" />
+					android:text="@string/title_locker"
+					app:layout_columnWeight="1" />
 
 				<Button
 					android:id="@+id/main_screen_btn_item_shop"
 					android:layout_width="0dp"
 					android:layout_height="100dp"
-					android:layout_columnWeight="1"
 					android:enabled="false"
-					android:text="@string/title_item_shop" />
+					android:text="@string/title_item_shop"
+					app:layout_columnWeight="1" />
 
 				<Button
 					android:id="@+id/main_screen_btn_news"
 					android:layout_width="0dp"
 					android:layout_height="100dp"
-					android:layout_columnWeight="1"
-					android:text="@string/title_news" />
+					android:text="@string/title_news"
+					app:layout_columnWeight="1" />
 
 				<Button
 					android:id="@+id/main_screen_btn_stw"
 					android:layout_width="0dp"
 					android:layout_height="100dp"
-					android:layout_columnWeight="1"
-					android:text="@string/title_stw_info" />
-			</GridLayout>
+					android:text="@string/title_stw_info"
+					app:layout_columnWeight="1" />
+			</androidx.gridlayout.widget.GridLayout>
 
 			<Button
 				android:id="@+id/main_screen_btn_login"

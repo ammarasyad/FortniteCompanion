@@ -98,7 +98,7 @@ public class ProfileActivity extends BaseActivity {
 			((TextView) findViewById(R.id.profile_account_id)).setText(currentLoggedIn.getDisplayName() + " \u2022 " + currentLoggedIn.getId());
 			((TextView) findViewById(R.id.profile_country)).setText(currentLoggedIn.country);
 			((TextView) findViewById(R.id.profile_display_name_changes)).setText(String.valueOf(currentLoggedIn.numberOfDisplayNameChanges));
-			((TextView) findViewById(R.id.profile_display_name_last_change)).setText(Utils.formatDateSimple(currentLoggedIn.lastDisplayNameChange));
+			((TextView) findViewById(R.id.profile_display_name_last_change)).setText(currentLoggedIn.lastDisplayNameChange == null ? "Never" : Utils.formatDateSimple(currentLoggedIn.lastDisplayNameChange));
 			((TextView) findViewById(R.id.profile_2fa)).setText(bool(currentLoggedIn.tfaEnabled));
 		}
 
@@ -106,8 +106,8 @@ public class ProfileActivity extends BaseActivity {
 			FortMcpProfile common_core = getThisApplication().profileManager.profileData.get("common_core");
 			CommonCoreProfileAttributes attributes = (CommonCoreProfileAttributes) common_core.stats.attributesObj;
 			((TextView) findViewById(R.id.profile_created_on)).setText(Utils.formatDateSimple(common_core.created));
-			((TextView) findViewById(R.id.profile_sac)).setText(attributes.mtx_affiliate);
-			((TextView) findViewById(R.id.profile_sac_set_time)).setText(Utils.formatDateSimple(attributes.mtx_affiliate_set_time));
+			((TextView) findViewById(R.id.profile_sac)).setText(attributes.mtx_affiliate.isEmpty() ? "None" : attributes.mtx_affiliate);
+			((TextView) findViewById(R.id.profile_sac_set_time)).setText(attributes.mtx_affiliate_set_time == null ? "Never" : Utils.formatDateSimple(attributes.mtx_affiliate_set_time));
 			((TextView) findViewById(R.id.profile_gift_send)).setText(bool(attributes.allowed_to_send_gifts));
 			((TextView) findViewById(R.id.profile_gift_receive)).setText(bool(attributes.allowed_to_receive_gifts));
 		}

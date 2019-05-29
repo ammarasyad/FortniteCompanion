@@ -110,12 +110,12 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 	}
 
 	public static Bitmap makeBannerIcon(BaseActivity activity, String bannerIcon, String bannerColor) {
-		BannerIcon bannerIconDef = activity.getThisApplication().bannerIcons.get(bannerIcon);
+		BannerIcon bannerIconDef = activity.getThisApplication().bannerIcons.get(bannerIcon == null || bannerIcon.isEmpty() ? "standardbanner31" : bannerIcon);
 
 		if (bannerIconDef != null) {
 			Bitmap bitmap = Utils.loadTga(activity, bannerIconDef.SmallImage.asset_path_name).copy(Bitmap.Config.ARGB_8888, true);
 
-			if (bannerColor != null) {
+			if (bannerColor != null && !bannerColor.isEmpty()) {
 				int color1 = 0xFF000000;
 				int color2 = 0xFF000000;
 				BannerColor bannerColorDef = activity.getThisApplication().bannerColors.get(bannerColor);
