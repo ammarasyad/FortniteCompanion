@@ -254,7 +254,7 @@ public class ItemShopActivity extends BaseActivity {
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onProfileUpdatedEvent(ProfileUpdatedEvent event) {
+	public void onProfileUpdated(ProfileUpdatedEvent event) {
 		if (event.profileId.equals("common_core")) {
 			updateVbucks();
 
