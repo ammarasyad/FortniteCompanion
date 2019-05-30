@@ -20,6 +20,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 public class ProfileManager {
+	private static final String TAG = "MCP-Profile";
 	private Map<String, FortMcpProfile> profileData = new HashMap<>();
 	private Map<String, Integer> profileRevisions = new HashMap<>();
 	private final FortniteCompanionApp app;
@@ -34,40 +35,56 @@ public class ProfileManager {
 		if (response.profileChanges != null) {
 			for (JsonObject obj : response.profileChanges) {
 				String changeType = JsonUtils.getStringOr("changeType", obj, "");
-				FortMcpProfile profile;
+				FortMcpProfile profile = null;
 
 				if (changeType.equals("fullProfileUpdate")) {
 					profile = app.gson.fromJson(obj.get("profile"), FortMcpProfile.class);
 					profileData.put(response.profileId, profile);
-					Log.i("MCP-Profile", String.format("Full profile update (rev=%d, version=%s@w=%d) for %s accountId=MCP:%s profileId=%s", profile.rvn, profile.version, profile.wipeNumber, app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId));
+					Log.i(TAG, String.format("Full profile update (rev=%d, version=%s@w=%d) for %s accountId=MCP:%s profileId=%s", profile.rvn, profile.version, profile.wipeNumber, app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId));
 				} else {
-					if (!hasProfileData(response.profileId)) {
-						return;
-					}
+					if (hasProfileData(response.profileId)) {
+						profile = getProfileData(response.profileId);
+						switch (changeType) {
+							case "itemAdded":
+								FortItemStack itemToAdd = app.gson.fromJson(obj.get("item"), FortItemStack.class);
+								profile.items.put(obj.get("itemId").getAsString(), itemToAdd);
+								Log.i(TAG, String.format("%s accountId=MCP:%s profileId=%s gained %s", app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId, itemToAdd.toString()));
+								break;
+							case "itemRemoved":
+								FortItemStack itemToRemove = profile.items.get(obj.get("itemId").getAsString());
 
-					profile = getProfileData(response.profileId);
-					switch (changeType) {
-						case "itemAdded":
-							FortItemStack item = app.gson.fromJson(obj.get("item"), FortItemStack.class);
-							profile.items.put(obj.get("itemId").getAsString(), item);
-							Log.i("MCP-Profile", String.format("%s accountId=MCP:%s profileId=%s gained %s", app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId, item.toString()));
-							break;
-						case "itemRemoved":
-							FortItemStack item1 = profile.items.get(obj.get("itemId").getAsString());
+								if (itemToRemove != null) {
+									profile.items.remove(obj.get("itemId").getAsString());
+									Log.i(TAG, String.format("%s accountId=MCP:%s profileId=%s lost %s", app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId, itemToRemove.toString()));
+								} else {
+									Log.w(TAG, "itemRemoved: Item ID " + obj.get("itemId").getAsString() + " not found");
+								}
 
-							if (item1 != null) {
-								profile.items.remove(obj.get("itemId").getAsString());
-								Log.i("MCP-Profile", String.format("%s accountId=MCP:%s profileId=%s lost %s", app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId, item1.toString()));
-							}
+								break;
+							case "itemAttrChanged":
+								FortItemStack itemAttrToChange = profile.items.get(obj.get("itemId").getAsString());
 
-							break;
-						case "itemAttrChanged":
-							profile.items.get(obj.get("itemId").getAsString()).attributes.add(obj.get("variants").getAsString(), obj.get("attributeValue"));
-							break;
-						case "statModified":
-							profile.stats.attributes.add(obj.get("name").getAsString(), obj.get("value"));
-							profile.reserializeAttrObject();
-							break;
+								if (itemAttrToChange != null) {
+									if (itemAttrToChange.attributes == null) {
+										itemAttrToChange.attributes = new JsonObject();
+									}
+
+									itemAttrToChange.attributes.add(obj.get("attributeName").getAsString(), obj.get("attributeValue"));
+								} else {
+									Log.w(TAG, "itemAttrChanged: Item ID " + obj.get("itemId").getAsString() + " not found");
+								}
+
+								break;
+							case "statModified":
+								profile.stats.attributes.add(obj.get("name").getAsString(), obj.get("value"));
+								profile.reserializeAttrObject();
+								break;
+							default:
+								Log.w(TAG, "Unknown change type '" + changeType + "'. If you're reading this, please inform the developer.");
+								break;
+						}
+					} else {
+						Log.w(TAG, "Change type isn't Full Profile Update and Profile ID '" + response.profileId + "' haven't done a Full Profile Update. This is definitely a bug. If you're reading this, please inform the developer.");
 					}
 				}
 
@@ -103,7 +120,7 @@ public class ProfileManager {
 						app.eventBus.post(new ProfileUpdateFailedEvent(profileId, EpicError.parse(execute)));
 					}
 				} catch (IOException e) {
-					Log.e("MCP-Profile", "Failed requesting profile update " + profileId, e);
+					Log.e(TAG, "Failed requesting profile update " + profileId, e);
 					app.eventBus.post(new ProfileUpdateFailedEvent(profileId, e));
 				}
 			}
@@ -121,6 +138,7 @@ public class ProfileManager {
 
 	public void clearProfileData() {
 		profileData.clear();
+		profileRevisions.clear();
 	}
 
 	public int getRvn(String profileId) {
