@@ -32,30 +32,33 @@ public class FortMcpProfile {
 		public ProfileAttributes attributesObj;
 	}
 
+	public void reserializeAttrObject() {
+		JsonObject profileJson = stats.attributes;
+		ProfileAttributes profileAttributes;
+
+		switch (profileId) {
+			case "common_public":
+				profileAttributes = Utils.DEFAULT_GSON.fromJson(profileJson, CommonPublicProfileAttributes.class);
+				break;
+			case "common_core":
+				profileAttributes = Utils.DEFAULT_GSON.fromJson(profileJson, CommonCoreProfileAttributes.class);
+				break;
+			case "athena":
+				profileAttributes = Utils.DEFAULT_GSON.fromJson(profileJson, AthenaProfileAttributes.class);
+				break;
+			default:
+				profileAttributes = new ProfileAttributes();
+		}
+
+		stats.attributesObj = profileAttributes;
+	}
+
 	public static class Serializer implements JsonDeserializer<FortMcpProfile> {
 		@Override
 		public FortMcpProfile deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
 			FortMcpProfile profile = Utils.DEFAULT_GSON.fromJson(json, FortMcpProfile.class);
-			JsonObject profileJson = profile.stats.attributes;
-			ProfileAttributes profileAttributes;
-
-			switch (profile.profileId) {
-				case "common_public":
-					profileAttributes = context.deserialize(profileJson, CommonPublicProfileAttributes.class);
-					break;
-				case "common_core":
-					profileAttributes = context.deserialize(profileJson, CommonCoreProfileAttributes.class);
-					break;
-				case "athena":
-					profileAttributes = context.deserialize(profileJson, AthenaProfileAttributes.class);
-					break;
-				default:
-					profileAttributes = new ProfileAttributes();
-			}
-
-			profile.stats.attributesObj = profileAttributes;
+			profile.reserializeAttrObject();
 			return profile;
 		}
 	}
-
 }

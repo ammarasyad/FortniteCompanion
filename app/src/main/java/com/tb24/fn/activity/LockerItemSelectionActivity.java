@@ -1,5 +1,6 @@
 package com.tb24.fn.activity;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -35,11 +36,13 @@ import com.tb24.fn.R;
 import com.tb24.fn.Registry;
 import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
+import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.assetdata.AthenaPetCarrierItemDefinition;
 import com.tb24.fn.model.assetdata.FortItemDefinition;
+import com.tb24.fn.model.command.EquipBattleRoyaleCustomization;
 import com.tb24.fn.model.command.MarkItemSeen;
 import com.tb24.fn.model.command.SetItemFavoriteStatusBatch;
 import com.tb24.fn.util.EFortRarity;
@@ -86,15 +89,18 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 	private LoadingViewController lc;
 	private GridLayoutManager layout;
 
+	private int incomingViewId;
 	private String itemTypeFilter;
 	private List<ItemFilter> itemFilters;
 	private int mFilterIndex;
+	private FortItemStack randomItem;
 	private String selectedItem;
 
 	private FortMcpProfile profileData;
 	private FortItemStack[] referenceData;
 	private Map<String, Boolean> favoriteChangeMap = new HashMap<>();
 	private Set<String> seenChangeSet = new HashSet<>();
+	private boolean equipExecuted;
 
 	public static String getItemCategoryFilterById(int id) {
 		switch (id) {
@@ -166,6 +172,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				return defData != null && defData.ItemVariants != null;
 			}
 		}, R.string.locker_filter_styles, null);
+		// TODO Master Portal back bling is not filtered into Reactive
 		ItemFilter filterReactive = new ItemFilter(new Predicate<FortItemStack>() {
 			@Override
 			public boolean apply(@NullableDecl FortItemStack input) {
@@ -331,10 +338,6 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				return true;
 			case "AthenaBackpack":
 				return true;
-			case "AthenaPickaxe":
-				return false;
-			case "AthenaGlider":
-				return false;
 			case "AthenaSkyDiveContrail":
 				return true;
 			case "AthenaItemWrap":
@@ -344,7 +347,36 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			case "AthenaLoadingScreen":
 				return true;
 			default:
-				return true;
+				return false;
+		}
+	}
+
+	private static EquipBattleRoyaleCustomization.ECustomizationSlot getCustomizationSlotByType(String filterId) {
+		if (filterId == null) {
+			return null;
+		}
+
+		switch (filterId) {
+			case "AthenaCharacter":
+				return EquipBattleRoyaleCustomization.ECustomizationSlot.Character;
+			case "AthenaBackpack":
+				return EquipBattleRoyaleCustomization.ECustomizationSlot.Backpack;
+			case "AthenaPickaxe":
+				return EquipBattleRoyaleCustomization.ECustomizationSlot.Pickaxe;
+			case "AthenaGlider":
+				return EquipBattleRoyaleCustomization.ECustomizationSlot.Glider;
+			case "AthenaSkyDiveContrail":
+				return EquipBattleRoyaleCustomization.ECustomizationSlot.SkyDiveContrail;
+			case "AthenaDance":
+				return EquipBattleRoyaleCustomization.ECustomizationSlot.Dance;
+			case "AthenaItemWrap":
+				return EquipBattleRoyaleCustomization.ECustomizationSlot.ItemWrap;
+			case "AthenaMusicPack":
+				return EquipBattleRoyaleCustomization.ECustomizationSlot.MusicPack;
+			case "AthenaLoadingScreen":
+				return EquipBattleRoyaleCustomization.ECustomizationSlot.LoadingScreen;
+			default:
+				return null;
 		}
 	}
 
@@ -442,37 +474,59 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			case R.id.locker_slot_skydivecontrail:
 				return attributes.favorite_skydivecontrail;
 			case R.id.locker_slot_emote1:
-				return 0 > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[0];
 			case R.id.locker_slot_emote2:
-				return 1 > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[1];
 			case R.id.locker_slot_emote3:
-				return 2 > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[2];
 			case R.id.locker_slot_emote4:
-				return 3 > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[3];
 			case R.id.locker_slot_emote5:
-				return 4 > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[4];
 			case R.id.locker_slot_emote6:
-				return 5 > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[5];
+				return getSlotIndexById(id) > attributes.favorite_dance.length - 1 ? "" : attributes.favorite_dance[getSlotIndexById(id)];
 			case R.id.locker_slot_wrap1:
-				return 0 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[0];
 			case R.id.locker_slot_wrap2:
-				return 1 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[1];
 			case R.id.locker_slot_wrap3:
-				return 2 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[2];
 			case R.id.locker_slot_wrap4:
-				return 3 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[3];
 			case R.id.locker_slot_wrap5:
-				return 4 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[4];
 			case R.id.locker_slot_wrap6:
-				return 5 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[5];
 			case R.id.locker_slot_wrap7:
-				return 6 > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[6];
+				return getSlotIndexById(id) > attributes.favorite_itemwraps.length - 1 ? "" : attributes.favorite_itemwraps[getSlotIndexById(id)];
 			case R.id.locker_slot_musicpack:
 				return attributes.favorite_musicpack;
 			case R.id.locker_slot_loadingscreen:
 				return attributes.favorite_loadingscreen;
 			default:
 				return null;
+		}
+	}
+
+	private static int getSlotIndexById(int id) {
+		switch (id) {
+			case R.id.locker_slot_emote1:
+				return 0;
+			case R.id.locker_slot_emote2:
+				return 1;
+			case R.id.locker_slot_emote3:
+				return 2;
+			case R.id.locker_slot_emote4:
+				return 3;
+			case R.id.locker_slot_emote5:
+				return 4;
+			case R.id.locker_slot_emote6:
+				return 5;
+			case R.id.locker_slot_wrap1:
+				return 0;
+			case R.id.locker_slot_wrap2:
+				return 1;
+			case R.id.locker_slot_wrap3:
+				return 2;
+			case R.id.locker_slot_wrap4:
+				return 3;
+			case R.id.locker_slot_wrap5:
+				return 4;
+			case R.id.locker_slot_wrap6:
+				return 5;
+			case R.id.locker_slot_wrap7:
+				return 6;
+			default:
+				return 0;
 		}
 	}
 
@@ -490,8 +544,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			itemFilters = getItemFilterListByItemCategory(getThisApplication().itemRegistry, itemTypeFilter);
 
 			if (getSupportActionBar() != null) {
-//				getActionBar().setTitle("Selecting");
-				getSupportActionBar().setTitle("Viewing");
+				getSupportActionBar().setTitle("Selecting");
 				getSupportActionBar().setSubtitle(getTitleTextById(id));
 			}
 
@@ -542,7 +595,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				return adapter.data.isEmpty();
 			}
 		};
-		profileData = getThisApplication().profileManager.profileData.get("athena");
+		profileData = getThisApplication().profileManager.getProfileData("athena");
 		refreshUi();
 		getThisApplication().eventBus.register(this);
 	}
@@ -570,7 +623,12 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				++i;
 			}
 
-			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp("SetItemFavoriteStatusBatch", PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""), "athena", -1, payload);
+			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp(
+					"SetItemFavoriteStatusBatch",
+					PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""),
+					"athena",
+					getThisApplication().profileManager.getRvn("athena"),
+					payload);
 			new Thread("Set Favorite Worker") {
 				@Override
 				public void run() {
@@ -589,7 +647,12 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		if (!seenChangeSet.isEmpty()) {
 			MarkItemSeen payload = new MarkItemSeen();
 			payload.itemIds = seenChangeSet.toArray(new String[]{});
-			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp("MarkItemSeen", PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""), "athena", -1, payload);
+			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp(
+					"MarkItemSeen",
+					PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""),
+					"athena",
+					getThisApplication().profileManager.getRvn("athena"),
+					payload);
 			new Thread("Mark Item Seen Worker") {
 				@Override
 				public void run() {
@@ -654,11 +717,10 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		}
 
 		FluentIterable<FortItemStack> chain = FluentIterable.from(profileData.items.values());
-		FortItemStack randomItem = null;
 
 		if (getIntent().hasExtra("a")) {
-			int id = getIntent().getIntExtra("a", 0);
-			String selected = getSelectedItemFromProfileById((AthenaProfileAttributes) profileData.stats.attributesObj, id);
+			incomingViewId = getIntent().getIntExtra("a", 0);
+			String selected = getSelectedItemFromProfileById((AthenaProfileAttributes) profileData.stats.attributesObj, incomingViewId);
 			selectedItem = selected == null ? null : selected.contains("-") ? profileData.items.get(selected).templateId : selected;
 
 			if (itemTypeFilter != null) {
@@ -815,16 +877,52 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 			holder.innerSlotView.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					if (activity.itemTypeFilter == null) {
+					if (activity.itemTypeFilter == null || activity.equipExecuted) {
 						return;
 					}
 
-					// TODO apply item
-					Toast.makeText(activity, "Applying locker item not available yet", Toast.LENGTH_SHORT).show();
-//					EquipBattleRoyaleCustomization payload = new EquipBattleRoyaleCustomization();
-//					payload.slotName = EquipBattleRoyaleCustomization.ECustomizationSlot.Dance;
-//					payload.WHATISTHIS = activity.findItemId(item.templateId);
-//					Call<FortMcpResponse> call = ...;
+					activity.equipExecuted = true;
+					EquipBattleRoyaleCustomization payload = new EquipBattleRoyaleCustomization();
+					payload.slotName = getCustomizationSlotByType(activity.itemTypeFilter);
+					payload.itemToSlot = item.templateId.isEmpty() || (activity.randomItem != null && item.templateId.equals(activity.randomItem.templateId)) ? item.templateId : activity.findItemId(item.templateId);
+					payload.indexWithinSlot = getSlotIndexById(activity.incomingViewId);
+					// TODO style selection
+					payload.variantUpdates = new EquipBattleRoyaleCustomization.VariantUpdate[]{};
+					final Call<FortMcpResponse> call = activity.getThisApplication().fortnitePublicService.mcp(
+							"EquipBattleRoyaleCustomization",
+							PreferenceManager.getDefaultSharedPreferences(activity).getString("epic_account_id", ""),
+							"athena",
+							activity.getThisApplication().profileManager.getRvn("athena"),
+							payload);
+					final ProgressDialog progressDialog = new ProgressDialog(activity);
+					progressDialog.setCancelable(false);
+					progressDialog.setMessage("Saving selection");
+					progressDialog.show();
+					new Thread("Apply Cosmetic Item Worker") {
+						@Override
+						public void run() {
+							try {
+								Response<FortMcpResponse> response = call.execute();
+
+								if (response.isSuccessful()) {
+									activity.getThisApplication().profileManager.executeProfileChanges(response.body());
+									activity.finish();
+								} else {
+									Utils.dialogError(activity, EpicError.parse(response).getDisplayText());
+								}
+							} catch (IOException e) {
+								Utils.throwableDialog(activity, e);
+							} finally {
+								activity.runOnUiThread(new Runnable() {
+									@Override
+									public void run() {
+										progressDialog.dismiss();
+									}
+								});
+								activity.equipExecuted = false;
+							}
+						}
+					}.start();
 				}
 			});
 			holder.innerSlotView.setOnLongClickListener(item == EMPTY_ITEM ? null : new View.OnLongClickListener() {

@@ -7,6 +7,6 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 public interface AffiliatePublicService {
-	@GET("/affiliate/api/public/affiliates/slug/{name}")
+	@GET("/affiliate/api/public/affiliates/slug/{slug}")
 	Call<Affiliate> affiliate(@Path("slug") String slug);
 }

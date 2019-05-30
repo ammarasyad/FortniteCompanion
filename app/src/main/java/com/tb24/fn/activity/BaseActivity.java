@@ -17,14 +17,14 @@ import java.util.Map;
 
 public abstract class BaseActivity extends AppCompatActivity {
 	public static int countAndSetVbucks(BaseActivity activity, ViewGroup vBucksView) {
-		if (!activity.getThisApplication().profileManager.profileData.containsKey("common_core")) {
+		if (!activity.getThisApplication().profileManager.hasProfileData("common_core")) {
 			vBucksView.setVisibility(View.GONE);
 			return 0;
 		}
 
 		int vBucksQty = 0;
 
-		for (Map.Entry<String, FortItemStack> entry : activity.getThisApplication().profileManager.profileData.get("common_core").items.entrySet()) {
+		for (Map.Entry<String, FortItemStack> entry : activity.getThisApplication().profileManager.getProfileData("common_core").items.entrySet()) {
 			String templateId = entry.getValue().templateId;
 
 			// TODO v-bucks breakdown

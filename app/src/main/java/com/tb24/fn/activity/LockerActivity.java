@@ -186,7 +186,7 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 	}
 
 	private void refreshUi() {
-		profileData = getThisApplication().profileManager.profileData.get("athena");
+		profileData = getThisApplication().profileManager.getProfileData("athena");
 
 		if (profileData == null) {
 			lc.loading();

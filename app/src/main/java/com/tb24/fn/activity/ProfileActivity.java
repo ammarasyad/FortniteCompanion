@@ -102,8 +102,8 @@ public class ProfileActivity extends BaseActivity {
 			((TextView) findViewById(R.id.profile_2fa)).setText(bool(currentLoggedIn.tfaEnabled));
 		}
 
-		if (getThisApplication().profileManager.profileData.containsKey("common_core")) {
-			FortMcpProfile common_core = getThisApplication().profileManager.profileData.get("common_core");
+		if (getThisApplication().profileManager.hasProfileData("common_core")) {
+			FortMcpProfile common_core = getThisApplication().profileManager.getProfileData("common_core");
 			CommonCoreProfileAttributes attributes = (CommonCoreProfileAttributes) common_core.stats.attributesObj;
 			((TextView) findViewById(R.id.profile_created_on)).setText(Utils.formatDateSimple(common_core.created));
 			((TextView) findViewById(R.id.profile_sac)).setText(attributes.mtx_affiliate.isEmpty() ? "None" : attributes.mtx_affiliate);
@@ -112,8 +112,8 @@ public class ProfileActivity extends BaseActivity {
 			((TextView) findViewById(R.id.profile_gift_receive)).setText(bool(attributes.allowed_to_receive_gifts));
 		}
 
-		if (getThisApplication().profileManager.profileData.containsKey("athena")) {
-			AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileManager.profileData.get("athena").stats.attributesObj;
+		if (getThisApplication().profileManager.hasProfileData("athena")) {
+			AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileManager.getProfileData("athena").stats.attributesObj;
 			((TextView) findViewById(R.id.profile_br_account_level)).setText(String.valueOf(attributes.accountLevel));
 			((TextView) findViewById(R.id.profile_br_xp_boost)).setText(String.valueOf(attributes.season_match_boost) + '%');
 			((TextView) findViewById(R.id.profile_br_xp_boost_friend)).setText(String.valueOf(attributes.season_friend_match_boost) + '%');

@@ -1,10 +1,16 @@
 package com.tb24.fn.activity;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.media.AudioAttributes;
 import android.media.SoundPool;
 import android.net.Uri;
@@ -31,6 +37,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Px;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -41,6 +48,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.R;
 import com.tb24.fn.event.CalendarDataLoadedEvent;
+import com.tb24.fn.event.ProfileUpdatedEvent;
+import com.tb24.fn.model.Affiliate;
 import com.tb24.fn.model.CalendarTimelineResponse;
 import com.tb24.fn.model.CommonCoreProfileAttributes;
 import com.tb24.fn.model.EpicError;
@@ -49,6 +58,7 @@ import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.assetdata.FortItemDefinition;
 import com.tb24.fn.model.command.PurchaseCatalogEntry;
+import com.tb24.fn.model.command.SetAffiliateName;
 import com.tb24.fn.util.EFortRarity;
 import com.tb24.fn.util.ItemUtils;
 import com.tb24.fn.util.JsonUtils;
@@ -82,28 +92,32 @@ public class ItemShopActivity extends BaseActivity {
 	private LoadingViewController lc;
 	private GridLayoutManager layout;
 	private ViewGroup vBucksView;
-	private CommonCoreProfileAttributes attributes;
 	private int vBucksQty;
 	private List<FortCatalogResponse.CatalogEntry> featuredItems;
 	private List<FortCatalogResponse.CatalogEntry> dailyItems;
 	private Call<FortCatalogResponse> catalogCall;
 	private Handler handler = new Handler();
 	private Runnable scheduleRunnable;
+	private AlertDialog currentlyShowingItemDialog;
+	private ProgressDialog affiliateProgressDialog;
+	private Affiliate affiliateResult;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.common_loadable_recycler_view);
 		setupActionBar();
 		fakePurchases = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fake_purchases", false);
-		attributes = (CommonCoreProfileAttributes) getThisApplication().profileManager.profileData.get("common_core").stats.attributesObj;
 		soundPool = new SoundPool.Builder().setMaxStreams(4).setAudioAttributes(new AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()).build();
 		int purchasedSound1 = soundPool.load(this, R.raw.store_purchaseitem_athena_01, 1);
 		int purchasedSound2 = soundPool.load(this, R.raw.store_purchaseitem_athena_02, 1);
 		sounds = new int[]{purchasedSound1, purchasedSound2};
+		affiliateProgressDialog = new ProgressDialog(this);
+		affiliateProgressDialog.setCancelable(false);
 		list = findViewById(R.id.main_recycler_view);
 		int p = (int) Utils.dp(getResources(), 4);
 		list.setPadding(p, p, p, p);
 		list.setClipToPadding(false);
+		list.setMotionEventSplittingEnabled(false);
 		list.post(new Runnable() {
 			@Override
 			public void run() {
@@ -235,11 +249,22 @@ public class ItemShopActivity extends BaseActivity {
 		lc.content();
 	}
 
-	private void updateFromProfile() {
+	private void updateVbucks() {
 		vBucksQty = BaseActivity.countAndSetVbucks(this, vBucksView);
+	}
 
-		if (adapter != null) {
-			adapter.notifyDataSetChanged();
+	@Subscribe(threadMode = ThreadMode.MAIN)
+	public void onProfileUpdatedEvent(ProfileUpdatedEvent event) {
+		if (event.profileId.equals("common_core")) {
+			updateVbucks();
+
+			if (currentlyShowingItemDialog != null) {
+				// TODO update sac code and/or even owned status in dialogs
+			}
+		} else if (event.profileId.equals("athena")) {
+			if (adapter != null) {
+				adapter.notifyDataSetChanged();
+			}
 		}
 	}
 
@@ -251,7 +276,7 @@ public class ItemShopActivity extends BaseActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menu.add("V-Bucks").setActionView(vBucksView = (ViewGroup) getLayoutInflater().inflate(R.layout.vbucks, null)).setShowAsActionFlags(MenuItem.SHOW_AS_ACTION_ALWAYS);
-		updateFromProfile();
+		updateVbucks();
 		menu.add(0, 1, 0, "Support a Creator");
 		return super.onCreateOptionsMenu(menu);
 	}
@@ -267,8 +292,9 @@ public class ItemShopActivity extends BaseActivity {
 					if (which == DialogInterface.BUTTON_POSITIVE) {
 						String s = editText.getText().toString();
 
-						if (!s.equals(attributes.mtx_affiliate)) {
-//							executeSetAffiliate(s);
+						if (!s.equals(getCoreAttributes().mtx_affiliate)) {
+							affiliateProgressDialog.show();
+							executeSetAffiliate(s);
 						}
 					} else if (which == DialogInterface.BUTTON_NEUTRAL) {
 						startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.fortnite.com/creator-list")));
@@ -283,12 +309,9 @@ public class ItemShopActivity extends BaseActivity {
 					.setNegativeButton("Close", listener)
 					.setNeutralButton("View Approved Creators", listener)
 					.show();
-			editText.setText(attributes.mtx_affiliate);
+			editText.setText(getCoreAttributes().mtx_affiliate);
 			editText.requestFocus();
 			final Button button = ad.getButton(DialogInterface.BUTTON_POSITIVE);
-			//TODO figure out SetAffiliateName
-			editText.setEnabled(false);
-			button.setEnabled(false);
 			editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 				@Override
 				public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
@@ -320,14 +343,89 @@ public class ItemShopActivity extends BaseActivity {
 		}
 	}
 
-//	private void executeSetAffiliate(String s) {
-//		new Thread() {
+	// TODO login with Epic Games launcher token to be able to check SAC codes, this time anything inputted are set regardless of being existent
+//	private void executeAffiliateCheck(final String s) {
+//		runOnUiThread(new Runnable() {
 //			@Override
 //			public void run() {
-//				Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp("SetAffiliateName", PreferenceManager.getDefaultSharedPreferences(ItemShopActivity.this).getString("epic_account_id", ""), "common_core", -1, true, null);
+//				affiliateProgressDialog.setMessage("Checking code");
+//			}
+//		});
+//		final Call<Affiliate> call = getThisApplication().affiliatePublicService.affiliate(s);
+//		new Thread("Check Affiliate Worker") {
+//			@Override
+//			public void run() {
+//				try {
+//					Response<Affiliate> response = call.execute();
+//
+//					if (response.isSuccessful()) {
+//						affiliateResult = response.body();
+//						executeSetAffiliate(s);
+//					} else {
+//						Utils.dialogError(ItemShopActivity.this, EpicError.parse(response).getDisplayText());
+//						dismissAffiliateProgressDialog();
+//					}
+//				} catch (IOException e) {
+//					Utils.throwableDialog(ItemShopActivity.this, e);
+//					dismissAffiliateProgressDialog();
+//				}
 //			}
 //		}.start();
 //	}
+
+	private void executeSetAffiliate(String s) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				affiliateProgressDialog.setMessage("Setting code");
+			}
+		});
+		SetAffiliateName payload = new SetAffiliateName();
+		payload.affiliateName = s;
+		final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp(
+				"SetAffiliateName",
+				PreferenceManager.getDefaultSharedPreferences(ItemShopActivity.this).getString("epic_account_id", ""),
+				"common_core",
+				getThisApplication().profileManager.getRvn("common_core"),
+				payload);
+		new Thread("Set Affiliate Worker") {
+			@Override
+			public void run() {
+				try {
+					Response<FortMcpResponse> response = call.execute();
+
+					if (response.isSuccessful()) {
+						getThisApplication().profileManager.executeProfileChanges(response.body());
+//						runOnUiThread(new Runnable() {
+//							@Override
+//							public void run() {
+//								Toast.makeText(ItemShopActivity.this, "Support a Creator code set to:\n" + affiliateResult.slug + " (" + affiliateResult.displayName + ")", Toast.LENGTH_LONG).show();
+//							}
+//						});
+					} else {
+						Utils.dialogError(ItemShopActivity.this, EpicError.parse(response).getDisplayText());
+					}
+				} catch (IOException e) {
+					Utils.throwableDialog(ItemShopActivity.this, e);
+				} finally {
+					dismissAffiliateProgressDialog();
+				}
+			}
+		}.start();
+	}
+
+	private void dismissAffiliateProgressDialog() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				affiliateProgressDialog.dismiss();
+			}
+		});
+	}
+
+	private CommonCoreProfileAttributes getCoreAttributes() {
+		return (CommonCoreProfileAttributes) getThisApplication().profileManager.getProfileData("common_core").stats.attributesObj;
+	}
 
 	private static class ItemShopAdapter extends RecyclerView.Adapter<ItemShopAdapter.ItemShopViewHolder> {
 		private final ItemShopActivity activity;
@@ -340,7 +438,11 @@ public class ItemShopActivity extends BaseActivity {
 		@Override
 		public ItemShopViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 			if (viewType == 1) {
-				return new ItemShopViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_entry_header, parent, false));
+				ViewGroup inflate = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_entry_header, parent, false);
+				ShapeDrawable shapeDrawable = new ShapeDrawable(new HeaderBackgroundShape((int) Utils.dp(activity.getResources(), 12)));
+				shapeDrawable.getPaint().setColor(0x807AA4D3);
+				inflate.getChildAt(0).setBackground(shapeDrawable);
+				return new ItemShopViewHolder(inflate);
 			} else {
 				ViewGroup itemView = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.item_shop_entry, parent, false);
 //				ViewGroup.LayoutParams layoutParams = itemView.getLayoutParams();
@@ -418,10 +520,10 @@ public class ItemShopActivity extends BaseActivity {
 			holder.displayImage.setImageBitmap(bitmap);
 			boolean owned = false;
 
-			if (activity.getThisApplication().profileManager.profileData.containsKey("athena")) {
+			if (activity.getThisApplication().profileManager.hasProfileData("athena")) {
 				for (FortCatalogResponse.Requirement requirement : item.requirements) {
 					if (requirement.requirementType.equals("DenyOnItemOwnership")) {
-						for (Map.Entry<String, FortItemStack> inventoryItem : activity.getThisApplication().profileManager.profileData.get("athena").items.entrySet()) {
+						for (Map.Entry<String, FortItemStack> inventoryItem : activity.getThisApplication().profileManager.getProfileData("athena").items.entrySet()) {
 							if (inventoryItem.getValue().templateId.equals(requirement.requiredId) && inventoryItem.getValue().quantity >= requirement.minQuantity) {
 								owned = true;
 								break;
@@ -562,9 +664,9 @@ public class ItemShopActivity extends BaseActivity {
 					updateButtons();
 					view.findViewById(R.id.no_refund).setVisibility(item.refundable ? View.GONE : View.VISIBLE);
 
-					if (!activity.attributes.mtx_affiliate.isEmpty()) {
+					if (!activity.getCoreAttributes().mtx_affiliate.isEmpty()) {
 						sacRoot.setVisibility(View.VISIBLE);
-						sacName.setText(activity.attributes.mtx_affiliate);
+						sacName.setText(activity.getCoreAttributes().mtx_affiliate);
 					} else {
 						sacRoot.setVisibility(View.GONE);
 					}
@@ -607,7 +709,7 @@ public class ItemShopActivity extends BaseActivity {
 						btnPurchase.setText("Not enough V-Bucks");
 					}
 
-					btnGift.setVisibility(activity.attributes.allowed_to_send_gifts && item.giftInfo != null && item.giftInfo.bIsEnabled && !notEnough ? View.VISIBLE : View.GONE);
+					btnGift.setVisibility(activity.getCoreAttributes().allowed_to_send_gifts && item.giftInfo != null && item.giftInfo.bIsEnabled && !notEnough ? View.VISIBLE : View.GONE);
 				}
 
 				private void doPurchase(final FortCatalogResponse.CatalogEntry item) {
@@ -616,7 +718,12 @@ public class ItemShopActivity extends BaseActivity {
 					payload.currencySubType = item.prices[0].currencySubType;
 					payload.expectedPrice = item.prices[0].basePrice;
 					payload.offerId = item.offerId;
-					final Call<FortMcpResponse> call = activity.getThisApplication().fortnitePublicService.mcp("PurchaseCatalogEntry", PreferenceManager.getDefaultSharedPreferences(activity).getString("epic_account_id", ""), "common_core", -1, payload);
+					final Call<FortMcpResponse> call = activity.getThisApplication().fortnitePublicService.mcp(
+							"PurchaseCatalogEntry",
+							PreferenceManager.getDefaultSharedPreferences(activity).getString("epic_account_id", ""),
+							"common_core",
+							activity.getThisApplication().profileManager.getRvn("common_core"),
+							payload);
 					purchasePending = true;
 					updateButtons();
 					new Thread("Purchase Worker") {
@@ -626,7 +733,7 @@ public class ItemShopActivity extends BaseActivity {
 								if (activity.fakePurchases) {
 									// fake it
 									Thread.sleep(2000);
-									activity.getThisApplication().profileManager.executeProfileChanges(activity.getThisApplication().gson.fromJson("{\"multiUpdate\":[{\"profileRevision\":7045,\"profileId\":\"athena\",\"profileChangesBaseRevision\":7043,\"profileChanges\":[{\"changeType\":\"itemAdded\",\"itemId\":\"" + UUID.randomUUID() + "\",\"item\":{\"templateId\":\"" + item.itemGrants[0].templateId + "\",\"attributes\":{\"max_level_bonus\":0,\"level\":1,\"item_seen\":false,\"xp\":0,\"variants\":[],\"favorite\":false,\"DUMMY\":true},\"quantity\":1}}],\"profileCommandRevision\":6412}]}", FortMcpResponse.class));
+									activity.getThisApplication().profileManager.executeProfileChanges(activity.getThisApplication().gson.fromJson("{\"multiUpdate\":[{\"profileRevision\":-1,\"profileId\":\"athena\",\"profileChangesBaseRevision\":7043,\"profileChanges\":[{\"changeType\":\"itemAdded\",\"itemId\":\"" + UUID.randomUUID() + "\",\"item\":{\"templateId\":\"" + item.itemGrants[0].templateId + "\",\"attributes\":{\"max_level_bonus\":0,\"level\":1,\"item_seen\":false,\"xp\":0,\"variants\":[],\"favorite\":false,\"DUMMY\":true},\"quantity\":1}}],\"profileCommandRevision\":6412}]}", FortMcpResponse.class));
 									purchaseSuccess();
 								} else {
 									// here we're going for real
@@ -662,7 +769,6 @@ public class ItemShopActivity extends BaseActivity {
 						@Override
 						public void run() {
 							purchaseSuccess = true;
-//							activity.setResult(RESULT_OK);
 							FortItemStack purchasedItem = item.itemGrants[0];
 							View purchasedDialogView = activity.getLayoutInflater().inflate(R.layout.dialog_purchased, null);
 							View purchasedText = purchasedDialogView.findViewById(R.id.item_shop_purchased_text);
@@ -710,7 +816,6 @@ public class ItemShopActivity extends BaseActivity {
 									dialog.dismiss();
 								}
 							}, 4000L);
-							activity.updateFromProfile();
 						}
 					});
 				}
@@ -751,6 +856,26 @@ public class ItemShopActivity extends BaseActivity {
 				owned = itemView.findViewById(R.id.item_owned);
 				backgroundable = itemView.findViewById(R.id.to_set_background);
 			}
+		}
+	}
+
+	private static class HeaderBackgroundShape extends RectShape {
+		private final int indent;
+		private final Path path = new Path();
+
+		public HeaderBackgroundShape(@Px int indent) {
+			this.indent = indent;
+		}
+
+		@Override
+		public void draw(Canvas canvas, Paint paint) {
+			path.reset();
+			path.moveTo(getWidth() - indent, 0.0F);
+			path.lineTo(0.0F, 0.0F);
+			path.lineTo(0.0F, getHeight());
+			path.lineTo(getWidth(), getHeight());
+			path.close();
+			canvas.drawPath(path, paint);
 		}
 	}
 }

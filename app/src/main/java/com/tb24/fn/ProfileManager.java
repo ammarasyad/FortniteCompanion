@@ -20,7 +20,8 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 public class ProfileManager {
-	public Map<String, FortMcpProfile> profileData = new HashMap<>();
+	private Map<String, FortMcpProfile> profileData = new HashMap<>();
+	private Map<String, Integer> profileRevisions = new HashMap<>();
 	private final FortniteCompanionApp app;
 
 	public ProfileManager(FortniteCompanionApp app) {
@@ -28,30 +29,43 @@ public class ProfileManager {
 	}
 
 	public void executeProfileChanges(FortMcpResponse response) {
+		profileRevisions.put(response.profileId, response.profileRevision);
+
 		if (response.profileChanges != null) {
 			for (JsonObject obj : response.profileChanges) {
 				String changeType = JsonUtils.getStringOr("changeType", obj, "");
+				FortMcpProfile profile;
 
 				if (changeType.equals("fullProfileUpdate")) {
-					FortMcpProfile parsed = app.gson.fromJson(obj.get("profile"), FortMcpProfile.class);
-					profileData.put(response.profileId, parsed);
-					app.eventBus.post(new ProfileUpdatedEvent(response.profileId, parsed));
-					Log.d("MCP-Profile", String.format("Full profile update (rev=%d, version=%s@w=%d) for %s accountId=MCP:%s profileId=%s", parsed.rvn, parsed.version, parsed.wipeNumber, app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), parsed.accountId, parsed.profileId));
-				} else if (changeType.equals("itemAdded")) {
-					if (!profileData.containsKey(response.profileId)) {
+					profile = app.gson.fromJson(obj.get("profile"), FortMcpProfile.class);
+					profileData.put(response.profileId, profile);
+					Log.d("MCP-Profile", String.format("Full profile update (rev=%d, version=%s@w=%d) for %s accountId=MCP:%s profileId=%s", profile.rvn, profile.version, profile.wipeNumber, app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId));
+				} else {
+					if (!hasProfileData(response.profileId)) {
 						return;
 					}
 
-					FortMcpProfile profile = profileData.get(response.profileId);
-					profile.items.put(obj.get("itemId").getAsString(), app.gson.fromJson(obj.get("item"), FortItemStack.class));
-					app.eventBus.post(new ProfileUpdatedEvent(response.profileId, profile));
-				} else if (changeType.equals("itemRemoved")) {
-					if (!profileData.containsKey(response.profileId)) {
-						return;
+					profile = getProfileData(response.profileId);
+					switch (changeType) {
+						case "itemAdded":
+							profile.items.put(obj.get("itemId").getAsString(), app.gson.fromJson(obj.get("item"), FortItemStack.class));
+							app.eventBus.post(new ProfileUpdatedEvent(response.profileId, profile));
+							break;
+						case "itemRemoved":
+							profile.items.remove(obj.get("itemId").getAsString());
+							app.eventBus.post(new ProfileUpdatedEvent(response.profileId, profile));
+							break;
+						case "itemAttrChanged":
+							profile.items.get(obj.get("itemId").getAsString()).attributes.add(obj.get("variants").getAsString(), obj.get("attributeValue"));
+							break;
+						case "statModified":
+							profile.stats.attributes.add(obj.get("name").getAsString(), obj.get("value"));
+							profile.reserializeAttrObject();
+							break;
 					}
+				}
 
-					FortMcpProfile profile = profileData.get(response.profileId);
-					profile.items.remove(obj.get("itemId").getAsString());
+				if (profile != null) {
 					app.eventBus.post(new ProfileUpdatedEvent(response.profileId, profile));
 				}
 			}
@@ -64,8 +78,13 @@ public class ProfileManager {
 		}
 	}
 
-	public Call<FortMcpResponse> requestFullProfileUpdate(final String profileId) {
-		final Call<FortMcpResponse> call = app.fortnitePublicService.mcp("QueryProfile", PreferenceManager.getDefaultSharedPreferences(app).getString("epic_account_id", ""), profileId, -1, new JsonObject());
+	public Call<FortMcpResponse> requestProfileUpdate(final String profileId) {
+		final Call<FortMcpResponse> call = app.fortnitePublicService.mcp(
+				"QueryProfile",
+				PreferenceManager.getDefaultSharedPreferences(app).getString("epic_account_id", ""),
+				profileId,
+				getRvn(profileId),
+				new JsonObject());
 		new Thread() {
 			@Override
 			public void run() {
@@ -84,5 +103,28 @@ public class ProfileManager {
 			}
 		}.start();
 		return call;
+	}
+
+	public FortMcpProfile getProfileData(String profileId) {
+		return profileData.get(profileId);
+	}
+
+	public boolean hasProfileData(String profileId) {
+		return profileData.containsKey(profileId);
+	}
+
+	public void clearProfileData() {
+		profileData.clear();
+	}
+
+	public int getRvn(String profileId) {
+		int out = -1;
+		Integer revision = profileRevisions.get(profileId);
+
+		if (revision != null) {
+			out = revision;
+		}
+
+		return out;
 	}
 }

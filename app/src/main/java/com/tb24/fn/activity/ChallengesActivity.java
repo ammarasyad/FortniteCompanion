@@ -75,7 +75,12 @@ public class ChallengesActivity extends BaseActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == 500) {
-			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp("ClientQuestLogin", PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""), "athena", -1, new JsonObject());
+			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp(
+					"ClientQuestLogin",
+					PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""),
+					"athena",
+					getThisApplication().profileManager.getRvn("athena"),
+					new JsonObject());
 			new Thread("Client Quest Login Worker") {
 				@Override
 				public void run() {
@@ -105,7 +110,7 @@ public class ChallengesActivity extends BaseActivity {
 	}
 
 	public void refreshUi() {
-		profileData = getThisApplication().profileManager.profileData.get("athena");
+		profileData = getThisApplication().profileManager.getProfileData("athena");
 
 		if (profileData == null) {
 			lc.loading();

@@ -25,7 +25,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -50,6 +49,7 @@ import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.assetdata.FortChallengeBundleItemDefinition;
 import com.tb24.fn.model.assetdata.FortQuestItemDefinition;
 import com.tb24.fn.model.command.FortRerollDailyQuest;
+import com.tb24.fn.model.command.SetPartyAssistQuest;
 import com.tb24.fn.util.ItemUtils;
 import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
@@ -88,6 +88,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 	private FortMcpProfile profileData;
 	private Map<String, FortItemStack> questsFromProfile = new HashMap<>();
 	private Call<FortMcpResponse> callReroll;
+	private Call<FortMcpResponse> callPartyAssist;
 	private String cheatsheetUrl;
 	private FortChallengeBundleItemDefinition challengeBundleDef;
 	private CalendarTimelineResponse.ActiveEvent calendarEventTag;
@@ -226,10 +227,14 @@ public class ChallengeBundleActivity extends BaseActivity {
 		if (callReroll != null) {
 			callReroll.cancel();
 		}
+
+		if (callPartyAssist != null) {
+			callPartyAssist.cancel();
+		}
 	}
 
 	private void refreshUi() {
-		if ((profileData = getThisApplication().profileManager.profileData.get("athena")) == null) {
+		if ((profileData = getThisApplication().profileManager.getProfileData("athena")) == null) {
 			lc.loading();
 			return;
 		}
@@ -438,6 +443,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 	private static class ChallengeViewHolder extends RecyclerView.ViewHolder {
 		public ViewGroup questMainContainer;
 		public TextView questDone;
+		public View assistText;
 		public TextView questTitle;
 		public ViewGroup questProgressParent;
 		public ProgressBar questProgressBar;
@@ -454,6 +460,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 			super(itemView);
 			questMainContainer = itemView.findViewById(R.id.quest_main_container);
 			questDone = itemView.findViewById(R.id.quest_done);
+			assistText = itemView.findViewById(R.id.quest_party_assist);
 			questTitle = itemView.findViewById(R.id.quest_title);
 			questProgressParent = itemView.findViewById(R.id.quest_progress_parent);
 			questProgressBar = itemView.findViewById(R.id.quest_progress_bar);
@@ -609,6 +616,8 @@ public class ChallengeBundleActivity extends BaseActivity {
 			boolean done = questState.equals("Claimed");
 			final boolean isEligibleForReplacement = !done && quest.export_type.equals("AthenaDailyQuestDefinition") && questState.equals("Active") && ((AthenaProfileAttributes) activity.profileData.stats.attributesObj).quest_manager.dailyQuestRerolls > 0;
 			final boolean isEligibleForAssist = !done && quest.GameplayTags != null && Arrays.binarySearch(quest.GameplayTags.gameplay_tags, "Quest.Metadata.PartyAssist") >= 0;
+			final boolean isPartyAssisted = isEligibleForAssist && ((AthenaProfileAttributes) activity.profileData.stats.attributesObj).party_assist_quest.equals(activity.findItemId(activeQuestItem.templateId));
+			holder.assistText.setVisibility(isPartyAssisted ? View.VISIBLE : View.GONE);
 			holder.questTitle.setText(TextUtils.concat(isChain ? Utils.color(String.format("Stage %,d of %,d", questItemChain.size(), questDefChain.size()), Utils.getTextColorPrimary(activity)) : "", (isChain ? " - " : "") + holder.questTitle.getText()));
 			holder.questProgressParent.setVisibility(done ? View.GONE : View.VISIBLE);
 
@@ -643,6 +652,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 			holder.actions.setVisibility(adapter.expandedPosition == position ? View.VISIBLE : View.GONE);
 			holder.btnReplace.setVisibility(isEligibleForReplacement ? View.VISIBLE : View.GONE);
 			holder.btnAssist.setVisibility(isEligibleForAssist ? View.VISIBLE : View.GONE);
+			holder.btnAssist.setText("Party Assist" + (isPartyAssisted ? " \u2714" : ""));
 			final FortItemStack finalActiveQuestItem = activeQuestItem;
 			holder.btnReplace.setOnClickListener(new View.OnClickListener() {
 				@Override
@@ -654,7 +664,12 @@ public class ChallengeBundleActivity extends BaseActivity {
 					v.setEnabled(false);
 					FortRerollDailyQuest payload = new FortRerollDailyQuest();
 					payload.questId = activity.findItemId(finalActiveQuestItem.templateId);
-					activity.callReroll = activity.getThisApplication().fortnitePublicService.mcp("FortRerollDailyQuest", PreferenceManager.getDefaultSharedPreferences(activity).getString("epic_account_id", ""), "athena", -1, payload);
+					activity.callReroll = activity.getThisApplication().fortnitePublicService.mcp(
+							"FortRerollDailyQuest",
+							PreferenceManager.getDefaultSharedPreferences(activity).getString("epic_account_id", ""),
+							"athena",
+							activity.getThisApplication().profileManager.getRvn("athena"),
+							payload);
 					new Thread("Reroll Daily Quest Worker") {
 						@Override
 						public void run() {
@@ -688,20 +703,49 @@ public class ChallengeBundleActivity extends BaseActivity {
 			});
 			holder.btnAssist.setOnClickListener(new View.OnClickListener() {
 				@Override
-				public void onClick(View v) {
+				public void onClick(final View v) {
 					if (!isEligibleForAssist) {
 						return;
 					}
 
-					// TODO set party assist quest
-					Toast.makeText(activity, "Setting party assist challenge not available yet", Toast.LENGTH_SHORT).show();
-//					SetPartyAssistQuest payload = new SetPartyAssistQuest();
-//					Call<FortMcpResponse> call = activity.getThisApplication().fortnitePublicService.mcp("SetPartyAssistQuest", PreferenceManager.getDefaultSharedPreferences(activity).getString("epic_account_id", ""), "athena", -1, payload);
-//					new Thread("Set Party Assist Worker") {
-//						@Override
-//						public void run() {
-//						}
-//					}.start();
+					v.setEnabled(false);
+					SetPartyAssistQuest payload = new SetPartyAssistQuest();
+					payload.questToPinAsPartyAssist = isPartyAssisted ? "" : activity.findItemId(finalActiveQuestItem.templateId);
+					activity.callPartyAssist = activity.getThisApplication().fortnitePublicService.mcp(
+							"SetPartyAssistQuest",
+							PreferenceManager.getDefaultSharedPreferences(activity).getString("epic_account_id", ""),
+							"athena",
+							activity.getThisApplication().profileManager.getRvn("athena"),
+							payload);
+					new Thread("Set Party Assist Quest Worker") {
+						@Override
+						public void run() {
+							try {
+								Response<FortMcpResponse> response = activity.callPartyAssist.execute();
+
+								if (response.isSuccessful()) {
+									activity.getThisApplication().profileManager.executeProfileChanges(response.body());
+									activity.runOnUiThread(new Runnable() {
+										@Override
+										public void run() {
+											adapter.notifyDataSetChanged();
+										}
+									});
+								} else {
+									Utils.dialogError(activity, EpicError.parse(response).getDisplayText());
+								}
+							} catch (IOException e) {
+								Utils.throwableDialog(activity, e);
+							} finally {
+								activity.runOnUiThread(new Runnable() {
+									@Override
+									public void run() {
+										v.setEnabled(true);
+									}
+								});
+							}
+						}
+					}.start();
 				}
 			});
 			holder.itemView.setOnClickListener(new View.OnClickListener() {

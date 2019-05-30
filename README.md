@@ -7,10 +7,12 @@ For Android 5.0 Lollipop (API 21) and up.
 * View BR profile, account creation date, and other hidden account info
 * View challenges
 * Replace daily challenges
-* View events and its leaderboard
+* Set party assist quest
+* View events and its leaderboard along with match history
 * View stats of yourself or other player’s, with playlist breakdown
-* View BR cosmetics/locker, with filtering, set/unset favorite, and marking as seen
+* Modify Locker, with filtering, set/unset favorite, and marking as seen
 * View BR Item Shop and purchase items, full display for unencrypted items
+* Set Support a Creator code (for now invalid codes can be set)
 * Change leaderboard privacy setting
 
 ## Permissions used
@@ -24,16 +26,12 @@ For Android 5.0 Lollipop (API 21) and up.
   A: Absolutely not. If you have a bit of extra time to prove it, go on read the source code of the [ItemShopActivity](https://github.com/Amrsatrio/FortniteCompanion/blob/master/app/src/main/java/com/tb24/fn/activity/ItemShopActivity.java) and [PurchaseCatalogEntry](https://github.com/Amrsatrio/FortniteCompanion/blob/master/app/src/main/java/com/tb24/fn/model/command/PurchaseCatalogEntry.java). No third party URLs or information collecting chunk of codes there.
 * **Q: Why the app is so huge for just like this? 50 megs for just like this, wow!**\
   A: Because in order for the Challenges, Locker, and Item Shop to be user friendly, the assets of the items are required. Currently, I don’t have a server to host those assets, so for now I decided to store them in the app. In the future, I will make the assets an optional download to reduce the app size although the items’ icons will not appear.
-* **Q: The locker page is sophisticated. But why I still can’t change my skin using this app?**\
-  A: I still haven’t figured out the behind the scenes of that thing, so it isn’t possible yet. If you’re a good reverse engineer you can help me find out how POST [.../EquipBattleRoyaleCustomization](https://github.com/Amrsatrio/FortniteCompanion/blob/master/app/src/main/java/com/tb24/fn/model/command/EquipBattleRoyaleCustomization.java) works and make a pull request here.
 * **Q: Will there be an iOS version of this?**\
   A: Not anytime soon. I’m a total default on iOS app development, and it takes a lot of time to master Swift and/or Objective-C. Plus, I don’t think there’s many players with iPhone 6 or earlier which can’t run FN Mobile which means this isn’t in my priority list.
 
 ## To-do
 * View all owned banners and apply them
-* Apply cosmetic item
-* Set Support a Creator code
-* Set party assist
+* Validate entered Support a Creator code
 * Add creative map code
 * View friends, their activity, and whispering them via Epic Chat
 * [STW info in user friendly view](https://www.stormshield.one/save-the-world) (to see if there’s a 25-30 V-Bucks mission without opening big screen Fortnite)
@@ -43,5 +41,6 @@ For Android 5.0 Lollipop (API 21) and up.
 * [@cryotus](https://www.instagram.com/cryotus/): for the app name and icon
 * [u/easkate](https://www.reddit.com/user/easkate): for the [concept and idea of this app](https://www.reddit.com/r/FortNiteBR/comments/b5wlwg/fortnite_retail_row_app_a_ui_concept_for_a/)
 * [Kysune](https://github.com/SzymonLisowiec), [Roberto Graham](https://github.com/RobertoGraham), and [Vrekt](https://github.com/Vrekt): for the network endpoints and its usage, from their libraries
+* [Cyuubi](https://github.com/Cyuubi) for finding a way to get the endpoints
 * [Umodel](https://github.com/gildor2/UModel) by [Gildor](https://github.com/gildor2): for extracting/exporting the .uassets from the .pak's
 * [John Wick Parse](https://github.com/SirWaddles/JohnWickParse) by [Waddlesworth](https://github.com/SirWaddles): for parsing the item data from the .uasset's

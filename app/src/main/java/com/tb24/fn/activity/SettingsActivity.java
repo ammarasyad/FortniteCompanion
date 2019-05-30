@@ -23,6 +23,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.FortniteCompanionApp;
+import com.tb24.fn.ProfileManager;
 import com.tb24.fn.R;
 import com.tb24.fn.event.LoggedOutEvent;
 import com.tb24.fn.model.AccountPrivacyResponse;
@@ -41,7 +42,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -186,11 +186,11 @@ public class SettingsActivity extends BaseActivity {
 				getActivity().runOnUiThread(new Runnable() {
 					@Override
 					public void run() {
-						Map<String, FortMcpProfile> profileData = getApplication_().profileManager.profileData;
+						ProfileManager profileManager = getApplication_().profileManager;
 
-						if (profileData.containsKey("common_core")) {
+						if (profileManager.hasProfileData("common_core")) {
 							prefMtxPlatform.setEnabled(true);
-							String newValue = changeBackTo != null ? changeBackTo : ((CommonCoreProfileAttributes) profileData.get("common_core").stats.attributesObj).current_mtx_platform.toString();
+							String newValue = changeBackTo != null ? changeBackTo : ((CommonCoreProfileAttributes) profileManager.getProfileData("common_core").stats.attributesObj).current_mtx_platform.toString();
 							prefMtxPlatform.setValue(newValue);
 							prefMtxPlatform.setSummary(Utils.makeItDark(newValue, getActivity()));
 						} else {
@@ -231,13 +231,18 @@ public class SettingsActivity extends BaseActivity {
 				}.start();
 				return true;
 			} else if (preference == prefMtxPlatform) {
-				if (getApplication_().profileManager.profileData.containsKey("common_core") && !value.equals(((CommonCoreProfileAttributes) getApplication_().profileManager.profileData.get("common_core").stats.attributesObj).current_mtx_platform.toString())) {
+				if (getApplication_().profileManager.hasProfileData("common_core") && !value.equals(((CommonCoreProfileAttributes) getApplication_().profileManager.getProfileData("common_core").stats.attributesObj).current_mtx_platform.toString())) {
 					preference.setEnabled(false);
 					final String old = prefMtxPlatform.getValue();
 					prefMtxPlatform.setSummary(Utils.makeItDark(value.toString(), getActivity()));
 					SetMtxPlatform payload = new SetMtxPlatform();
 					payload.newPlatform = SetMtxPlatform.EMtxPlatform.valueOf(value.toString());
-					final Call<FortMcpResponse> callSetMtxPlatform = getApplication_().fortnitePublicService.mcp("SetMtxPlatform", getPreferenceManager().getSharedPreferences().getString("epic_account_id", ""), "common_core", -1, payload);
+					final Call<FortMcpResponse> callSetMtxPlatform = getApplication_().fortnitePublicService.mcp(
+							"SetMtxPlatform",
+							getPreferenceManager().getSharedPreferences().getString("epic_account_id", ""),
+							"common_core",
+							getApplication_().profileManager.getRvn("common_core"),
+							payload);
 					new Thread("Set MTX Platform Worker") {
 						@Override
 						public void run() {
@@ -293,7 +298,7 @@ public class SettingsActivity extends BaseActivity {
 					Utils.dialogOkNonMain(getActivity(), null, s);
 					Log.d("LoginDump", s);
 				} else if (preference.getKey().equals("copy_profile")) {
-					FortMcpProfile profile = getApplication_().profileManager.profileData.get("common_core");
+					FortMcpProfile profile = getApplication_().profileManager.getProfileData("common_core");
 
 					if (profile != null) {
 						((ClipboardManager) getActivity().getSystemService(Context.CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("Profile Data", new GsonBuilder().setPrettyPrinting().create().toJson(profile)));

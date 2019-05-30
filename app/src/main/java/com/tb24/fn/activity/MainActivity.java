@@ -43,6 +43,7 @@ import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.CommonPublicProfileAttributes;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.ExchangeResponse;
+import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.GameProfile;
 import com.tb24.fn.model.XGameProfile;
@@ -110,7 +111,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		profileLc = new LoadingViewController(profileFrame, findViewById(R.id.p_root), "No profile data") {
 			@Override
 			public boolean shouldShowEmpty() {
-				return !getThisApplication().profileManager.profileData.containsKey("athena");
+				return !getThisApplication().profileManager.hasProfileData("athena");
 			}
 		};
 		loggedOutDialog = new AlertDialog.Builder(this)
@@ -143,9 +144,39 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			updateLoginText("...");
 			profileLc.loading();
 			String accountId = prefs.getString("epic_account_id", "");
-			callMcpCommonPublic = getThisApplication().profileManager.requestFullProfileUpdate("common_public");
-			callMcpCommonCore = getThisApplication().profileManager.requestFullProfileUpdate("common_core");
-			callMcpAthena = getThisApplication().profileManager.requestFullProfileUpdate("athena");
+
+			if (!getThisApplication().profileManager.hasProfileData("common_public")) {
+				callMcpCommonPublic = getThisApplication().profileManager.requestProfileUpdate("common_public");
+			} else {
+				commonPublicLoaded();
+			}
+
+			if (!getThisApplication().profileManager.hasProfileData("common_core")) {
+				callMcpCommonCore = getThisApplication().profileManager.requestProfileUpdate("common_core");
+			} else {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							Thread.sleep(100);
+							runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									commonCoreLoaded();
+								}
+							});
+						} catch (InterruptedException ignored) {
+						}
+					}
+				}).start();
+			}
+
+			if (!getThisApplication().profileManager.hasProfileData("athena")) {
+				callMcpAthena = getThisApplication().profileManager.requestProfileUpdate("athena");
+			} else {
+				athenaLoaded();
+			}
+
 			getThisApplication().loadCalendarData();
 			callSelfName = getThisApplication().accountPublicService.account(accountId);
 			new Thread() {
@@ -176,24 +207,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	public void onProfileUpdated(ProfileUpdatedEvent event) {
 		switch (event.profileId) {
 			case "common_public":
-				// homebase name only that's unique to that profile id
-				CommonPublicProfileAttributes attributes = (CommonPublicProfileAttributes) event.profileObj.stats.attributesObj;
-				((ImageView) findViewById(R.id.p_banner)).setImageBitmap(LockerActivity.makeBannerIcon(this, attributes.banner_icon, attributes.banner_color));
+				commonPublicLoaded();
 				break;
 			case "common_core":
-				menuVbucks.setVisible(true);
-				countAndSetVbucks(MainActivity.this, vBucksView);
-				findViewById(R.id.main_screen_btn_item_shop).setEnabled(event.profileObj != null);
+				commonCoreLoaded();
 				break;
 			case "athena":
-				displayAthenaLevelAndBattlePass();
+				athenaLoaded();
 				break;
 		}
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
 	public void onProfileUpdateFailed(ProfileUpdateFailedEvent event) {
-		if (event.profileId.equals("athena") && !getThisApplication().profileManager.profileData.containsKey("athena")) {
+		if (event.profileId.equals("athena") && !getThisApplication().profileManager.hasProfileData("athena")) {
 			profileLc.content();
 		}
 	}
@@ -236,11 +263,25 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		}
 	}
 
+	private void commonPublicLoaded() {
+		// homebase name only that's unique to that profile id
+		FortMcpProfile profile = getThisApplication().profileManager.getProfileData("common_public");
+		CommonPublicProfileAttributes attributes = (CommonPublicProfileAttributes) profile.stats.attributesObj;
+		((ImageView) findViewById(R.id.p_banner)).setImageBitmap(LockerActivity.makeBannerIcon(this, attributes.banner_icon, attributes.banner_color));
+	}
+
+	private void commonCoreLoaded() {
+		FortMcpProfile profile = getThisApplication().profileManager.getProfileData("common_core");
+		menuVbucks.setVisible(true);
+		countAndSetVbucks(MainActivity.this, vBucksView);
+		findViewById(R.id.main_screen_btn_item_shop).setEnabled(profile != null);
+	}
+
 	@SuppressLint("DefaultLocale")
-	private void displayAthenaLevelAndBattlePass() {
+	private void athenaLoaded() {
 		profileLc.content();
 
-		if (!getThisApplication().profileManager.profileData.containsKey("athena")) {
+		if (!getThisApplication().profileManager.hasProfileData("athena")) {
 			return;
 		}
 
@@ -249,7 +290,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		TextView txtLvlUpReward = findViewById(R.id.p_lvl_up_reward);
 		TextView txtXpProgress = findViewById(R.id.p_xp_progress);
 
-		AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileManager.profileData.get("athena").stats.attributesObj;
+		AthenaProfileAttributes attributes = (AthenaProfileAttributes) getThisApplication().profileManager.getProfileData("athena").stats.attributesObj;
 		txtSeason.setBackground(new SeasonBackgroundDrawable(this));
 		txtSeason.setText(String.format("Season %,d", attributes.season_num));
 		((TextView) findViewById(R.id.p_level)).setText(String.format("%,d", attributes.level));

@@ -150,7 +150,7 @@ public class FortniteCompanionApp extends Application {
 				.remove("epic_account_access_token")
 				.remove("epic_account_id")
 				.apply();
-		profileManager.profileData.clear();
+		profileManager.clearProfileData();
 		eventData = null;
 	}
 
