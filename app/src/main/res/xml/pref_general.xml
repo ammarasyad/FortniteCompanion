@@ -32,6 +32,12 @@
 			android:title="Store platform" />
 	</PreferenceCategory>
 
+	<PreferenceCategory>
+		<Preference
+			android:key="check_for_updates"
+			android:title="Check for updates" />
+	</PreferenceCategory>
+
 	<PreferenceCategory android:title="Debugging">
 		<SwitchPreference
 			android:defaultValue="false"

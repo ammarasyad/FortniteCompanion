@@ -4,8 +4,11 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.res.AssetManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +25,7 @@ import androidx.preference.TwoStatePreference;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonReader;
 import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.ProfileManager;
 import com.tb24.fn.R;
@@ -33,6 +37,7 @@ import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.command.SetMtxPlatform;
 import com.tb24.fn.util.ERegion;
+import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.Utils;
 import com.tb24.fn.view.LayoutPreference;
 
@@ -43,6 +48,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Response;
 
@@ -65,6 +72,7 @@ public class SettingsActivity extends BaseActivity {
 		private Preference prefViewLoginData;
 		private LayoutPreference prefLogOut;
 		private AccountPrivacyResponse privacyData;
+		private okhttp3.Call checkForUpdatesCall;
 
 		@Override
 		public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -290,7 +298,57 @@ public class SettingsActivity extends BaseActivity {
 		@Override
 		public boolean onPreferenceTreeClick(Preference preference) {
 			if (preference.getKey() != null) {
-				if (preference.getKey().equals("view_login_data")) {
+				if (preference.getKey().equals("check_for_updates")) {
+					if (checkForUpdatesCall != null && checkForUpdatesCall.isExecuted()) {
+						return true;
+					}
+
+					checkForUpdatesCall = new OkHttpClient().newCall(new Request.Builder().url("https://api.github.com/repos/Amrsatrio/FortniteCompanion/releases/17689462").build());
+					new Thread("Check for Updates Worker") {
+						@Override
+						public void run() {
+							try {
+								okhttp3.Response response = checkForUpdatesCall.execute();
+
+								if (response.isSuccessful()) {
+									final JsonObject object = getApplication_().gson.fromJson(new JsonReader(response.body().charStream()), JsonObject.class);
+									response.body().close();
+									PackageInfo packageInfo = Utils.getPackageInfo(getApplication_());
+
+									if (packageInfo.versionName.equals(JsonUtils.getStringOr("name", object, ""))) {
+										Utils.dialogOkNonMain(getActivity(), null, "Up to date!");
+									} else {
+										if (getActivity() != null) {
+											getActivity().runOnUiThread(new Runnable() {
+												@Override
+												public void run() {
+													String s = "Version: " + JsonUtils.getStringOr("name", object, "") + "\nWhat's new:\n" + JsonUtils.getStringOr("body", object, "");
+													new AlertDialog.Builder(getActivity())
+															.setTitle("A new version is available")
+															.setMessage(s)
+															.setPositiveButton(android.R.string.ok, null)
+															.setNeutralButton("Update", new DialogInterface.OnClickListener() {
+																@Override
+																public void onClick(DialogInterface dialog, int which) {
+																	startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(JsonUtils.getStringOr("html_url", object, ""))));
+																}
+															})
+															.show();
+												}
+											});
+										}
+									}
+								} else {
+									Utils.dialogOkNonMain(getActivity(), null, "Update check failed");
+								}
+							} catch (IOException e) {
+								Utils.throwableDialog(getActivity(), e);
+							} finally {
+								checkForUpdatesCall = null;
+							}
+						}
+					}.start();
+				} else if (preference.getKey().equals("view_login_data")) {
 					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 					String s = "Account ID: " + prefs.getString("epic_account_id", null)
 							+ '\n' + "Access Token: " + prefs.getString("epic_account_token_type", null) + " " + prefs.getString("epic_account_access_token", null)

@@ -3,6 +3,8 @@ package com.tb24.fn.util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -421,6 +423,17 @@ public final class Utils {
 		}
 
 		return path.substring(path.lastIndexOf('/') + 1, path.lastIndexOf('.'));
+	}
+
+	public static PackageInfo getPackageInfo(Context context) {
+		PackageInfo pInfo = null;
+
+		try {
+			pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+		} catch (PackageManager.NameNotFoundException ignored) {
+		}
+
+		return pInfo;
 	}
 
 	public interface EditTextDialogCallback {
