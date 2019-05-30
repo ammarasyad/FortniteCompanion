@@ -39,7 +39,7 @@ public class ProfileManager {
 				if (changeType.equals("fullProfileUpdate")) {
 					profile = app.gson.fromJson(obj.get("profile"), FortMcpProfile.class);
 					profileData.put(response.profileId, profile);
-					Log.d("MCP-Profile", String.format("Full profile update (rev=%d, version=%s@w=%d) for %s accountId=MCP:%s profileId=%s", profile.rvn, profile.version, profile.wipeNumber, app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId));
+					Log.i("MCP-Profile", String.format("Full profile update (rev=%d, version=%s@w=%d) for %s accountId=MCP:%s profileId=%s", profile.rvn, profile.version, profile.wipeNumber, app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId));
 				} else {
 					if (!hasProfileData(response.profileId)) {
 						return;
@@ -50,14 +50,14 @@ public class ProfileManager {
 						case "itemAdded":
 							FortItemStack item = app.gson.fromJson(obj.get("item"), FortItemStack.class);
 							profile.items.put(obj.get("itemId").getAsString(), item);
-							Log.d("MCP-Profile", String.format("%s accountId=MCP:%s profileId=%s gained %s", app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId, item.toString()));
+							Log.i("MCP-Profile", String.format("%s accountId=MCP:%s profileId=%s gained %s", app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId, item.toString()));
 							break;
 						case "itemRemoved":
 							FortItemStack item1 = profile.items.get(obj.get("itemId").getAsString());
 
 							if (item1 != null) {
 								profile.items.remove(obj.get("itemId").getAsString());
-								Log.d("MCP-Profile", String.format("%s accountId=MCP:%s profileId=%s lost %s", app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId, item1.toString()));
+								Log.i("MCP-Profile", String.format("%s accountId=MCP:%s profileId=%s lost %s", app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId, item1.toString()));
 							}
 
 							break;

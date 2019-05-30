@@ -11,6 +11,7 @@ import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -105,6 +106,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 		boolean done = item.attributes != null && JsonUtils.getStringOr("quest_state", item.attributes, "").equals("Claimed");
 		view.findViewById(R.id.quest_main_container).setAlpha(done ? 0.6F : 1.0F);
 		view.findViewById(R.id.quest_done).setVisibility(done ? View.VISIBLE : View.GONE);
+		view.findViewById(R.id.quest_done_check_mark).setVisibility(done ? View.VISIBLE : View.GONE);
 		FortQuestItemDefinition quest = (FortQuestItemDefinition) item.getDefData();
 
 		if (quest == null) {
@@ -396,6 +398,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 
 			if (viewType == 0 || viewType == VIEW_TYPE_COMPLETION_REWARD) {
 				inflate = inflater.inflate(R.layout.quest_entry, parent, false);
+				((ImageView) inflate.findViewById(R.id.quest_done_check_mark)).setImageBitmap(Utils.loadTga(activity, "/Game/Athena/UI/Challenges/Art/T_UI_ChallengeCheck_64.T_UI_ChallengeCheck_64"));
 			} else if (viewType == VIEW_TYPE_HEADER) {
 				inflate = inflater.inflate(R.layout.quest_header, parent, false);
 			} else if (viewType == VIEW_TYPE_CHEATSHEET) {
@@ -443,12 +446,13 @@ public class ChallengeBundleActivity extends BaseActivity {
 	private static class ChallengeViewHolder extends RecyclerView.ViewHolder {
 		public ViewGroup questMainContainer;
 		public TextView questDone;
-		public View assistText;
+		public TextView assistText;
 		public TextView questTitle;
 		public ViewGroup questProgressParent;
 		public ProgressBar questProgressBar;
 		public TextView questProgressText;
 		public ViewGroup questRewardParent;
+		public ImageView questDoneCheck;
 		public ImageView questRewardIcon;
 		public TextView questRewardText;
 		public ViewGroup actions;
@@ -466,6 +470,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 			questProgressBar = itemView.findViewById(R.id.quest_progress_bar);
 			questProgressText = itemView.findViewById(R.id.quest_progress_text);
 			questRewardParent = itemView.findViewById(R.id.quest_reward_parent);
+			questDoneCheck = itemView.findViewById(R.id.quest_done_check_mark);
 			questRewardIcon = itemView.findViewById(R.id.quest_reward_icon);
 			questRewardText = itemView.findViewById(R.id.quest_reward_text);
 			actions = itemView.findViewById(R.id.quest_options);
@@ -516,6 +521,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 			holder.questMainContainer.setAlpha(done ? 0.6F : 1.0F);
 			holder.questDone.setText("Earned!");
 			holder.questDone.setVisibility(done ? View.VISIBLE : View.GONE);
+			holder.questDoneCheck.setVisibility(done ? View.VISIBLE : View.GONE);
 			holder.questProgressParent.setVisibility(done ? View.GONE : View.VISIBLE);
 			String s;
 
@@ -617,7 +623,17 @@ public class ChallengeBundleActivity extends BaseActivity {
 			final boolean isEligibleForReplacement = !done && quest.export_type.equals("AthenaDailyQuestDefinition") && questState.equals("Active") && ((AthenaProfileAttributes) activity.profileData.stats.attributesObj).quest_manager.dailyQuestRerolls > 0;
 			final boolean isEligibleForAssist = !done && quest.GameplayTags != null && Arrays.binarySearch(quest.GameplayTags.gameplay_tags, "Quest.Metadata.PartyAssist") >= 0;
 			final boolean isPartyAssisted = isEligibleForAssist && ((AthenaProfileAttributes) activity.profileData.stats.attributesObj).party_assist_quest.equals(activity.findItemId(activeQuestItem.templateId));
-			holder.assistText.setVisibility(isPartyAssisted ? View.VISIBLE : View.GONE);
+
+			if (isPartyAssisted) {
+				BitmapDrawable drawable = new BitmapDrawable(activity.getResources(), Utils.loadTga(activity, "/Game/Athena/UI/Challenges/Art/T_UI_PartyAssist_Incoming_64.T_UI_PartyAssist_Incoming_64"));
+				int i = (int) Utils.dp(activity.getResources(), 24);
+				drawable.setBounds(0, 0, i, i);
+				holder.assistText.setCompoundDrawables(drawable, null, null, null);
+				holder.assistText.setVisibility(View.VISIBLE);
+			} else {
+				holder.assistText.setVisibility(View.GONE);
+			}
+
 			holder.questTitle.setText(TextUtils.concat(isChain ? Utils.color(String.format("Stage %,d of %,d", questItemChain.size(), questDefChain.size()), Utils.getTextColorPrimary(activity)) : "", (isChain ? " - " : "") + holder.questTitle.getText()));
 			holder.questProgressParent.setVisibility(done ? View.GONE : View.VISIBLE);
 
@@ -678,12 +694,6 @@ public class ChallengeBundleActivity extends BaseActivity {
 
 								if (response.isSuccessful()) {
 									activity.getThisApplication().profileManager.executeProfileChanges(response.body());
-									activity.runOnUiThread(new Runnable() {
-										@Override
-										public void run() {
-											adapter.notifyDataSetChanged();
-										}
-									});
 								} else {
 									Utils.dialogError(activity, EpicError.parse(response).getDisplayText());
 								}
@@ -725,12 +735,6 @@ public class ChallengeBundleActivity extends BaseActivity {
 
 								if (response.isSuccessful()) {
 									activity.getThisApplication().profileManager.executeProfileChanges(response.body());
-									activity.runOnUiThread(new Runnable() {
-										@Override
-										public void run() {
-											adapter.notifyDataSetChanged();
-										}
-									});
 								} else {
 									Utils.dialogError(activity, EpicError.parse(response).getDisplayText());
 								}
