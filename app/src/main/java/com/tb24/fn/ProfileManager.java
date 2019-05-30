@@ -48,12 +48,18 @@ public class ProfileManager {
 					profile = getProfileData(response.profileId);
 					switch (changeType) {
 						case "itemAdded":
-							profile.items.put(obj.get("itemId").getAsString(), app.gson.fromJson(obj.get("item"), FortItemStack.class));
-							app.eventBus.post(new ProfileUpdatedEvent(response.profileId, profile));
+							FortItemStack item = app.gson.fromJson(obj.get("item"), FortItemStack.class);
+							profile.items.put(obj.get("itemId").getAsString(), item);
+							Log.d("MCP-Profile", String.format("%s accountId=MCP:%s profileId=%s gained %s", app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId, item.toString()));
 							break;
 						case "itemRemoved":
-							profile.items.remove(obj.get("itemId").getAsString());
-							app.eventBus.post(new ProfileUpdatedEvent(response.profileId, profile));
+							FortItemStack item1 = profile.items.get(obj.get("itemId").getAsString());
+
+							if (item1 != null) {
+								profile.items.remove(obj.get("itemId").getAsString());
+								Log.d("MCP-Profile", String.format("%s accountId=MCP:%s profileId=%s lost %s", app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId, item1.toString()));
+							}
+
 							break;
 						case "itemAttrChanged":
 							profile.items.get(obj.get("itemId").getAsString()).attributes.add(obj.get("variants").getAsString(), obj.get("attributeValue"));
