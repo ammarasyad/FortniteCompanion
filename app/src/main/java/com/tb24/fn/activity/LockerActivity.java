@@ -1,13 +1,23 @@
 package com.tb24.fn.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.Region;
 import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.Gravity;
@@ -16,9 +26,13 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.view.ViewPropertyAnimator;
+import android.view.animation.AccelerateInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
@@ -34,6 +48,7 @@ import com.tb24.fn.util.ItemUtils;
 import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
+import com.tb24.fn.view.SlotCustomImageView;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.greenrobot.eventbus.Subscribe;
@@ -58,6 +73,8 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 	private FortMcpProfile profileData;
 	private SparseArray<FortItemStack> itemMap = new SparseArray<>();
 	private LoadingViewController lc;
+	private ViewPropertyAnimator animateHover1;
+	private ViewPropertyAnimator animateHover2;
 
 	private static Bitmap getEmptyIcon(BaseActivity activity, int id) {
 		String path = null;
@@ -161,6 +178,12 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 		bannerSlot = frame.findViewById(R.id.locker_slot_banner);
 		musicPackSlot = frame.findViewById(R.id.locker_slot_musicpack);
 		loadingScreenSlot = frame.findViewById(R.id.locker_slot_loadingscreen);
+		ShapeDrawable shapeDrawable1 = new ShapeDrawable(new HeaderBackgroundShape(getResources().getDisplayMetrics().density));
+		shapeDrawable1.getPaint().setColor(0xFF0044CB);
+		hoverText.setBackground(shapeDrawable1);
+		ShapeDrawable shapeDrawable2 = new ShapeDrawable(new HeaderBackgroundShape2(getResources().getDisplayMetrics().density));
+		shapeDrawable2.getPaint().setColor(0xFF00AAFF);
+		hoverText2.setBackground(shapeDrawable2);
 		lc = new LoadingViewController(this, frame, "");
 		refreshUi();
 		getThisApplication().eventBus.register(this);
@@ -176,6 +199,22 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 	protected void onResume() {
 		super.onResume();
 		refreshUi();
+		resetAnimatedViews();
+	}
+
+	private void resetAnimatedViews() {
+		if (animateHover1 != null) {
+			animateHover1.cancel();
+			hoverText.setTranslationX(0.0F);
+			hoverText.setAlpha(1.0F);
+		}
+
+		if (animateHover2 != null) {
+			animateHover2.cancel();
+			hoverText2.setScaleX(1.0F);
+			hoverText2.setScaleY(1.0F);
+			hoverText2.setAlpha(1.0F);
+		}
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
@@ -219,6 +258,8 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 		if (selected == null) {
 			select(characterSlot);
 		}
+
+		// TODO if you wanna make this app RIP-ped old phones even more, go ahead add the slot enter/exit staggering animations
 	}
 
 	private void apply(final View slot, String itemGuid) {
@@ -228,6 +269,11 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 		slot.setOnTouchListener(this);
 		final String filter = LockerItemSelectionActivity.getItemCategoryFilterById(slot.getId());
 		TextView newText = slot.findViewById(R.id.item_new);
+		newText.setPadding(0, 0, 0, 0);
+		newText.setMinWidth((int) Utils.dp(getResources(), 22));
+		ShapeDrawable newTextBackground = new ShapeDrawable(new EventWindowLeaderboardActivity.ParallelogramShape((int) Utils.dp(getResources(), 4)));
+		newTextBackground.getPaint().setColor(0xFFFFF448);
+		newText.setBackground(newTextBackground);
 		int newItemsCount = Collections2.filter(profileData.items.values(), new Predicate<FortItemStack>() {
 			@Override
 			public boolean apply(@NullableDecl FortItemStack input) {
@@ -238,8 +284,10 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 		newText.setVisibility(newItemsCount > 0 ? View.VISIBLE : View.GONE);
 
 		if (itemGuid.isEmpty()) {
-			slot.setBackground(null);
-			((ImageView) slot.findViewById(R.id.item_img)).setImageBitmap(getEmptyIcon(this, slot.getId()));
+			SlotCustomImageView displayImage = slot.findViewById(R.id.item_img);
+			slot.setBackground(new EmptySlotBackgroundDrawable(this));
+			displayImage.setFancyBackgroundEnabled(false);
+			displayImage.setImageDrawable(new BitmapDrawable(getResources(), getEmptyIcon(this, slot.getId())));
 			return;
 		}
 
@@ -269,7 +317,10 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 	}
 
 	@Override
-	public void onClick(View v) {
+	public void onClick(final View v) {
+		resetAnimatedViews();
+		animateHover1 = hoverText.animate().translationX(hoverText.getWidth()).alpha(0.0F).setDuration(125L).setInterpolator(new AccelerateInterpolator());
+		animateHover2 = hoverText2.animate().scaleX(2.0F).scaleY(2.0F).alpha(0.0F).setDuration(125L).setStartDelay(63L).setInterpolator(new AccelerateInterpolator());
 		Intent intent = new Intent(LockerActivity.this, LockerItemSelectionActivity.class);
 		intent.putExtra("a", v.getId());
 		startActivity(intent);
@@ -326,5 +377,92 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 		toast.setView(toastView);
 		toast.setDuration(Toast.LENGTH_LONG);
 		toast.show();
+	}
+
+	private static class HeaderBackgroundShape extends RectShape {
+		private final float indent;
+		private final Path path = new Path();
+
+		public HeaderBackgroundShape(float density) {
+			this.indent = 8.0F * density;
+		}
+
+		@Override
+		public void draw(Canvas canvas, Paint paint) {
+			path.reset();
+			path.moveTo(getWidth(), 0.0F);
+			path.lineTo(indent, 0.0F);
+			path.lineTo(0.0F, getHeight());
+			path.lineTo(getWidth(), getHeight());
+			path.close();
+			canvas.drawPath(path, paint);
+		}
+	}
+
+	private static class HeaderBackgroundShape2 extends RectShape {
+		private final float indent;
+		private final Path path = new Path();
+
+		public HeaderBackgroundShape2(float density) {
+			this.indent = 4.0F * density;
+		}
+
+		@Override
+		public void draw(Canvas canvas, Paint paint) {
+			path.reset();
+			path.moveTo(getWidth(), 0.0F);
+			path.lineTo(0.0F, 0.0F);
+			path.lineTo(indent, getHeight());
+			path.lineTo(getWidth() - indent, getHeight());
+			path.close();
+			canvas.drawPath(path, paint);
+		}
+	}
+
+	public static class EmptySlotBackgroundDrawable extends Drawable {
+		private final Paint paint = new Paint();
+		private final Paint paint2 = new Paint();
+		private final Path path = new Path();
+//		private final float density;
+
+		public EmptySlotBackgroundDrawable(Context ctx) {
+//			density = ctx.getResources().getDisplayMetrics().density;
+		}
+
+		@Override
+		public void draw(@NonNull Canvas canvas) {
+			// TODO jaggies and as always, RIP old phones
+			Rect rect = getBounds();
+			float offMax = rect.width() / 10.0F;
+			float offMin = rect.width() / 20.0F;
+			path.reset();
+			path.moveTo(rect.width() - offMin, offMin);
+			path.lineTo(offMax, offMax);
+			path.lineTo(offMin, rect.height() - offMin);
+			path.lineTo(rect.width() - offMax, rect.height() - offMax);
+			path.close();
+			canvas.save();
+			canvas.clipPath(path, Region.Op.DIFFERENCE);
+			paint.setColor(0x80FFFFFF);
+			canvas.drawRect(rect, paint);
+			canvas.restore();
+			paint2.setShader(new LinearGradient(0.0F, 0.0F, 0.0F, rect.height(), 0, 0x40003468, Shader.TileMode.CLAMP));
+			canvas.drawRect(rect, paint2);
+		}
+
+		@Override
+		public void setAlpha(int alpha) {
+			paint.setAlpha(alpha);
+		}
+
+		@Override
+		public void setColorFilter(@Nullable ColorFilter colorFilter) {
+			paint.setColorFilter(colorFilter);
+		}
+
+		@Override
+		public int getOpacity() {
+			return PixelFormat.OPAQUE;
+		}
 	}
 }

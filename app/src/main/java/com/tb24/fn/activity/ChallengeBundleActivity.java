@@ -81,6 +81,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 		cheatsheetUrls.put("ChallengeBundle:questbundle_s9_week_001", "https://i.redd.it/eoa6qwoe8fx21.jpg");
 		cheatsheetUrls.put("ChallengeBundle:questbundle_s9_week_002", "https://i.redd.it/s5o3wgbqdly21.jpg");
 		cheatsheetUrls.put("ChallengeBundle:questbundle_s9_week_003", "https://i.redd.it/hkczsox5pyz21.jpg");
+		cheatsheetUrls.put("ChallengeBundle:questbundle_s9_week_004", "https://i.redd.it/gieae2lcjc131.jpg");
 	}
 
 	private RecyclerView list;

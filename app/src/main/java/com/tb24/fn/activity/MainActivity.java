@@ -37,7 +37,7 @@ import androidx.appcompat.app.AlertDialog;
 import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.R;
 import com.tb24.fn.event.LoggedOutEvent;
-import com.tb24.fn.event.ProfileUpdateFailedEvent;
+import com.tb24.fn.event.ProfileQueryFailedEvent;
 import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.CommonPublicProfileAttributes;
@@ -142,7 +142,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 
 		if (loggedIn) {
 			updateLoginText("...");
-			profileLc.loading();
 			String accountId = prefs.getString("epic_account_id", "");
 
 			if (!getThisApplication().profileManager.hasProfileData("common_public")) {
@@ -172,6 +171,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			}
 
 			if (!getThisApplication().profileManager.hasProfileData("athena")) {
+				profileLc.loading();
 				callMcpAthena = getThisApplication().profileManager.requestProfileUpdate("athena");
 			} else {
 				athenaLoaded();
@@ -219,7 +219,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 	}
 
 	@Subscribe(threadMode = ThreadMode.MAIN)
-	public void onProfileUpdateFailed(ProfileUpdateFailedEvent event) {
+	public void onProfileQueryFailed(ProfileQueryFailedEvent event) {
 		if (event.profileId.equals("athena") && !getThisApplication().profileManager.hasProfileData("athena")) {
 			profileLc.content();
 		}
@@ -479,7 +479,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		public void draw(@NonNull Canvas canvas) {
 			Rect rect = getBounds();
 			path.reset();
-			path.moveTo(rect.width(), 0.0F + 2.0F * density);
+			path.moveTo(rect.width(), 2.0F * density);
 			path.lineTo(rect.width() / 2.0F - density, 6.0F * density);
 			path.lineTo(rect.width() / 2.0F + density, 0);
 			path.lineTo(0.0F, 2.0F * density);
@@ -520,8 +520,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			Rect rect = getBounds();
 			float off = density * 12.0F;
 			path.reset();
-			path.moveTo(rect.width(), off + 0.0F + density * 4.0F);
-			path.lineTo(0.0F, off + 0.0F);
+			path.moveTo(rect.width(), off + density * 4.0F);
+			path.lineTo(0.0F, off);
 			path.lineTo(0.0F, rect.height());
 			path.lineTo(rect.width(), rect.height());
 			path.close();

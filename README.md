@@ -30,7 +30,10 @@ For Android 5.0 Lollipop (API 21) and up.
   A: Not anytime soon. I’m a total default on iOS app development, and it takes a lot of time to master Swift and/or Objective-C. Plus, I don’t think there’s many players with iPhone 6 or earlier which can’t run FN Mobile which means this isn’t in my priority list.
 
 ## To-do
+Pull requests to add these features are welcome.
+* Edit cosmetic's styles and apply them
 * View all owned banners and apply them
+* Proper locker layout (auto fit slots, no more scrolling)
 * Validate entered Support a Creator code
 * Add creative map code
 * View friends, their activity, and whispering them via Epic Chat

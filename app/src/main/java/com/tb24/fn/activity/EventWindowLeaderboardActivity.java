@@ -674,7 +674,7 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 //		}
 //	}
 
-	private static class ParallelogramShape extends RectShape {
+	public static class ParallelogramShape extends RectShape {
 		private final int indent;
 		private final Path path = new Path();
 

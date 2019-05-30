@@ -4,7 +4,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.gson.JsonObject;
-import com.tb24.fn.event.ProfileUpdateFailedEvent;
+import com.tb24.fn.event.ProfileQueryFailedEvent;
 import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortItemStack;
@@ -80,11 +80,11 @@ public class ProfileManager {
 								profile.reserializeAttrObject();
 								break;
 							default:
-								Log.w(TAG, "Unknown change type '" + changeType + "'. If you're reading this, please inform the developer.");
+								Log.w(TAG, "Unknown change type '" + changeType + "'. If you're reading this, please inform the author of this app.");
 								break;
 						}
 					} else {
-						Log.w(TAG, "Change type isn't Full Profile Update and Profile ID '" + response.profileId + "' haven't done a Full Profile Update. This is definitely a bug. If you're reading this, please inform the developer.");
+						Log.w(TAG, "Change type isn't Full Profile Update and Profile ID '" + response.profileId + "' haven't performed a Full Profile Update. This is definitely a bug. If you're reading this, please inform the author of this app.");
 					}
 				}
 
@@ -117,11 +117,11 @@ public class ProfileManager {
 					if (execute.isSuccessful()) {
 						executeProfileChanges(execute.body());
 					} else {
-						app.eventBus.post(new ProfileUpdateFailedEvent(profileId, EpicError.parse(execute)));
+						app.eventBus.post(new ProfileQueryFailedEvent(profileId, EpicError.parse(execute)));
 					}
 				} catch (IOException e) {
 					Log.e(TAG, "Failed requesting profile update " + profileId, e);
-					app.eventBus.post(new ProfileUpdateFailedEvent(profileId, e));
+					app.eventBus.post(new ProfileQueryFailedEvent(profileId, e));
 				}
 			}
 		}.start();

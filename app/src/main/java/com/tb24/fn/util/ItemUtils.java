@@ -26,6 +26,7 @@ import com.tb24.fn.activity.BaseActivity;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.RarityData;
 import com.tb24.fn.model.assetdata.FortItemDefinition;
+import com.tb24.fn.view.SlotCustomImageView;
 
 public class ItemUtils {
 	public static final int OVERLAY_COLOR = 0xFFC0C0C0;
@@ -243,7 +244,10 @@ public class ItemUtils {
 			rarityBackground.setBackground(rarityBgSlot(activity, getRarity(jsonObject)));
 		}
 
-		((ImageView) slotView.findViewById(R.id.item_img)).setImageBitmap(bitmap);
+		SlotCustomImageView displayImage = slotView.findViewById(R.id.item_img);
+		displayImage.setFancyBackgroundEnabled(true);
+		displayImage.setScaleImage(!item.templateId.isEmpty() && item.getIdCategory().equals("AthenaCharacter"));
+		displayImage.setImageBitmap(bitmap);
 		((TextView) slotView.findViewById(R.id.item_slot_dbg_text)).setText(bitmap == null ? item.templateId : null);
 		quantity.setVisibility(item.quantity > 1 ? View.VISIBLE : View.GONE);
 		quantity.setText(String.valueOf(item.quantity));

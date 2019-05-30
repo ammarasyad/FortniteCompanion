@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
@@ -51,6 +52,7 @@ import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 import com.tb24.fn.view.ForcedMarqueeTextView;
+import com.tb24.fn.view.SlotCustomImageView;
 
 import org.checkerframework.checker.nullness.compatqual.NullableDecl;
 import org.greenrobot.eventbus.Subscribe;
@@ -820,6 +822,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 
 	private static class LockerAdapter extends RecyclerView.Adapter<LockerAdapter.LockerViewHolder> {
 		private final LockerItemSelectionActivity activity;
+		private final ShapeDrawable newTextBackground;
 		private List<FortItemStack> data;
 		private Toast toast;
 		private ViewGroup toastView;
@@ -828,6 +831,8 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		public LockerAdapter(LockerItemSelectionActivity activity, List<FortItemStack> data) {
 			this.activity = activity;
 			this.data = data;
+			newTextBackground = new ShapeDrawable(new EventWindowLeaderboardActivity.ParallelogramShape((int) Utils.dp(activity.getResources(), 4)));
+			newTextBackground.getPaint().setColor(0xFFFFF448);
 		}
 
 		@NonNull
@@ -835,6 +840,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		public LockerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 			LockerViewHolder holder = new LockerViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.slot_view_encased, parent, false));
 			holder.favorite.setImageBitmap(Utils.loadTga(activity, "/Game/UI/Foundation/Textures/Icons/Locker/T_Icon_FavoriteTab_64.T_Icon_FavoriteTab_64"));
+			holder.newIcon.setBackground(newTextBackground);
 			return holder;
 		}
 
@@ -851,8 +857,11 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				holder.favorite.setVisibility(View.GONE);
 			}
 
+			holder.displayImage.setFancyBackgroundEnabled(item != EMPTY_ITEM);
+			holder.displayImage.setScaleImage(item != EMPTY_ITEM && !item.templateId.isEmpty() && item.getIdCategory().equals("AthenaCharacter") && item != activity.randomItem);
+
 			if (item == EMPTY_ITEM) {
-				holder.innerSlotView.setBackground(null);
+				holder.innerSlotView.setBackground((new LockerActivity.EmptySlotBackgroundDrawable(activity)));
 				holder.displayImage.setImageResource(R.drawable.ic_close_black_24dp);
 				holder.itemName.setText(null);
 			} else {
@@ -1073,7 +1082,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		}
 
 		static class LockerViewHolder extends RecyclerView.ViewHolder {
-			ImageView displayImage;
+			SlotCustomImageView displayImage;
 			TextView itemName;
 			TextView quantity;
 			ImageView favorite;
