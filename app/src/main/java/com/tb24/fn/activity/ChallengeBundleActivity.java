@@ -274,7 +274,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 
 			challengeBundleDef = getThisApplication().gson.fromJson(a.getAsJsonArray().get(0), FortChallengeBundleItemDefinition.class);
 			setTitle(Utils.color(challengeBundleDef.DisplayName, 0xFFFFFFFF));
-			getWindow().setStatusBarColor(challengeBundleDef.DisplayStyle.PrimaryColor.asInt());
+			getWindow().setStatusBarColor(challengeBundleDef.DisplayStyle.PrimaryColor.toPackedARGB());
 			getSupportActionBar().setBackgroundDrawable(new TitleBackgroundDrawable(this, challengeBundleDef.DisplayStyle));
 			List<CompletionRewardQuestEntry> completionRewardQuestEntries = new ArrayList<>();
 
@@ -737,10 +737,10 @@ public class ChallengeBundleActivity extends BaseActivity {
 		public TitleBackgroundDrawable(Context ctx, FortChallengeBundleItemDefinition.DisplayStyle displayStyle) {
 			density = ctx.getResources().getDisplayMetrics().density;
 			// TODO gradient
-			colorsBackground[0] = displayStyle.PrimaryColor.asInt();
-			colorsBackground[1] = displayStyle.PrimaryColor.asInt();
-			colorsPath[0] = 0x80000000 | modifyRGB(displayStyle.AccentColor.asInt(), 0.75F, null) & 0x00FFFFFF;
-			colorsPath[1] = 0x80000000 | modifyRGB(displayStyle.AccentColor.asInt(), 0.75F, null) & 0x00FFFFFF;
+			colorsBackground[0] = displayStyle.PrimaryColor.toPackedARGB();
+			colorsBackground[1] = displayStyle.PrimaryColor.toPackedARGB();
+			colorsPath[0] = 0x80000000 | modifyRGB(displayStyle.AccentColor.toPackedARGB(), 0.75F, null) & 0x00FFFFFF;
+			colorsPath[1] = 0x80000000 | modifyRGB(displayStyle.AccentColor.toPackedARGB(), 0.75F, null) & 0x00FFFFFF;
 		}
 
 		@Override

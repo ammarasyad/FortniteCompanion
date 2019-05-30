@@ -53,7 +53,7 @@ import java.util.Random;
 
 public final class Utils {
 	public static final Gson DEFAULT_GSON = new Gson();
-	public static final String[] STRINGS = {"That wasn't supposed to happen", "There was an error", "We hit a roadblock", "Not the llama you're looking for", "Whoops!", "Uh oh! Something goofed"};
+	public static final String[] STRINGS = {"That wasn't supposed to happen", "There was an error", "We hit a roadblock", "Not the llama you're looking for", "Whoops!", "Uh oh!  Something goofed"};
 	public static final Random RANDOM = new Random();
 	public static final DialogInterface.OnClickListener LISTENER_TO_CANCEL = new DialogInterface.OnClickListener() {
 		@Override
@@ -81,6 +81,7 @@ public final class Utils {
 	 * @param withSeconds include seconds?
 	 * @return the formatted elapsed time
 	 */
+	// from: https://android.googlesource.com/platform/frameworks/base/+/master/packages/SettingsLib/src/com/android/settingslib/utils/StringUtil.java
 	public static CharSequence formatElapsedTime(Context context, double millis, boolean withSeconds) {
 		SpannableStringBuilder sb = new SpannableStringBuilder();
 		int seconds = (int) Math.floor(millis / 1000);
@@ -88,6 +89,7 @@ public final class Utils {
 			// Round up.
 			seconds += 30;
 		}
+
 		int days = 0, hours = 0, minutes = 0;
 		if (seconds >= SECONDS_PER_DAY) {
 			days = seconds / SECONDS_PER_DAY;
@@ -101,6 +103,7 @@ public final class Utils {
 			minutes = seconds / SECONDS_PER_MINUTE;
 			seconds -= minutes * SECONDS_PER_MINUTE;
 		}
+
 		if (Build.VERSION.SDK_INT >= 24) {
 			final List<Measure> measureList = new ArrayList<>(4);
 			if (days > 0) {
@@ -120,9 +123,11 @@ public final class Utils {
 				measureList.add(new Measure(0, withSeconds ? MeasureUnit.SECOND : MeasureUnit.MINUTE));
 			}
 			final Measure[] measureArray = measureList.toArray(new Measure[measureList.size()]);
+
 			final Locale locale = context.getResources().getConfiguration().locale;
 			final MeasureFormat measureFormat = MeasureFormat.getInstance(locale, MeasureFormat.FormatWidth.NARROW);
 			sb.append(measureFormat.formatMeasures(measureArray));
+
 			if (measureArray.length == 1 && MeasureUnit.MINUTE.equals(measureArray[0].getUnit())) {
 				// Add ttsSpan if it only have minute value, because it will be read as "meters"
 				final TtsSpan ttsSpan = new TtsSpan.MeasureBuilder().setNumber(minutes).setUnit("minute").build();
@@ -149,6 +154,7 @@ public final class Utils {
 			}
 			sb.append(SPACE_JOINER.join(list));
 		}
+
 		return sb;
 	}
 

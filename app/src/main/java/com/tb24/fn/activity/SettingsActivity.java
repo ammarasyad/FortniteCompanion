@@ -31,7 +31,6 @@ import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.command.SetMtxPlatform;
-import com.tb24.fn.util.EMtxPlatform;
 import com.tb24.fn.util.ERegion;
 import com.tb24.fn.util.Utils;
 import com.tb24.fn.view.LayoutPreference;
@@ -116,13 +115,13 @@ public class SettingsActivity extends BaseActivity {
 				}.start();
 
 				prefMtxPlatform = findPreference("mtx_platform");
-				int len1 = EMtxPlatform.values().length;
+				int len1 = SetMtxPlatform.EMtxPlatform.values().length;
 				String[] values1 = new String[len1];
 				String[] names1 = new String[len1];
-				EMtxPlatform[] enumValues1 = EMtxPlatform.values();
+				SetMtxPlatform.EMtxPlatform[] enumValues1 = SetMtxPlatform.EMtxPlatform.values();
 
 				for (int i = 0; i < enumValues1.length; i++) {
-					EMtxPlatform value = enumValues1[i];
+					SetMtxPlatform.EMtxPlatform value = enumValues1[i];
 					values1[i] = value.toString();
 					names1[i] = value.toString();
 				}
@@ -237,7 +236,7 @@ public class SettingsActivity extends BaseActivity {
 					final String old = prefMtxPlatform.getValue();
 					prefMtxPlatform.setSummary(Utils.makeItDark(value.toString(), getActivity()));
 					SetMtxPlatform payload = new SetMtxPlatform();
-					payload.newPlatform = EMtxPlatform.valueOf(value.toString());
+					payload.newPlatform = SetMtxPlatform.EMtxPlatform.valueOf(value.toString());
 					final Call<FortMcpResponse> callSetMtxPlatform = getApplication_().fortnitePublicService.mcp("SetMtxPlatform", getPreferenceManager().getSharedPreferences().getString("epic_account_id", ""), "common_core", -1, payload);
 					new Thread("Set MTX Platform Worker") {
 						@Override

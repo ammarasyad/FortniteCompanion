@@ -23,7 +23,7 @@ public class FortHomebaseBannerColorMap {
 	}
 
 	public static class ColorEntry {
-		public FloatColor PrimaryColor;
-		public FloatColor SecondaryColor;
+		public FColor PrimaryColor;
+		public FColor SecondaryColor;
 	}
 }

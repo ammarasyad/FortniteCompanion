@@ -1,11 +1,13 @@
 package com.tb24.fn.network;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.model.AccountPrivacyResponse;
 import com.tb24.fn.model.CalendarTimelineResponse;
 import com.tb24.fn.model.FortCatalogResponse;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.FortStatsV2Response;
+import com.tb24.fn.model.Receipt;
 import com.tb24.fn.model.WorldInfoResponse;
 
 import retrofit2.Call;
@@ -31,9 +33,6 @@ public interface FortnitePublicService {
 	@GET("/fortnite/api/storefront/v2/catalog")
 	Call<FortCatalogResponse> storefrontCatalog();
 
-	@GET("/fortnite/api/storefront/v2/keychain")
-	Call<String[]> storefrontKeychain();
-
 	@GET("/fortnite/api/calendar/v1/timeline")
 	Call<CalendarTimelineResponse> calendarTimeline();
 
@@ -43,7 +42,18 @@ public interface FortnitePublicService {
 	@GET("/fortnite/api/cloudstorage/user/{id}")
 	Call<JsonObject[]> enumerateUserFiles(@Path("id") String id);
 
-	//TODO what method?
-	@GET("/fortnite/api/game/v2/events/v2/processPendingRewards/{id}")
-	Call<JsonObject[]> eventsProcessPendingRewards(@Path("id") String id);
+	@POST("/fortnite/api/game/v2/events/v2/processPendingRewards/{id}")
+	Call<JsonElement[]> eventsProcessPendingRewards(@Path("id") String id);
+
+	@GET("/fortnite/api/game/v2/tryPlayOnPlatform/account/{id}")
+	Call<Boolean> tryPlayOnPlatform(@Path("id") String id, @Query("platform") String platform);
+
+	@GET("/fortnite/api/game/v2/enabled_features")
+	Call<JsonElement[]> enabledFeatures();
+
+	@GET("/fortnite/api/storefront/v2/keychain")
+	Call<String[]> storefrontKeychain(@Query("numKeysDownloaded") Integer numKeysDownloaded);
+
+	@GET("/fortnite/api/receipts/v1/account/{id}/receipts")
+	Call<Receipt[]> receipts(@Path("id") String id);
 }

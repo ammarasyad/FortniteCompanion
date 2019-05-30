@@ -25,9 +25,9 @@ For Android 5.0 Lollipop (API 21) and up.
 * **Q: Why the app is so huge for just like this? 50 megs for just like this, wow!**\
   A: Because in order for the Challenges, Locker, and Item Shop to be user friendly, the assets of the items are required. Currently, I don’t have a server to host those assets, so for now I decided to store them in the app. In the future, I will make the assets an optional download to reduce the app size although the items’ icons will not appear.
 * **Q: The locker page is sophisticated. But why I still can’t change my skin using this app?**\
-  A: I still haven’t figured out the behind the scenes of that thing, so it isn’t possible yet. If you’re a good reverse engineer you can help me find out how POST .../EquipBattleRoyaleCustomization works and make a pull request here.
-* **Q: Will there be an iOS version of this?
-  A: Not anytime soon. I’m a total noob on iOS app development. Plus, I don’t think theres many players with iPhone 6 or earlier which can’t run FN Mobile which means this isn’t in my priority list.
+  A: I still haven’t figured out the behind the scenes of that thing, so it isn’t possible yet. If you’re a good reverse engineer you can help me find out how POST [.../EquipBattleRoyaleCustomization](https://github.com/Amrsatrio/FortniteCompanion/blob/master/app/src/main/java/com/tb24/fn/model/command/EquipBattleRoyaleCustomization.java) works and make a pull request here.
+* **Q: Will there be an iOS version of this?**\
+  A: Not anytime soon. I’m a total default on iOS app development, and it takes a lot of time to master Swift and/or Objective-C. Plus, I don’t think there’s many players with iPhone 6 or earlier which can’t run FN Mobile which means this isn’t in my priority list.
 
 ## To-do
 * View all owned banners and apply them
@@ -43,5 +43,5 @@ For Android 5.0 Lollipop (API 21) and up.
 * [@cryotus](https://www.instagram.com/cryotus/): for the app name and icon
 * [u/easkate](https://www.reddit.com/user/easkate): for the [concept and idea of this app](https://www.reddit.com/r/FortNiteBR/comments/b5wlwg/fortnite_retail_row_app_a_ui_concept_for_a/)
 * [Kysune](https://github.com/SzymonLisowiec), [Roberto Graham](https://github.com/RobertoGraham), and [Vrekt](https://github.com/Vrekt): for the network endpoints and its usage, from their libraries
-* [Umodel](https://www.gildor.org/en/projects/umodel) by Gildor: for extracting/exporting the .uassets from the .pak's
+* [Umodel](https://github.com/gildor2/UModel) by [Gildor](https://github.com/gildor2): for extracting/exporting the .uassets from the .pak's
 * [John Wick Parse](https://github.com/SirWaddles/JohnWickParse) by [Waddlesworth](https://github.com/SirWaddles): for parsing the item data from the .uasset's

@@ -105,10 +105,10 @@ public class ItemUtils {
 		};
 		content.setGradientType(GradientDrawable.RADIAL_GRADIENT);
 		content.setGradientRadius(Utils.dp(ctx.getResources(), 200));
-		content.setColors(new int[]{rarityData.Color2.asInt(), rarityData.Color3.asInt()});
+		content.setColors(new int[]{rarityData.Color2.toPackedARGB(), rarityData.Color3.toPackedARGB()});
 		GradientDrawable border = new GradientDrawable();
 		border.setOrientation(GradientDrawable.Orientation.BL_TR);
-		border.setColors(new int[]{rarityData.Color3.asInt(), rarityData.Color1.asInt()});
+		border.setColors(new int[]{rarityData.Color3.toPackedARGB(), rarityData.Color1.toPackedARGB()});
 		border.setColorFilter(OVERLAY_COLOR, PorterDuff.Mode.OVERLAY);
 		LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{border, content});
 		int p = (int) ctx.getResources().getDimension(R.dimen.rarity_bg_square_padding);
@@ -127,7 +127,7 @@ public class ItemUtils {
 		}
 
 		RarityData rarityData = FortniteCompanionApp.sRarityData[rarity.ordinal()];
-		int[] colors = {rarityData.Color3.asInt(), rarityData.Color1.asInt()};
+		int[] colors = {rarityData.Color3.toPackedARGB(), rarityData.Color1.toPackedARGB()};
 		GradientDrawable content = new GradientDrawable();
 		content.setOrientation(GradientDrawable.Orientation.LEFT_RIGHT);
 		content.setColors(colors);
@@ -194,8 +194,8 @@ public class ItemUtils {
 		int twelve = (int) Utils.dp(view.getResources(), 12);
 		int eight = (int) Utils.dp(view.getResources(), 8);
 		backgroundView.setPadding(twelve, eight, twelve, eight);
-		((TextView) view.findViewById(R.id.item_text1)).setText(TextUtils.concat(Utils.color(rarity.name, FortniteCompanionApp.sRarityData[rarity.ordinal()].Color1.asInt()), " | ", getShortDescription(item)));
-		itemTitle.setShadowLayer(10.0F, 0.0F, 0.0F, FortniteCompanionApp.sRarityData[rarity.ordinal()].Color1.asInt());
+		((TextView) view.findViewById(R.id.item_text1)).setText(TextUtils.concat(Utils.color(rarity.name, FortniteCompanionApp.sRarityData[rarity.ordinal()].Color1.toPackedARGB()), " | ", getShortDescription(item)));
+		itemTitle.setShadowLayer(10.0F, 0.0F, 0.0F, FortniteCompanionApp.sRarityData[rarity.ordinal()].Color1.toPackedARGB());
 		itemTitle.setText((item.attributes != null && item.attributes.has("DUMMY") ? "[Dummy] " : "") + defData.DisplayName);
 		CharSequence concat = defData.Description;
 

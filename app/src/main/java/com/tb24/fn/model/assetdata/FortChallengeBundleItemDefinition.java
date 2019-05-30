@@ -16,9 +16,9 @@ public class FortChallengeBundleItemDefinition extends FortItemDefinition {
 	}
 
 	public static class DisplayStyle {
-		public FloatColor PrimaryColor;
-		public FloatColor SecondaryColor;
-		public FloatColor AccentColor;
+		public FColor PrimaryColor;
+		public FColor SecondaryColor;
+		public FColor AccentColor;
 		public AssetReference DisplayImage;
 		public AssetReference CustomBackground;
 	}

@@ -124,8 +124,8 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 					FortHomebaseBannerColorMap.ColorEntry colorEntry = activity.getThisApplication().bannerColorMap.ColorMap.get(bannerColorDef.ColorKeyName);
 
 					if (colorEntry != null) {
-						color1 = colorEntry.PrimaryColor.asInt();
-						color2 = colorEntry.SecondaryColor.asInt();
+						color1 = colorEntry.PrimaryColor.toPackedARGB();
+						color2 = colorEntry.SecondaryColor.toPackedARGB();
 					}
 				}
 

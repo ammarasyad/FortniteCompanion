@@ -1,11 +1,11 @@
 package com.tb24.fn.model;
 
-import com.tb24.fn.model.assetdata.FloatColor;
+import com.tb24.fn.model.assetdata.FColor;
 
 public class RarityData {
-	public FloatColor Color1;
-	public FloatColor Color2;
-	public FloatColor Color3;
-	public FloatColor Color4;
-	public FloatColor Color5;
+	public FColor Color1;
+	public FColor Color2;
+	public FColor Color3;
+	public FColor Color4;
+	public FColor Color5;
 }

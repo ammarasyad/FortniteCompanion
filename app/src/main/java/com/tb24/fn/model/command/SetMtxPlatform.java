@@ -1,9 +1,11 @@
 package com.tb24.fn.model.command;
 
-import com.tb24.fn.util.EMtxPlatform;
-
 // com.epicgames.fortnite.core.game.commands.mtx.SetMtxPlatform
 // profileId == common_core
 public class SetMtxPlatform {
 	public EMtxPlatform newPlatform;
+
+	public enum EMtxPlatform {
+		WeGame, EpicPCKorea, Epic, EpicPC, EpicAndroid, PSN, Live, IOSAppStore, Nintendo, Samsung, Shared;
+	}
 }
