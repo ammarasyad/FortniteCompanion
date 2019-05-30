@@ -342,6 +342,8 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 				return true;
 			case "AthenaSkyDiveContrail":
 				return true;
+			case "AthenaDance":
+				return true;
 			case "AthenaItemWrap":
 				return true;
 			case "AthenaMusicPack":
