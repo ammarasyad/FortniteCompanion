@@ -178,7 +178,7 @@ public class LoginActivity extends BaseActivity implements LoaderCallbacks<Curso
 	}
 
 	private void handleLogin(final String email, String password) {
-		loginRequest = getThisApplication().accountPublicService.oauthToken(FortniteCompanionApp.CLIENT_TOKEN_FORTNITE, "password", ImmutableMap.of("username", email, "password", password), false);
+		loginRequest = getThisApplication().accountPublicService.oauthToken(FortniteCompanionApp.CLIENT_TOKEN_FORTNITE, "password", ImmutableMap.of("username", email, "password", password, "token_type", "eg1"), false);
 		new Thread() {
 			@Override
 			public void run() {

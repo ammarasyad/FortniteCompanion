@@ -87,10 +87,10 @@ public class ProfileManager {
 						Log.w(TAG, "Change type isn't Full Profile Update and Profile ID '" + response.profileId + "' haven't performed a Full Profile Update. This is definitely a bug. If you're reading this, please inform the author of this app.");
 					}
 				}
+			}
 
-				if (profile != null) {
-					app.eventBus.post(new ProfileUpdatedEvent(response.profileId, profile));
-				}
+			if (response.profileChanges.length > 0 && hasProfileData(response.profileId)) {
+				app.eventBus.post(new ProfileUpdatedEvent(response.profileId, getProfileData(response.profileId)));
 			}
 		}
 
