@@ -1,10 +1,14 @@
 package com.tb24.fn.model.command;
 
-// com.epicgames.fortnite.core.game.commands.mtx.FortPurchaseCatalogEntry
-// profileId == common_core
+import com.tb24.fn.model.ECurrencyType;
+
+/**
+ * com.epicgames.fortnite.core.game.commands.mtx.FortPurchaseCatalogEntry
+ * <p>
+ * Profile ID: common_core
+ */
 public class PurchaseCatalogEntry {
-	// enum: Other, RealMoney, GameItem, MtxCurrency
-	public String currency;
+	public ECurrencyType currency;
 	public String currencySubType;
 	public Integer expectedPrice;
 	public String offerId;

@@ -55,7 +55,7 @@ import java.util.Random;
 
 public final class Utils {
 	public static final Gson DEFAULT_GSON = new Gson();
-	public static final String[] STRINGS = {"That wasn't supposed to happen", "There was an error", "We hit a roadblock", "Not the llama you're looking for", "Whoops!", "Uh oh!  Something goofed"};
+	public static final String[] STRINGS = {"That wasn't supposed to happen", "There was an error", "We hit a roadblock", "Not the llama you're looking for", "Whoops!", "Uh oh!  Something goofed", "Drat! We're sorry"};
 	public static final Random RANDOM = new Random();
 	public static final DialogInterface.OnClickListener LISTENER_TO_CANCEL = new DialogInterface.OnClickListener() {
 		@Override
@@ -257,14 +257,18 @@ public final class Utils {
 	}
 
 	public static void throwableDialog(Activity activity, Throwable e) {
-		dialogOkNonMain(activity, STRINGS[RANDOM.nextInt(STRINGS.length - 1)], userFriendlyNetError(e));
+		dialogOkNonMain(activity, STRINGS[RANDOM.nextInt(STRINGS.length - 1)], userFriendlyNetError(e), "Continue");
 	}
 
 	public static void dialogError(Activity activity, CharSequence msg) {
-		dialogOkNonMain(activity, STRINGS[RANDOM.nextInt(STRINGS.length - 1)], msg);
+		dialogOkNonMain(activity, STRINGS[RANDOM.nextInt(STRINGS.length - 1)], msg, "Continue");
 	}
 
 	public static void dialogOkNonMain(final Activity activity, final CharSequence title, final CharSequence message) {
+		dialogOkNonMain(activity, title, message, activity.getString(android.R.string.ok));
+	}
+
+	public static void dialogOkNonMain(final Activity activity, final CharSequence title, final CharSequence message, final CharSequence okText) {
 		if (activity != null && !activity.isDestroyed()) {
 			activity.runOnUiThread(new Runnable() {
 				@Override
@@ -272,7 +276,7 @@ public final class Utils {
 					new AlertDialog.Builder(activity)
 							.setTitle(title)
 							.setMessage(message)
-							.setPositiveButton(android.R.string.ok, null)
+							.setPositiveButton(okText, null)
 							.show();
 				}
 			});
@@ -340,7 +344,7 @@ public final class Utils {
 	}
 
 	public static CharSequence userFriendlyNetError(Throwable e) {
-		return e instanceof IOException ? "Connection to server failed. (" + e.getLocalizedMessage() + ")" : e.getLocalizedMessage();
+		return e instanceof IOException ? "Connection to the server failed." : e.getLocalizedMessage();
 	}
 
 	public static Bitmap loadTga(BaseActivity activity, String uPath) {

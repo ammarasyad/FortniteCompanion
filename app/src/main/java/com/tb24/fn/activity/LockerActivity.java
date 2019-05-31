@@ -349,6 +349,10 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 	}
 
 	private void select(View v) {
+		if (v == selected) {
+			return;
+		}
+
 		if (selected != null) {
 			selected.setSelected(false);
 		}
@@ -443,7 +447,7 @@ public class LockerActivity extends BaseActivity implements View.OnClickListener
 			path.close();
 			canvas.save();
 			canvas.clipPath(path, Region.Op.DIFFERENCE);
-			paint.setColor(0x80FFFFFF);
+			paint.setColor(0x60FFFFFF);
 			canvas.drawRect(rect, paint);
 			canvas.restore();
 			paint2.setShader(new LinearGradient(0.0F, 0.0F, 0.0F, rect.height(), 0, 0x40003468, Shader.TileMode.CLAMP));

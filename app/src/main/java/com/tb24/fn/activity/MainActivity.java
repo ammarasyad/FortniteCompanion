@@ -348,7 +348,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 				startActivity(new Intent(this, EventsActivity.class));
 				break;
 			case R.id.main_screen_btn_stats:
-				AlertDialog dialog = Utils.createEditTextDialog(this, "Epic Display Name or Account ID", getString(android.R.string.ok), new Utils.EditTextDialogCallback() {
+				AlertDialog dialog = Utils.createEditTextDialog(this, "Epic Display Name, Email, or Account ID", getString(android.R.string.ok), new Utils.EditTextDialogCallback() {
 					@Override
 					public void onResult(String s) {
 						if (s.length() < 3) {
@@ -356,7 +356,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 						}
 
 						if (s.length() != 32) {
-							final Call<GameProfile> call = getThisApplication().personaPublicService.getAccountIdByDisplayName(s);
+							final Call<GameProfile> call = s.matches("\\S+@\\S+\\.\\S+") ? getThisApplication().accountPublicService.accountByEmail(s) : getThisApplication().accountPublicService.accountByName(s);
 							new Thread() {
 								@Override
 								public void run() {

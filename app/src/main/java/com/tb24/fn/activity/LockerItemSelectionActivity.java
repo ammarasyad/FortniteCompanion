@@ -37,6 +37,7 @@ import com.tb24.fn.R;
 import com.tb24.fn.Registry;
 import com.tb24.fn.event.ProfileUpdatedEvent;
 import com.tb24.fn.model.AthenaProfileAttributes;
+import com.tb24.fn.model.ECustomizationSlot;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
@@ -355,30 +356,30 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		}
 	}
 
-	private static EquipBattleRoyaleCustomization.ECustomizationSlot getCustomizationSlotByType(String filterId) {
+	private static ECustomizationSlot getCustomizationSlotByType(String filterId) {
 		if (filterId == null) {
 			return null;
 		}
 
 		switch (filterId) {
 			case "AthenaCharacter":
-				return EquipBattleRoyaleCustomization.ECustomizationSlot.Character;
+				return ECustomizationSlot.Character;
 			case "AthenaBackpack":
-				return EquipBattleRoyaleCustomization.ECustomizationSlot.Backpack;
+				return ECustomizationSlot.Backpack;
 			case "AthenaPickaxe":
-				return EquipBattleRoyaleCustomization.ECustomizationSlot.Pickaxe;
+				return ECustomizationSlot.Pickaxe;
 			case "AthenaGlider":
-				return EquipBattleRoyaleCustomization.ECustomizationSlot.Glider;
+				return ECustomizationSlot.Glider;
 			case "AthenaSkyDiveContrail":
-				return EquipBattleRoyaleCustomization.ECustomizationSlot.SkyDiveContrail;
+				return ECustomizationSlot.SkyDiveContrail;
 			case "AthenaDance":
-				return EquipBattleRoyaleCustomization.ECustomizationSlot.Dance;
+				return ECustomizationSlot.Dance;
 			case "AthenaItemWrap":
-				return EquipBattleRoyaleCustomization.ECustomizationSlot.ItemWrap;
+				return ECustomizationSlot.ItemWrap;
 			case "AthenaMusicPack":
-				return EquipBattleRoyaleCustomization.ECustomizationSlot.MusicPack;
+				return ECustomizationSlot.MusicPack;
 			case "AthenaLoadingScreen":
-				return EquipBattleRoyaleCustomization.ECustomizationSlot.LoadingScreen;
+				return ECustomizationSlot.LoadingScreen;
 			default:
 				return null;
 		}
@@ -849,7 +850,8 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 		@Override
 		public void onBindViewHolder(@NonNull LockerViewHolder holder, int position) {
 			final FortItemStack item = data.get(position);
-			holder.itemView.setSelected(item.templateId.equals(activity.selectedItem));
+			final boolean itemIsSelected = item.templateId.equals(activity.selectedItem);
+			holder.itemView.setSelected(itemIsSelected);
 
 			if (item.attributes != null) {
 				holder.newIcon.setVisibility(JsonUtils.getBooleanOr("item_seen", item.attributes, false) ? View.INVISIBLE : View.VISIBLE);
@@ -892,6 +894,11 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 						return;
 					}
 
+					if (itemIsSelected) {
+						activity.finish();
+						return;
+					}
+
 					activity.equipExecuted = true;
 					EquipBattleRoyaleCustomization payload = new EquipBattleRoyaleCustomization();
 					payload.slotName = getCustomizationSlotByType(activity.itemTypeFilter);
@@ -907,6 +914,7 @@ public class LockerItemSelectionActivity extends BaseActivity implements Adapter
 							payload);
 					final ProgressDialog progressDialog = new ProgressDialog(activity);
 					progressDialog.setCancelable(false);
+					progressDialog.setTitle("Saving...");
 					progressDialog.setMessage("Saving selection");
 					progressDialog.show();
 					new Thread("Apply Cosmetic Item Worker") {

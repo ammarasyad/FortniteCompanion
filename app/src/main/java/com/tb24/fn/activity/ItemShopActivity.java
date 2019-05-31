@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -31,6 +32,7 @@ import android.view.animation.Interpolator;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -39,9 +41,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Px;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ComparisonChain;
 import com.google.gson.JsonElement;
@@ -84,6 +88,7 @@ import retrofit2.Response;
 
 public class ItemShopActivity extends BaseActivity {
 	private static final String CONFIRM_PHRASE = "CONFIRM";
+	private boolean bypassVbucks;
 	private boolean fakePurchases;
 	private SoundPool soundPool;
 	private int[] sounds;
@@ -106,7 +111,28 @@ public class ItemShopActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.common_loadable_recycler_view);
 		setupActionBar();
+		bypassVbucks = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("mtx_check_bypass", false);
 		fakePurchases = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("fake_purchases", false);
+		List<String> warnings = new ArrayList<>();
+
+		if (bypassVbucks) {
+			warnings.add("V-Bucks check bypassed");
+		}
+
+		if (fakePurchases) {
+			warnings.add("Purchases simulated");
+		}
+
+		if (!warnings.isEmpty()) {
+			TextView tv = new AppCompatTextView(this);
+			tv.setGravity(Gravity.CENTER_HORIZONTAL);
+			tv.setTextColor(0xFFFFFF00);
+			tv.setText(Joiner.on(", ").join(warnings));
+			FrameLayout pinnedHeader = findViewById(R.id.pinned_header);
+			pinnedHeader.setVisibility(View.VISIBLE);
+			pinnedHeader.addView(tv, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+		}
+
 		soundPool = new SoundPool.Builder().setMaxStreams(4).setAudioAttributes(new AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()).build();
 		int purchasedSound1 = soundPool.load(this, R.raw.store_purchaseitem_athena_01, 1);
 		int purchasedSound2 = soundPool.load(this, R.raw.store_purchaseitem_athena_02, 1);
@@ -697,14 +723,14 @@ public class ItemShopActivity extends BaseActivity {
 
 				private void updateButtons() {
 					boolean finallyOwned = purchaseSuccess || finalOwned;
-					boolean notEnough = activity.vBucksQty < price.basePrice;
+					boolean notEnough = !activity.bypassVbucks && activity.vBucksQty < price.basePrice;
 					owned.setVisibility(finallyOwned ? View.VISIBLE : View.GONE);
-					btnPurchase.setText(purchasePending ? "Purchase Pending" : item.itemGrants.length == 1 ? "Purchase" : "Purchase Items");
+					btnPurchase.setText(item.itemGrants.length == 1 ? "Purchase" : "Purchase Items");
 					btnPurchase.setEnabled(!purchasePending);
 					btnPurchase.setVisibility(finallyOwned ? View.GONE : View.VISIBLE);
 					btnGift.setVisibility(activity.getCoreAttributes().allowed_to_send_gifts && item.giftInfo != null && item.giftInfo.bIsEnabled && (finallyOwned || !notEnough) ? View.VISIBLE : View.GONE);
 
-					if (notEnough && !PreferenceManager.getDefaultSharedPreferences(activity).getBoolean("mtx_check_bypass", false)) {
+					if (notEnough) {
 						btnPurchase.setEnabled(false);
 						// TODO "Get V-Bucks"
 						btnPurchase.setText("Not enough V-Bucks");

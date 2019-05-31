@@ -33,12 +33,12 @@ public class ProfileManager {
 		profileRevisions.put(response.profileId, response.profileRevision);
 
 		if (response.profileChanges != null) {
-			for (JsonObject obj : response.profileChanges) {
-				String changeType = JsonUtils.getStringOr("changeType", obj, "");
-				FortMcpProfile profile = null;
+			for (JsonObject profileChangeEntryObj : response.profileChanges) {
+				String changeType = JsonUtils.getStringOr("changeType", profileChangeEntryObj, "");
+				FortMcpProfile profile;
 
 				if (changeType.equals("fullProfileUpdate")) {
-					profile = app.gson.fromJson(obj.get("profile"), FortMcpProfile.class);
+					profile = app.gson.fromJson(profileChangeEntryObj.get("profile"), FortMcpProfile.class);
 					profileData.put(response.profileId, profile);
 					Log.i(TAG, String.format("Full profile update (rev=%d, version=%s@w=%d) for %s accountId=MCP:%s profileId=%s", profile.rvn, profile.version, profile.wipeNumber, app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId));
 				} else {
@@ -46,37 +46,51 @@ public class ProfileManager {
 						profile = getProfileData(response.profileId);
 						switch (changeType) {
 							case "itemAdded":
-								FortItemStack itemToAdd = app.gson.fromJson(obj.get("item"), FortItemStack.class);
-								profile.items.put(obj.get("itemId").getAsString(), itemToAdd);
+								FortItemStack itemToAdd = app.gson.fromJson(profileChangeEntryObj.get("item"), FortItemStack.class);
+								profile.items.put(JsonUtils.getStringOr("itemId", profileChangeEntryObj, null), itemToAdd);
 								Log.i(TAG, String.format("%s accountId=MCP:%s profileId=%s gained %s", app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId, itemToAdd.toString()));
 								break;
 							case "itemRemoved":
-								FortItemStack itemToRemove = profile.items.get(obj.get("itemId").getAsString());
+								FortItemStack itemToRemove = profile.items.get(JsonUtils.getStringOr("itemId", profileChangeEntryObj, null));
 
 								if (itemToRemove != null) {
-									profile.items.remove(obj.get("itemId").getAsString());
+									profile.items.remove(JsonUtils.getStringOr("itemId", profileChangeEntryObj, null));
 									Log.i(TAG, String.format("%s accountId=MCP:%s profileId=%s lost %s", app.currentLoggedIn == null ? "" : app.currentLoggedIn.getDisplayName(), profile.accountId, profile.profileId, itemToRemove.toString()));
 								} else {
-									Log.w(TAG, "itemRemoved: Item ID " + obj.get("itemId").getAsString() + " not found");
+									Log.w(TAG, "itemRemoved: Item ID " + JsonUtils.getStringOr("itemId", profileChangeEntryObj, null) + " not found");
+								}
+
+								break;
+							case "itemQuantityChanged":
+								FortItemStack itemQuantityToChange = profile.items.get(JsonUtils.getStringOr("itemId", profileChangeEntryObj, null));
+
+								if (itemQuantityToChange != null) {
+									if (itemQuantityToChange.attributes == null) {
+										itemQuantityToChange.attributes = new JsonObject();
+									}
+
+									itemQuantityToChange.quantity = JsonUtils.getIntOr("quantity", profileChangeEntryObj, -1);
+								} else {
+									Log.w(TAG, "itemQuantityChanged: Item ID " + JsonUtils.getStringOr("itemId", profileChangeEntryObj, null) + " not found");
 								}
 
 								break;
 							case "itemAttrChanged":
-								FortItemStack itemAttrToChange = profile.items.get(obj.get("itemId").getAsString());
+								FortItemStack itemAttrToChange = profile.items.get(JsonUtils.getStringOr("itemId", profileChangeEntryObj, null));
 
 								if (itemAttrToChange != null) {
 									if (itemAttrToChange.attributes == null) {
 										itemAttrToChange.attributes = new JsonObject();
 									}
 
-									itemAttrToChange.attributes.add(obj.get("attributeName").getAsString(), obj.get("attributeValue"));
+									itemAttrToChange.attributes.add(JsonUtils.getStringOr("attributeName", profileChangeEntryObj, null), profileChangeEntryObj.get("attributeValue"));
 								} else {
-									Log.w(TAG, "itemAttrChanged: Item ID " + obj.get("itemId").getAsString() + " not found");
+									Log.w(TAG, "itemAttrChanged: Item ID " + JsonUtils.getStringOr("itemId", profileChangeEntryObj, null) + " not found");
 								}
 
 								break;
 							case "statModified":
-								profile.stats.attributes.add(obj.get("name").getAsString(), obj.get("value"));
+								profile.stats.attributes.add(JsonUtils.getStringOr("name", profileChangeEntryObj, null), profileChangeEntryObj.get("value"));
 								profile.reserializeAttrObject();
 								break;
 							default:
@@ -89,7 +103,7 @@ public class ProfileManager {
 				}
 			}
 
-			if (response.profileChanges.length > 0 && hasProfileData(response.profileId)) {
+			if (hasProfileData(response.profileId)) {
 				app.eventBus.post(new ProfileUpdatedEvent(response.profileId, getProfileData(response.profileId)));
 			}
 		}

@@ -53,4 +53,10 @@ public interface AccountPublicService {
 
 	@GET("/account/api/public/account/{id}/externalAuths")
 	Call<ExternalAuth[]> accountExternalAuths(@Path("id") String id);
+
+	@GET("/account/api/public/account/displayName/{name}")
+	Call<GameProfile> accountByName(@Path("name") String name);
+
+	@GET("/account/api/public/account/email/{email}")
+	Call<GameProfile> accountByEmail(@Path("email") String email);
 }

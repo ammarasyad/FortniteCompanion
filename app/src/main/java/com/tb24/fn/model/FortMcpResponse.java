@@ -7,7 +7,7 @@ import java.util.Date;
 public class FortMcpResponse {
 	public Integer profileRevision;
 	public String profileId;
-	public String profileChangesBaseRevision;
+	public Integer profileChangesBaseRevision;
 	public JsonObject[] profileChanges;
 	public JsonObject[] notifications;
 	public Integer profileCommandRevision;

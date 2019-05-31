@@ -41,28 +41,27 @@ public class FortCatalogResponse {
 		//***BRWeeklyStorefront***
 		//TODO unknown content
 		public JsonElement[] fulfillmentIds;
-		//"meta":{
-		//"BannerOverride":"NewStyle"
-		//"StoreToastHeader":"Updated",
-		//"StoreToastBody":"ItemIsBack"
-		//}
+		// ex: "meta":{
+		//     "BannerOverride":"NewStyle"
+		//     "StoreToastHeader":"Updated",
+		//     "StoreToastBody":"ItemIsBack"
+		// }
 		public JsonObject meta;
 		public String matchFilter;
 		public Float filterWeight;
 		public GiftInfo giftInfo;
 		public Boolean refundable;
-		// com.epicgames.fortnite.core.game.fulfillments.BattlePassTierFulfillment
+		// ex: com.epicgames.fortnite.core.game.fulfillments.BattlePassTierFulfillment
 		public String fulfillmentClass;
 	}
 
 	public static class Price {
-		public String currencyType;
+		public ECurrencyType currencyType;
 		public String currencySubType;
 		public Integer regularPrice;
 		public Integer finalPrice;
 		//nonexistent if not sale
 		public String saleType;
-		//date
 		public Date saleExpiration;
 		public Integer basePrice;
 	}
