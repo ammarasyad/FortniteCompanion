@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,8 +44,10 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 	private static final List<StatName> DUO_DISPLAY = Arrays.asList(StatName.placetop1, StatName.placetop5, StatName.placetop12, StatName.kills, StatName.matchesplayed, StatName.__kd, StatName.__winrate, StatName.__top5rate, StatName.minutesplayed, StatName.playersoutlived, StatName.score);
 	private static final List<StatName> SQUAD_DISPLAY = Arrays.asList(StatName.placetop1, StatName.placetop3, StatName.placetop6, StatName.kills, StatName.matchesplayed, StatName.__kd, StatName.__winrate, StatName.__top3rate, StatName.minutesplayed, StatName.playersoutlived, StatName.score);
 	private static final List<StatName> LTM_DISPLAY = Arrays.asList(StatName.placetop1, StatName.score, StatName.playersoutlived, StatName.placetop3, StatName.placetop5, StatName.placetop6, StatName.placetop12, StatName.placetop25, StatName.kills, StatName.matchesplayed, StatName.minutesplayed);
-	private Button btn1, btn2;
-	private ViewGroup heroGroup, extrasGroup;
+	private Button btnPlatform;
+	private Button btnMode;
+	private ViewGroup heroGroup;
+	private ViewGroup extrasGroup;
 	private Input selectedInput = Input.ALL;
 	private GameMode selectedGameMode = GameMode.SOLO;
 	// br_playersoutlived_touch_m0_playlist_snipers_duos
@@ -89,12 +92,12 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 		getSupportActionBar().setTitle(PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", "").equals(id) ? "You" : name == null ? id : name);
 		final View frame = findViewById(R.id.main_content);
 		getLayoutInflater().inflate(R.layout.br_stat_view, (ViewGroup) frame);
-		btn1 = findViewById(R.id.br_stats_btn_platform_cycle);
-		btn2 = findViewById(R.id.br_stats_btn_mode_cycle);
-		btn1.setOnClickListener(this);
-		btn2.setOnClickListener(this);
-		btntxt();
-		btn2txt();
+		btnPlatform = findViewById(R.id.br_stats_btn_platform_cycle);
+		btnMode = findViewById(R.id.br_stats_btn_mode_cycle);
+		btnPlatform.setOnClickListener(this);
+		btnMode.setOnClickListener(this);
+		updatePlatformBtn();
+		updateModeBtn();
 		heroGroup = findViewById(R.id.br_stats_hero);
 		extrasGroup = findViewById(R.id.br_stats_extras);
 		lc = new LoadingViewController(this, frame, "There are no stats to display.") {
@@ -106,36 +109,36 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 		fetchStatsIdReady(id);
 	}
 
-	private void btntxt() {
+	private void updatePlatformBtn() {
 		if (selectedInput != Input.ALL) {
 			Drawable drawable = getDrawable(selectedInput.img);
 			int i = (int) Utils.dp(getResources(), 24);
 			drawable.setBounds(0, 0, i, i);
-			drawable.setTint(btn1.getCurrentTextColor());
-			btn1.setCompoundDrawables(null, null, drawable, null);
+			drawable.setTint(btnPlatform.getCurrentTextColor());
+			btnPlatform.setCompoundDrawables(null, null, drawable, null);
 		} else {
-			btn1.setCompoundDrawables(null, null, null, null);
+			btnPlatform.setCompoundDrawables(null, null, null, null);
 		}
 
-		btn1.setText("Input: " + selectedInput);
+		btnPlatform.setText("Input: " + selectedInput);
 	}
 
-	private void btn2txt() {
-		btn2.setText("Mode: " + selectedGameMode);
+	private void updateModeBtn() {
+		btnMode.setText("Mode: " + selectedGameMode);
 	}
 
 	@Override
 	public void onClick(View v) {
 		if (v.getId() == R.id.br_stats_btn_platform_cycle) {
 			selectedInput = Input.values()[(selectedInput.ordinal() + 1) % Input.values().length];
-			btntxt();
+			updatePlatformBtn();
 
 			if (loaded) {
 				refreshUi();
 			}
 		} else if (v.getId() == R.id.br_stats_btn_mode_cycle) {
 			selectedGameMode = GameMode.values()[(selectedGameMode.ordinal() + 1) % GameMode.values().length];
-			btn2txt();
+			updateModeBtn();
 
 			if (loaded) {
 				refreshUi();
@@ -145,7 +148,7 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 
 	private void fetchStatsIdReady(String id) {
 		loaded = false;
-		final Call<FortStatsV2Response> call = getThisApplication().fortnitePublicService.statsV2(id);
+		final Call<FortStatsV2Response> call = getThisApplication().fortnitePublicService.statsV2(id, null, null);
 		lc.loading();
 		new Thread(new Runnable() {
 			@Override
@@ -257,6 +260,19 @@ public class BRStatsActivity extends BaseActivity implements View.OnClickListene
 				inflate.animate().setDuration(50L).setStartDelay((i - 3) * 50L).scaleY(1);
 				attachMoreStatDetails(inflate, statName);
 			}
+		}
+
+//		printOut(displays, statNameAndSums);
+	}
+
+	private void printOut(List<StatName> displays, Map<String, Object> statNameAndSums) {
+		int w = 32;
+		String b = getIntent().getStringExtra("b");
+		Log.i("Stats", b == null ? getIntent().getStringExtra("a") : b);
+
+		for (int i = 0; i < displays.size(); i++) {
+			StatName statName = displays.get(i);
+			Log.i("Stats", String.format("%s%" + (w - statName.friendlyName.length()) + "s", statName.friendlyName, statName.format(BRStatsActivity.this, statNameAndSums.containsKey(statName.asString) ? statNameAndSums.get(statName.asString) : 0)));
 		}
 	}
 

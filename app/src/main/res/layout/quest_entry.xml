@@ -87,7 +87,6 @@
 		android:id="@+id/quest_options"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
-		android:minWidth="200dp"
 		android:paddingStart="12dp"
 		android:paddingTop="8dp"
 		android:paddingEnd="12dp"
@@ -98,6 +97,7 @@
 		<LinearLayout
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:minWidth="160dp"
 			android:orientation="vertical">
 
 			<Button

@@ -84,7 +84,7 @@ public class ProfileManager {
 								break;
 						}
 					} else {
-						Log.w(TAG, "Change type isn't Full Profile Update and Profile ID '" + response.profileId + "' haven't performed a Full Profile Update. This is definitely a bug. If you're reading this, please inform the author of this app.");
+						Log.w(TAG, "Change type '" + changeType + "' isn't Full Profile Update and Profile ID '" + response.profileId + "' haven't performed a Full Profile Update. This is definitely a bug. If you're reading this, please inform the author of this app.");
 					}
 				}
 			}

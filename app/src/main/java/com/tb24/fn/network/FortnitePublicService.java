@@ -37,7 +37,7 @@ public interface FortnitePublicService {
 	Call<CalendarTimelineResponse> calendarTimeline();
 
 	@GET("/fortnite/api/statsv2/account/{id}")
-	Call<FortStatsV2Response> statsV2(@Path("id") String id);
+	Call<FortStatsV2Response> statsV2(@Path("id") String id, @Query("startTime") Long startTime, @Query("endTime") Long endTime);
 
 	@GET("/fortnite/api/cloudstorage/user/{id}")
 	Call<JsonObject[]> enumerateUserFiles(@Path("id") String id);

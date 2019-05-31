@@ -697,19 +697,26 @@ public class ItemShopActivity extends BaseActivity {
 
 				private void updateButtons() {
 					boolean finallyOwned = purchaseSuccess || finalOwned;
+					boolean notEnough = activity.vBucksQty < price.basePrice;
 					owned.setVisibility(finallyOwned ? View.VISIBLE : View.GONE);
 					btnPurchase.setText(purchasePending ? "Purchase Pending" : item.itemGrants.length == 1 ? "Purchase" : "Purchase Items");
 					btnPurchase.setEnabled(!purchasePending);
 					btnPurchase.setVisibility(finallyOwned ? View.GONE : View.VISIBLE);
-					boolean notEnough = activity.vBucksQty < price.basePrice;
+					btnGift.setVisibility(activity.getCoreAttributes().allowed_to_send_gifts && item.giftInfo != null && item.giftInfo.bIsEnabled && (finallyOwned || !notEnough) ? View.VISIBLE : View.GONE);
 
 					if (notEnough && !PreferenceManager.getDefaultSharedPreferences(activity).getBoolean("mtx_check_bypass", false)) {
 						btnPurchase.setEnabled(false);
 						// TODO "Get V-Bucks"
 						btnPurchase.setText("Not enough V-Bucks");
-					}
 
-					btnGift.setVisibility(activity.getCoreAttributes().allowed_to_send_gifts && item.giftInfo != null && item.giftInfo.bIsEnabled && !notEnough ? View.VISIBLE : View.GONE);
+						if (btnGift.getVisibility() == View.VISIBLE) {
+							btnGift.setEnabled(false);
+							btnGift.setText("Gift: Not enough V-Bucks");
+						}
+					} else {
+						btnGift.setEnabled(true);
+						btnGift.setText("Buy As A Gift");
+					}
 				}
 
 				private void doPurchase(final FortCatalogResponse.CatalogEntry item) {

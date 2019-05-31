@@ -49,6 +49,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class FortniteCompanionApp extends Application {
 	public static final String CLIENT_TOKEN_FORTNITE = "basic MzQ0NmNkNzI2OTRjNGE0NDg1ZDgxYjc3YWRiYjIxNDE6OTIwOWQ0YTVlMjVhNDU3ZmI5YjA3NDg5ZDMxM2I0MWE=";
+	// below is from fortnite, this cant be used to log in with password
+//	public static final String CLIENT_TOKEN_FORTNITE = "basic ZWM2ODRiOGM2ODdmNDc5ZmFkZWEzY2IyYWQ4M2Y1YzY6ZTFmMzFjMjExZjI4NDEzMTg2MjYyZDM3YTEzZmM4NGQ=";
 	public static final String ACCOUNT_PUBLIC_SERVICE = "https://account-public-service-prod03.ol.epicgames.com";
 	public static final String AFFILIATE_PUBLIC_SERVICE = "https://affiliate-public-service-prod.ol.epicgames.com";
 	public static final String CATALOG_PUBLIC_SERVICE = "https://catalog-public-service-prod06.ol.epicgames.com";
@@ -158,7 +160,8 @@ public class FortniteCompanionApp extends Application {
 		if (calendarData == null) {
 //			calendarCall = fortnitePublicService.calendarTimeline();
 			// Escape retrofit because it glitched the cache resulting item shop timer not updating right after UTC midnight
-			calendarCall = okHttpClient.newCall(new Request.Builder().url(FortniteCompanionApp.FORTNITE_PUBLIC_SERVICE + "/fortnite/api/calendar/v1/timeline").build());
+			// PLZ OKHTTP ALLOW ME TO REMOVE IF-MODIFIED-SINCE
+			calendarCall = okHttpClient.newCall(new Request.Builder().url(FortniteCompanionApp.FORTNITE_PUBLIC_SERVICE + "/fortnite/api/calendar/v1/timeline").header("if-modified-since", "0").build());
 			new Thread() {
 				@Override
 				public void run() {

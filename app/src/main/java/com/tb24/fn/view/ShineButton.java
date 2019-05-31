@@ -12,16 +12,12 @@ import android.view.animation.LinearInterpolator;
 
 import androidx.appcompat.widget.AppCompatButton;
 
-import com.tb24.fn.util.Utils;
-
 public class ShineButton extends AppCompatButton {
 	private static final long SHINE_DURATION = 500;
 	private static final long SHINE_DELAY_BETWEEN = 1500;
 	private Paint paint;
 	private Path path;
 	private Path path2;
-	private float indentLow;
-	private float indentHigh;
 	private Interpolator interpolator = new LinearInterpolator();
 
 	public ShineButton(Context context) {
@@ -43,8 +39,6 @@ public class ShineButton extends AppCompatButton {
 		paint = new Paint();
 		path = new Path();
 		path2 = new Path();
-		indentLow = Utils.dpF(getResources(), 3.0F);
-		indentHigh = Utils.dpF(getResources(), 6.0F);
 	}
 
 	@Override
@@ -52,16 +46,20 @@ public class ShineButton extends AppCompatButton {
 		super.onDraw(canvas);
 		int width = getWidth();
 		int height = getHeight();
+		float indentXLow = width / 60.0F;
+		float indentXHigh = width / 25.0F;
+		float indentYLow = height / 16.0F;
+		float indentYHigh = height / 8.0F;
 		path.reset();
-		path.moveTo(width - indentLow, indentLow);
-		path.lineTo(indentHigh, indentHigh);
-		path.lineTo(indentLow, height - indentLow);
-		path.lineTo(width - indentHigh, height - indentHigh);
+		path.moveTo(width - indentXLow, indentYLow);
+		path.lineTo(indentXHigh, indentYHigh);
+		path.lineTo(indentXLow, height - indentYLow);
+		path.lineTo(width - indentXHigh, height - indentYHigh);
 		path.close();
 		canvas.save();
 		canvas.clipPath(path, Region.Op.DIFFERENCE);
 		paint.setColor(0x90FFFFFF);
-		canvas.drawRect(0, 0, width, height, paint);
+		canvas.drawPaint(paint);
 		canvas.restore();
 
 		if (!isEnabled() || !isShown()) {
@@ -74,7 +72,7 @@ public class ShineButton extends AppCompatButton {
 			float shineWidth = 0.25F * width;
 			float off = interpolator.getInterpolation((float) a / (float) SHINE_DURATION) * (shineWidth + width);
 			path2.reset();
-			float indentDelta = indentHigh - indentLow;
+			float indentDelta = indentXHigh - indentXLow;
 			path2.moveTo(shineWidth, 0);
 			path2.lineTo(indentDelta, 0);
 			path2.lineTo(0, height);
