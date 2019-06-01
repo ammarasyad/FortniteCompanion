@@ -1,10 +1,13 @@
 # FortniteCompanion
 A mini Fortnite client for Android.\
-Download: [releases page](https://github.com/Amrsatrio/FortniteCompanion/releases)\
-For Android 5.0 Lollipop (API 21) and up.
+**Download:** [releases page](https://github.com/Amrsatrio/FortniteCompanion/releases)\
+**Requirements:**
+* Android 5.0 Lollipop or newer
+* Minimum 2 GB RAM
 
 ## Features
 * View BR profile, account creation date, and other hidden account info
+* Change homebase name for Save the World owners
 * View challenges
 * Replace daily challenges
 * Set party assist quest
@@ -14,6 +17,14 @@ For Android 5.0 Lollipop (API 21) and up.
 * View BR Item Shop and purchase items, full display for unencrypted items
 * Set Support a Creator code (for now invalid codes can be set)
 * Change leaderboard privacy setting
+
+## Screenshots
+<img src="https://raw.github.com/Amrsatrio/FortniteCompanion/master/Screenshots/sc-mainscreen.png" width="200" />
+<img src="https://raw.github.com/Amrsatrio/FortniteCompanion/master/Screenshots/sc-locker.png" width="200" />
+<img src="https://raw.github.com/Amrsatrio/FortniteCompanion/master/Screenshots/sc-challenges.png" width="200" />
+<img src="https://raw.github.com/Amrsatrio/FortniteCompanion/master/Screenshots/sc-fortbyteleaked.png" width="200" />
+<img src="https://raw.github.com/Amrsatrio/FortniteCompanion/master/Screenshots/sc-stats.png" width="200" />
+<img src="https://raw.github.com/Amrsatrio/FortniteCompanion/master/Screenshots/sc-itemshoppurchasedialog.png" width="200" />
 
 ## Permissions used
 * Contacts: to autocomplete the email field in the log in screen
