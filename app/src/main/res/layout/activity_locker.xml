@@ -14,11 +14,14 @@
 		android:clipChildren="false"
 		android:clipToPadding="false"
 		android:gravity="bottom|center_horizontal"
-		android:padding="16dp">
+		android:paddingStart="16dp"
+		android:paddingTop="16dp"
+		android:paddingEnd="16dp"
+		android:paddingBottom="12dp">
 
 		<TextView
 			android:id="@+id/locker_hover_text"
-			style="@style/TextAppearance.BurbankSmall.Black"
+			style="@style/BurbankSmall.Black"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:background="#0044CB"
@@ -26,6 +29,7 @@
 			android:paddingTop="3dp"
 			android:paddingEnd="12dp"
 			android:paddingBottom="2dp"
+			android:singleLine="true"
 			android:textAllCaps="true"
 			android:textColor="#66CCFF"
 			android:textSize="18sp"
@@ -34,7 +38,7 @@
 
 		<TextView
 			android:id="@+id/locker_hover_text_2"
-			style="@style/TextAppearance.BurbankSmall.Black"
+			style="@style/BurbankSmall.Black"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginStart="-4dp"
@@ -43,6 +47,7 @@
 			android:paddingTop="3dp"
 			android:paddingEnd="16dp"
 			android:paddingBottom="6dp"
+			android:singleLine="true"
 			android:textAllCaps="true"
 			android:textColor="?android:textColorPrimary"
 			android:textSize="18sp"

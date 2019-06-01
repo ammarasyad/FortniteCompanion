@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
@@ -24,25 +23,22 @@
 
 		<TextView
 			android:id="@+id/news_entry_title"
+			style="@style/BurbankBigCondensed.Black"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="12dp"
 			android:textAllCaps="true"
 			android:textColor="?android:textColorPrimary"
-			android:textFontWeight="900"
 			android:textSize="26sp"
-			android:textStyle="bold"
-			app:fontFamily="@font/burbank_big_condensed"
 			tools:text="title" />
 
 		<TextView
 			android:id="@+id/news_entry_body"
+			style="@style/BurbankSmall.Bold"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="2dp"
 			android:lineSpacingExtra="2dp"
-			android:textFontWeight="500"
-			app:fontFamily="@font/burbank_small"
 			tools:text="body" />
 	</LinearLayout>
 

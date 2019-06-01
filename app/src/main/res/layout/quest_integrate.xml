@@ -14,7 +14,7 @@
 
 		<TextView
 			android:id="@+id/quest_party_assist"
-			style="@style/TextAppearance.BurbankSmall.Black"
+			style="@style/BurbankSmall.Black"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:drawablePadding="4dp"
@@ -28,7 +28,7 @@
 
 		<TextView
 			android:id="@+id/quest_title"
-			style="@style/TextAppearance.BurbankSmall.Bold"
+			style="@style/BurbankSmall.Bold"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:textColor="#99CCFF"
@@ -52,7 +52,7 @@
 
 		<TextView
 			android:id="@+id/quest_progress_text"
-			style="@style/TextAppearance.BurbankSmall.Bold"
+			style="@style/BurbankSmall.Bold"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginStart="8dp"

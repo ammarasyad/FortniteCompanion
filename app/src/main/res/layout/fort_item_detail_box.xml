@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
@@ -29,6 +28,7 @@
 
 		<com.tb24.fn.view.ForcedMarqueeTextView
 			android:id="@+id/item_text2"
+			style="@style/BurbankBigCondensed.Black"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:ellipsize="marquee"
@@ -37,9 +37,7 @@
 			android:singleLine="true"
 			android:textAllCaps="true"
 			android:textColor="#F0FFFFFF"
-			android:textFontWeight="900"
 			android:textSize="28sp"
-			app:fontFamily="@font/burbank_big_condensed"
 			tools:text="Any legendary emote out there?" />
 	</LinearLayout>
 

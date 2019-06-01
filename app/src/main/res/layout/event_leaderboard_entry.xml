@@ -3,7 +3,6 @@
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
 	android:layout_height="48dp"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
 	android:gravity="center_vertical"
 	android:paddingStart="16dp">
 
@@ -11,7 +10,7 @@
 		android:id="@+id/lb_place"
 		android:layout_width="48dp"
 		android:layout_height="wrap_content"
-		app:fontFamily="@font/burbank_small"
+		style="@style/BurbankSmall.Bold"
 		android:gravity="right"
 		android:singleLine="true"
 		android:textAppearance="?android:textAppearanceListItem"
@@ -34,7 +33,7 @@
 			android:ellipsize="marquee"
 			android:focusable="true"
 			android:focusableInTouchMode="true"
-			app:fontFamily="@font/burbank_small"
+			style="@style/BurbankSmall.Bold"
 			android:marqueeRepeatLimit="marquee_forever"
 			android:singleLine="true"
 			android:textAppearance="?android:textAppearanceListItem"
@@ -45,7 +44,7 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_marginStart="8dp"
-			app:fontFamily="@font/burbank_small"
+			style="@style/BurbankSmall.Bold"
 			android:singleLine="true"
 			android:textAppearance="?android:textAppearanceListItem"
 			tools:text="99" />

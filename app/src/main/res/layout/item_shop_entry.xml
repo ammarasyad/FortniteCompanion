@@ -37,6 +37,7 @@
 
 			<com.tb24.fn.view.ForcedMarqueeTextView
 				android:id="@+id/item_text1"
+				style="@style/BurbankBigCondensed.Black"
 				android:layout_width="match_parent"
 				android:layout_height="wrap_content"
 				android:layout_marginBottom="-2dp"
@@ -48,9 +49,7 @@
 				android:textAllCaps="true"
 				android:textAppearance="?android:textAppearanceListItem"
 				android:textColor="#FFFFFF"
-				android:textFontWeight="900"
 				android:textSize="24sp"
-				app:fontFamily="@font/burbank_big_condensed"
 				tools:text="Item Name" />
 
 			<TextView

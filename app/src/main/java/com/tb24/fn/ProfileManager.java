@@ -103,8 +103,10 @@ public class ProfileManager {
 				}
 			}
 
-			if (hasProfileData(response.profileId)) {
+			if ((response.profileChanges.length > 0 || response.profileRevision > response.profileChangesBaseRevision) && hasProfileData(response.profileId)) {
 				app.eventBus.post(new ProfileUpdatedEvent(response.profileId, getProfileData(response.profileId)));
+			} else {
+				Log.i(TAG, "No changes for Profile ID " + response.profileId + " revision " + response.profileRevision);
 			}
 		}
 

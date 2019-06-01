@@ -17,17 +17,16 @@
 
 		<TextView
 			android:id="@+id/item_shop_purchased_text"
+			style="@style/BurbankBigCondensed.Black"
 			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
+			android:layout_height="36sp"
 			android:shadowColor="#80FFFFFF"
 			android:shadowRadius="15.0"
 			android:singleLine="true"
 			android:text="Successfully Purchased"
 			android:textAllCaps="true"
 			android:textColor="#FFFFFF"
-			android:textFontWeight="900"
-			android:textSize="36sp"
-			app:fontFamily="@font/burbank_big_condensed" />
+			app:autoSizeTextType="uniform" />
 
 		<ImageView
 			android:id="@+id/item_shop_purchased_check"
@@ -40,6 +39,7 @@
 
 	<TextView
 		android:id="@+id/item_shop_purchased_item_title"
+		style="@style/BurbankBigCondensed.Black"
 		android:layout_width="match_parent"
 		android:layout_height="52sp"
 		android:gravity="center"
@@ -47,9 +47,7 @@
 		android:shadowRadius="15.0"
 		android:textAllCaps="true"
 		android:textColor="#FFFFFF"
-		android:textFontWeight="900"
 		app:autoSizeTextType="uniform"
-		app:fontFamily="@font/burbank_big_condensed"
 		tools:text="Renegade Raider" />
 
 	<include

@@ -14,6 +14,40 @@
 		<item name="actionBarTheme">@style/ThemeOverlay.ActionBar</item>
 	</style>
 
+	<style name="BurbankSmall">
+		<item name="fontFamily">@font/burbank_small</item>
+	</style>
+
+	<style name="BurbankSmall.Bold" parent="BurbankSmall">
+		<item name="android:textStyle">bold</item>
+	</style>
+
+	<style name="BurbankSmall.Black" parent="BurbankSmall">
+		<item name="android:textFontWeight">900</item>
+	</style>
+
+	<style name="BurbankBigRegular">
+		<item name="fontFamily">@font/burbank_big_regular</item>
+	</style>
+
+	<style name="BurbankBigRegular.Bold" parent="BurbankBigRegular">
+		<item name="android:textStyle">bold</item>
+	</style>
+
+	<style name="BurbankBigRegular.Black" parent="BurbankBigRegular">
+		<item name="android:textFontWeight">900</item>
+	</style>
+
+	<style name="BurbankBigCondensed">
+		<item name="fontFamily">@font/burbank_big_condensed</item>
+	</style>
+
+	<style name="BurbankBigCondensed.Bold" parent="BurbankBigCondensed" />
+
+	<style name="BurbankBigCondensed.Black" parent="BurbankBigCondensed">
+		<item name="android:textFontWeight">900</item>
+	</style>
+
 	<style name="TextAppearance.Widget.Button" parent="TextAppearance.AppCompat.Widget.Button">
 		<item name="fontFamily">@font/noto_sans</item>
 		<item name="android:textStyle">bold</item>
@@ -40,57 +74,38 @@
 		<item name="fontFamily">@font/noto_sans</item>
 	</style>
 
-	<style name="TextAppearance" />
-
-	<style name="TextAppearance.BurbankSmall" parent="TextAppearance">
-		<item name="fontFamily">@font/burbank_small</item>
-	</style>
-
-	<style name="TextAppearance.BurbankSmall.Bold" parent="TextAppearance.BurbankSmall">
-		<item name="android:textStyle">bold</item>
-	</style>
-
-	<style name="TextAppearance.BurbankSmall.Black" parent="TextAppearance.BurbankSmall">
-		<item name="android:textFontWeight">900</item>
-	</style>
-
 	<style name="TextAppearance.Switch" parent="TextAppearance.AppCompat.Title" />
 
-	<style name="BannerStyle">
+	<style name="BannerStyle" parent="BurbankBigCondensed.Black">
+		<item name="android:singleLine">true</item>
 		<item name="android:background">#F76070</item>
-		<item name="fontFamily">@font/burbank_big_condensed</item>
 		<item name="android:paddingLeft">8dp</item>
 		<item name="android:paddingTop">2dp</item>
 		<item name="android:paddingRight">8dp</item>
 		<item name="android:paddingBottom">2dp</item>
 		<item name="android:textAllCaps">true</item>
 		<item name="android:textColor">#FFFFFFFF</item>
-		<item name="android:textFontWeight">900</item>
 		<item name="android:textSize">18sp</item>
 		<item name="android:textStyle">bold</item>
 	</style>
 
-	<style name="btn_primary_m_yellow">
+	<style name="btn_primary_m_yellow" parent="BurbankBigCondensed.Black">
 		<item name="android:background">@drawable/btn_primary_shiny</item>
-		<item name="fontFamily">@font/burbank_big_condensed</item>
 		<item name="android:paddingStart">12dp</item>
 		<item name="android:paddingEnd">12dp</item>
 		<item name="android:textColor">#1C2238</item>
-		<item name="android:textFontWeight">900</item>
 		<item name="android:textSize">28sp</item>
 	</style>
 
-	<style name="btn_primary_m_normal">
+	<style name="btn_primary_m_normal" parent="BurbankBigCondensed.Black">
 		<item name="android:background">@drawable/btn_primary</item>
-		<item name="fontFamily">@font/burbank_big_condensed</item>
 		<item name="android:paddingStart">12dp</item>
 		<item name="android:paddingEnd">12dp</item>
 		<item name="android:textColor">#1C2238</item>
-		<item name="android:textFontWeight">900</item>
 		<item name="android:textSize">28sp</item>
 	</style>
 
-	<style name="ButtonPartyAssist" parent="@style/TextAppearance.BurbankSmall.Black">
+	<style name="ButtonPartyAssist" parent="@style/BurbankSmall.Black">
 		<item name="android:textColor">@color/btn_party_assist</item>
 		<item name="android:background">@drawable/btn_party_assist_bg</item>
 		<item name="android:paddingEnd">12dp</item>

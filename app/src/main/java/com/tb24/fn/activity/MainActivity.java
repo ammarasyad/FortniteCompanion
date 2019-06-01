@@ -157,7 +157,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 					@Override
 					public void run() {
 						try {
-							Thread.sleep(100);
+							Thread.sleep(100L);
 							runOnUiThread(new Runnable() {
 								@Override
 								public void run() {
@@ -394,7 +394,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 				startActivity(new Intent(this, LockerActivity.class));
 				break;
 			case R.id.main_screen_btn_item_shop:
-				startActivityForResult(new Intent(this, ItemShopActivity.class), UPDATE_IF_OK_REQ_CODE);
+				startActivity(new Intent(this, ItemShopActivity.class));
 				break;
 			case R.id.main_screen_btn_news:
 				Intent intent = new Intent(this, NewsActivity.class);

@@ -1,85 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:orientation="vertical"
-	android:padding="16dp">
-
-	<TextView
-		android:id="@+id/event_is_started"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:textAllCaps="true"
-		android:textColor="?android:textColorPrimary"
-		android:textSize="24sp"
-		android:textStyle="bold|italic"
-		app:fontFamily="@font/burbank_small"
-		tools:text="This event has ended." />
-
-	<TextView
-		android:id="@+id/event_details_description"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="16dp"
-		android:letterSpacing="-0.025"
-		android:lineSpacingExtra="3dp"
-		android:textColor="?android:textColorPrimary"
-		android:textStyle="bold"
-		app:fontFamily="@font/burbank_small"
-		tools:text="event_details_description. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna. Nunc viverra imperdiet enim. Fusce est. Vivamus a tellus." />
-
-	<TextView
-		android:id="@+id/event_flavor_description"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="8dp"
-		android:lineSpacingExtra="3dp"
-		android:textStyle="bold"
-		app:fontFamily="@font/burbank_small"
-		tools:text="event_flavor_description. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin pharetra nonummy pede. Mauris et orci. Aenean nec lorem." />
-
-	<!--textcolor = titletextcolor-->
-	<TextView
-		android:id="@+id/event_dates_title"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="16dp"
-		android:text="Event Dates"
-		android:textAllCaps="true"
-		android:textColor="?android:textColorPrimary"
-		android:textFontWeight="900"
-		android:textSize="18sp"
-		app:fontFamily="@font/burbank_small" />
+	android:layout_height="match_parent">
 
 	<LinearLayout
-		android:id="@+id/event_dates"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="16dp"
-		android:gravity="center_horizontal"
-		android:orientation="vertical" />
+		android:layout_height="match_parent"
+		android:orientation="vertical"
+		android:padding="16dp">
 
-	<TextView
-		android:id="@+id/event_short_format_title"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:layout_marginTop="16dp"
-		android:textColor="?android:textColorPrimary"
-		android:textFontWeight="900"
-		android:textSize="18sp"
-		app:fontFamily="@font/burbank_small"
-		tools:text="event_short_format_title" />
-
-	<HorizontalScrollView
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content">
-
-		<LinearLayout
-			android:id="@+id/event_sessions"
+		<TextView
+			android:id="@+id/event_is_started"
+			style="@style/BurbankSmall.Bold"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
-			android:orientation="horizontal" />
-	</HorizontalScrollView>
-</LinearLayout>
+			android:textAllCaps="true"
+			android:textColor="?android:textColorPrimary"
+			android:textSize="24sp"
+			android:textStyle="italic"
+			tools:text="This event has ended." />
+
+		<TextView
+			android:id="@+id/event_details_description"
+			style="@style/BurbankBigRegular.Bold"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:lineSpacingExtra="3dp"
+			android:textColor="?android:textColorPrimary"
+			tools:text="event_details_description. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas porttitor congue massa. Fusce posuere, magna sed pulvinar ultricies, purus lectus malesuada libero, sit amet commodo magna eros quis urna. Nunc viverra imperdiet enim. Fusce est. Vivamus a tellus." />
+
+		<TextView
+			android:id="@+id/event_flavor_description"
+			style="@style/BurbankSmall.Bold"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="8dp"
+			android:lineSpacingExtra="3dp"
+			tools:text="event_flavor_description. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin pharetra nonummy pede. Mauris et orci. Aenean nec lorem." />
+
+		<!--textcolor = titletextcolor-->
+		<TextView
+			android:id="@+id/event_dates_title"
+			style="@style/BurbankSmall.Black"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:text="Event Dates"
+			android:textAllCaps="true"
+			android:textColor="?android:textColorPrimary"
+			android:textSize="18sp" />
+
+		<LinearLayout
+			android:id="@+id/event_dates"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:gravity="center_horizontal"
+			android:orientation="vertical" />
+
+		<TextView
+			android:id="@+id/event_short_format_title"
+			style="@style/BurbankSmall.Black"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="16dp"
+			android:textColor="?android:textColorPrimary"
+			android:textSize="18sp"
+			tools:text="event_short_format_title" />
+
+		<HorizontalScrollView
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+
+			<LinearLayout
+				android:id="@+id/event_sessions"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:orientation="horizontal" />
+		</HorizontalScrollView>
+	</LinearLayout>
+</ScrollView>

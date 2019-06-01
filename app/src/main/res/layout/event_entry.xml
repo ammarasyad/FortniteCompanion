@@ -30,42 +30,39 @@
 
 		<TextView
 			android:id="@+id/item_text1"
+			style="@style/BurbankSmall.Black"
 			android:layout_width="match_parent"
 			android:layout_height="28dp"
 			android:gravity="center"
 			android:textAllCaps="true"
 			android:textColor="#FFFFFFFF"
-			android:textFontWeight="900"
 			android:textStyle="italic"
 			app:autoSizeTextType="uniform"
-			app:fontFamily="@font/burbank_small"
 			tools:text="Title" />
 
 		<TextView
 			android:id="@+id/item_text2"
+			style="@style/BurbankSmall.Black"
 			android:layout_width="match_parent"
 			android:layout_height="28dp"
 			android:gravity="center"
 			android:textAllCaps="true"
 			android:textColor="#FFFFFFFF"
-			android:textFontWeight="900"
 			android:textStyle="italic"
 			app:autoSizeTextType="uniform"
-			app:fontFamily="@font/burbank_small"
 			tools:text="Line2" />
 
 		<TextView
 			android:id="@+id/item_text3"
+			style="@style/BurbankSmall.Black"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:gravity="center"
 			android:singleLine="true"
 			android:textAllCaps="true"
 			android:textColor="#FFFFFFFF"
-			android:textFontWeight="900"
 			android:textSize="12sp"
 			app:autoSizeTextType="uniform"
-			app:fontFamily="@font/burbank_small"
 			tools:text="Line3" />
 	</LinearLayout>
 </RelativeLayout>

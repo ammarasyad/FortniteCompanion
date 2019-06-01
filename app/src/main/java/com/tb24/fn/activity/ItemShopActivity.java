@@ -765,7 +765,7 @@ public class ItemShopActivity extends BaseActivity {
 							try {
 								if (activity.fakePurchases) {
 									// fake it
-									Thread.sleep(2000);
+									Thread.sleep(2000L);
 									activity.getThisApplication().profileManager.executeProfileChanges(activity.getThisApplication().gson.fromJson("{\"multiUpdate\":[{\"profileRevision\":-1,\"profileId\":\"athena\",\"profileChangesBaseRevision\":7043,\"profileChanges\":[{\"changeType\":\"itemAdded\",\"itemId\":\"" + UUID.randomUUID() + "\",\"item\":{\"templateId\":\"" + item.itemGrants[0].templateId + "\",\"attributes\":{\"max_level_bonus\":0,\"level\":1,\"item_seen\":false,\"xp\":0,\"variants\":[],\"favorite\":false,\"DUMMY\":true},\"quantity\":1}}],\"profileCommandRevision\":6412}]}", FortMcpResponse.class));
 									purchaseSuccess();
 								} else {
