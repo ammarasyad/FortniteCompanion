@@ -304,7 +304,7 @@ public class SettingsActivity extends BaseActivity {
 						return true;
 					}
 
-					checkForUpdatesCall = new OkHttpClient().newCall(new Request.Builder().url("https://api.github.com/repos/Amrsatrio/FortniteCompanion/releases/17689462").build());
+					checkForUpdatesCall = new OkHttpClient().newCall(new Request.Builder().url("https://api.github.com/repos/Amrsatrio/FortniteCompanion/releases/latest").build());
 					new Thread("Check for Updates Worker") {
 						@Override
 						public void run() {
@@ -317,7 +317,7 @@ public class SettingsActivity extends BaseActivity {
 									PackageInfo packageInfo = Utils.getPackageInfo(getApplication_());
 
 									if (packageInfo.versionName.equals(JsonUtils.getStringOr("name", object, ""))) {
-										Utils.dialogOkNonMain(getActivity(), null, "Up to date!");
+										Utils.dialogOkNonMain(getActivity(), null, String.format("%s is up to date", getString(R.string.app_name)));
 									} else {
 										if (getActivity() != null) {
 											getActivity().runOnUiThread(new Runnable() {
@@ -327,14 +327,24 @@ public class SettingsActivity extends BaseActivity {
 													new AlertDialog.Builder(getActivity())
 															.setTitle("A new version is available")
 															.setMessage(s)
-															.setPositiveButton(android.R.string.ok, null)
-															.setNeutralButton("Update", new DialogInterface.OnClickListener() {
+//															.setNeutralButton("Remind Me Later", null)
+															.setNegativeButton("Ignore", null)
+															.setPositiveButton("Download", new DialogInterface.OnClickListener() {
 																@Override
 																public void onClick(DialogInterface dialog, int which) {
-																	startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(JsonUtils.getStringOr("html_url", object, ""))));
+																	String dlUrl = JsonUtils.getStringOr("html_url", object, "");
+
+																	if (object.has("assets") && object.get("assets").getAsJsonArray().size() > 0) {
+																		JsonObject firstFileObj = object.get("assets").getAsJsonArray().get(0).getAsJsonObject();
+
+																		if (JsonUtils.getStringOr("content_type", firstFileObj, "").equals("application/vnd.android.package-archive")) {
+																			dlUrl = JsonUtils.getStringOr("browser_download_url", firstFileObj, dlUrl);
+																		}
+																	}
+
+																	startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(dlUrl)));
 																}
-															})
-															.show();
+															}).show();
 												}
 											});
 										}

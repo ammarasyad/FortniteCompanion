@@ -34,6 +34,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.Px;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.core.widget.TextViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -354,11 +355,14 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 	private void addRow(String k, String v, TableLayout table) {
 		TableRow row = new TableRow(this);
 		row.setGravity(Gravity.CENTER_VERTICAL);
-		TextView one = new TextView(this), two = new TextView(this);
+		TextView one = new AppCompatTextView(this);
+		TextView two = new AppCompatTextView(this);
 		TextViewCompat.setTextAppearance(one, R.style.BurbankSmall_Bold);
 		TextViewCompat.setTextAppearance(two, R.style.BurbankSmall_Black);
 		two.setGravity(Gravity.CENTER_HORIZONTAL);
 		two.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24);
+		one.setTextColor(Utils.getTextColorPrimary(this));
+		two.setTextColor(Utils.getTextColorPrimary(this));
 		one.setText(k);
 		two.setText(v);
 		row.addView(one);

@@ -8,30 +8,59 @@
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
+		android:clipToPadding="false"
 		android:orientation="vertical"
 		android:padding="16dp">
 
-		<TextView
-			android:id="@+id/profile_name"
-			style="@style/BurbankSmall.Black"
+		<LinearLayout
+			android:id="@+id/profile_btn_manage_account"
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:textAppearance="@android:style/TextAppearance.Material.Title"
-			tools:text="First Last" />
+			android:layout_height="80dp"
+			android:layout_marginStart="-16dp"
+			android:layout_marginEnd="-16dp"
+			android:layout_marginBottom="12dp"
+			android:background="@drawable/ripple_over_color_primary"
+			android:gravity="center_vertical"
+			android:paddingStart="16dp"
+			android:paddingEnd="16dp">
 
-		<TextView
-			android:id="@+id/profile_email"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:textIsSelectable="true"
-			tools:text="yourname@example.com" />
+			<ImageView
+				android:id="@+id/p_banner"
+				android:layout_width="64dp"
+				android:layout_height="64dp"
+				android:layout_marginEnd="12dp"
+				android:contentDescription="Banner" />
 
-		<TextView
-			android:id="@+id/profile_account_id"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:textIsSelectable="true"
-			tools:text="account id" />
+			<LinearLayout
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_weight="1"
+				android:orientation="vertical">
+
+				<TextView
+					android:id="@+id/profile_name"
+					style="@style/BurbankSmall.Black"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					android:textColor="?android:textColorPrimary"
+					android:textSize="22sp"
+					tools:text="First Last" />
+
+				<TextView
+					android:id="@+id/profile_email"
+					android:layout_width="match_parent"
+					android:layout_height="wrap_content"
+					tools:text="yourname@example.com" />
+			</LinearLayout>
+
+			<ImageView
+				android:layout_width="24dp"
+				android:layout_height="24dp"
+				android:layout_marginStart="12dp"
+				android:contentDescription="Next"
+				android:src="@drawable/ic_navigate_next_black_24dp"
+				android:tint="?android:textColorSecondary" />
+		</LinearLayout>
 
 		<LinearLayout
 			android:layout_width="wrap_content"
@@ -227,6 +256,25 @@
 				tools:text="XX" />
 		</LinearLayout>
 
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content">
+
+			<TextView
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="Homebase name" />
+
+			<TextView
+				android:id="@+id/profile_homebase_name"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_marginStart="8dp"
+				android:textAppearance="?android:textAppearanceListItem"
+				android:textStyle="bold"
+				tools:text="XX" />
+		</LinearLayout>
+
 		<TextView
 			style="@style/BurbankSmall.Bold"
 			android:layout_width="match_parent"
@@ -323,6 +371,15 @@
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:text="No data" />
-	</LinearLayout>
 
+		<TextView
+			android:id="@+id/profile_account_id"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_marginTop="12dp"
+			android:gravity="center_horizontal"
+			android:textIsSelectable="true"
+			android:textSize="10dp"
+			tools:text="account id" />
+	</LinearLayout>
 </ScrollView>

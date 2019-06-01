@@ -178,7 +178,7 @@ public final class Utils {
 			@Override
 			public void onShow(DialogInterface dialog) {
 				final Button button = ad.getButton(DialogInterface.BUTTON_POSITIVE);
-				button.setEnabled(editText.getText().length() != 0);
+				button.setEnabled(editText.toString().trim().length() != 0);
 				editText.addTextChangedListener(new TextWatcher() {
 					@Override
 					public void beforeTextChanged(CharSequence s, int start, int count, int after) {

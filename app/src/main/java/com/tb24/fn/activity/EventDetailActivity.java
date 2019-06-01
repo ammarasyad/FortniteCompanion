@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.widget.AppCompatButton;
+
 import com.google.gson.JsonObject;
 import com.tb24.fn.R;
 import com.tb24.fn.model.EventDownloadResponse;
@@ -100,7 +102,7 @@ public class EventDetailActivity extends BaseActivity {
 		ViewGroup session = findViewById(R.id.event_sessions);
 
 		for (final EventDownloadResponse.EventWindow window : thisEventData.eventWindows) {
-			Button btn = new Button(this);
+			Button btn = new AppCompatButton(this);
 			btn.setGravity(Gravity.END);
 			final boolean windowStarted = new Date().after(window.beginTime);
 			final boolean windowEnded = new Date().after(window.endTime);
