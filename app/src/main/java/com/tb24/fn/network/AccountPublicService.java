@@ -29,13 +29,13 @@ public interface AccountPublicService {
 	 */
 	@FormUrlEncoded
 	@POST("/account/api/oauth/token")
-	Call<LoginResponse> oauthToken(@Header("Authorization") String auth, @Field("grant_type") String grantType, @FieldMap Map<String, String> fields, @Field("includePerms") boolean includePerms);
+	Call<LoginResponse> oauthToken(@Header("Authorization") String auth, @Field("grant_type") String grantType, @FieldMap Map<String, String> fields, @Field("includePerms") Boolean includePerms);
 
 	@GET("/account/api/oauth/exchange")
 	Call<ExchangeResponse> oauthExchange();
 
 	@GET("/account/api/oauth/verify")
-	Call<VerifyResponse> oauthVerify(@Query("includePerms") boolean includePerms);
+	Call<VerifyResponse> oauthVerify(@Query("includePerms") Boolean includePerms);
 
 	@DELETE("/account/api/oauth/sessions/kill/{accessToken}")
 	Call<Void> oauthSessionsKillAccessToken(@Path("accessToken") String accessToken);

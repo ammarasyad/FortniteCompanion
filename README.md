@@ -39,6 +39,7 @@ Pull requests to add these features are welcome.
 * View friends, their activity, and whispering them via Epic Chat
 * [STW info in user friendly view](https://www.stormshield.one/save-the-world) (to see if there’s a 25-30 V-Bucks mission without opening big screen Fortnite)
 * __Manually__ collect STW research points and daily rewards (Manually because if it’s automatic it breaks the purpose of the word "Daily" and I have no purpose to cheat the game using this app)
+* Play Store variant of this app without V-Bucks purchasing link
 
 ## Credits
 * [@cryotus](https://www.instagram.com/cryotus/): for the app name and icon

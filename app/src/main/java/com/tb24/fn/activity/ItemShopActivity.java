@@ -284,9 +284,9 @@ public class ItemShopActivity extends BaseActivity {
 		if (event.profileId.equals("common_core")) {
 			updateVbucks();
 
-			if (currentlyShowingItemDialog != null) {
-				// TODO update sac code and/or even owned status in dialogs
-			}
+//			if (currentlyShowingItemDialog != null) {
+			// TODO update sac code and/or even owned status in dialogs
+//			}
 		} else if (event.profileId.equals("athena")) {
 			if (adapter != null) {
 				adapter.notifyDataSetChanged();
@@ -639,7 +639,6 @@ public class ItemShopActivity extends BaseActivity {
 									}
 								}
 							});
-
 							LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams((int) Utils.dp(activity.getResources(), 66), (int) Utils.dp(activity.getResources(), 110));
 							int m = (int) Utils.dp(activity.getResources(), 4);
 							lp.setMargins(m, m, m, m);
@@ -682,6 +681,9 @@ public class ItemShopActivity extends BaseActivity {
 							} else if (v == btnGift) {
 								// TODO gifting: firstly you have to add friends endpoint
 								Toast.makeText(activity, "Gifting not available yet", Toast.LENGTH_SHORT).show();
+								Intent intent = new Intent(activity, GiftActivity.class);
+								intent.putExtra("a", activity.getThisApplication().gson.toJson(item));
+								activity.startActivity(intent);
 							}
 						}
 					};
@@ -747,10 +749,10 @@ public class ItemShopActivity extends BaseActivity {
 
 				private void doPurchase(final FortCatalogResponse.CatalogEntry item) {
 					PurchaseCatalogEntry payload = new PurchaseCatalogEntry();
+					payload.offerId = item.offerId;
 					payload.currency = item.prices[0].currencyType;
 					payload.currencySubType = item.prices[0].currencySubType;
 					payload.expectedPrice = item.prices[0].basePrice;
-					payload.offerId = item.offerId;
 					final Call<FortMcpResponse> call = activity.getThisApplication().fortnitePublicService.mcp(
 							"PurchaseCatalogEntry",
 							PreferenceManager.getDefaultSharedPreferences(activity).getString("epic_account_id", ""),

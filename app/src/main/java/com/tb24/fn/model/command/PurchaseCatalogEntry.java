@@ -8,8 +8,10 @@ import com.tb24.fn.model.ECurrencyType;
  * Profile ID: common_core
  */
 public class PurchaseCatalogEntry {
+	public String offerId;
+	public Integer purchaseQuantity;
 	public ECurrencyType currency;
 	public String currencySubType;
 	public Integer expectedPrice;
-	public String offerId;
+	public String gameContext = "";
 }

@@ -3,6 +3,7 @@ package com.tb24.fn;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.tb24.fn.event.ProfileQueryFailedEvent;
 import com.tb24.fn.event.ProfileUpdatedEvent;
@@ -69,7 +70,7 @@ public class ProfileManager {
 										itemQuantityToChange.attributes = new JsonObject();
 									}
 
-									itemQuantityToChange.quantity = JsonUtils.getIntOr("quantity", profileChangeEntryObj, -1);
+									itemQuantityToChange.quantity = JsonUtils.getIntOr("quantity", profileChangeEntryObj, itemQuantityToChange.quantity);
 								} else {
 									Log.w(TAG, "itemQuantityChanged: Item ID " + JsonUtils.getStringOr("itemId", profileChangeEntryObj, null) + " not found");
 								}
@@ -83,7 +84,16 @@ public class ProfileManager {
 										itemAttrToChange.attributes = new JsonObject();
 									}
 
-									itemAttrToChange.attributes.add(JsonUtils.getStringOr("attributeName", profileChangeEntryObj, null), profileChangeEntryObj.get("attributeValue"));
+									String attributeName = JsonUtils.getStringOr("attributeName", profileChangeEntryObj, null);
+									JsonElement attributeValue = profileChangeEntryObj.get("attributeValue");
+
+									if (attributeName != null) {
+										if (attributeValue != null) {
+											itemAttrToChange.attributes.add(attributeName, attributeValue);
+										} else {
+											itemAttrToChange.attributes.remove(attributeName);
+										}
+									}
 								} else {
 									Log.w(TAG, "itemAttrChanged: Item ID " + JsonUtils.getStringOr("itemId", profileChangeEntryObj, null) + " not found");
 								}

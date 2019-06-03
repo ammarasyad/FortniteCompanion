@@ -28,6 +28,7 @@ import com.tb24.fn.network.DefaultInterceptor;
 import com.tb24.fn.network.EventsPublicServiceLive;
 import com.tb24.fn.network.FortniteContentWebsiteService;
 import com.tb24.fn.network.FortnitePublicService;
+import com.tb24.fn.network.FriendsPublicService;
 import com.tb24.fn.network.PersonaPublicService;
 import com.tb24.fn.util.ERegion;
 import com.tb24.fn.util.ItemUtils;
@@ -57,6 +58,7 @@ public class FortniteCompanionApp extends Application {
 	public static final String EVENTS_PUBLIC_SERVICE = "https://events-public-service-live.ol.epicgames.com";
 	public static final String FORTNITECONTENT_WEBSITE = "https://fortnitecontent-website-prod07.ol.epicgames.com";
 	public static final String FORTNITE_PUBLIC_SERVICE = "https://fortnite-public-service-prod11.ol.epicgames.com";
+	public static final String FRIENDS_PUBLIC_SERVICE = "https://friends-public-service-prod.ol.epicgames.com";
 	public static final String LIGHTSWITCH_PUBLIC_SERVICE = "https://lightswitch-public-service-prod.ol.epicgames.com";
 	public static final String PERSONA_PUBLIC_SERVICE = "https://persona-public-service-prod06.ol.epicgames.com";
 	public static final String PRICEENGINE_PUBLIC_SERVICE_ECOMPROD = "https://priceengine-public-service-ecomprod01.ol.epicgames.com";
@@ -64,10 +66,10 @@ public class FortniteCompanionApp extends Application {
 	public static final int MIN_DP_FOR_TWOCOLUMN = 600;
 	public final Gson gson = new GsonBuilder().registerTypeAdapter(FortMcpProfile.class, new FortMcpProfile.Serializer()).create();
 	public final EventBus eventBus = new EventBus();
-	public final LruCache<String, Bitmap> bitmapCache = new LruCache<String, Bitmap>(16 * 1024 * 1024) {
+	public final LruCache<String, Bitmap> bitmapCache = new LruCache<String, Bitmap>((int) (Runtime.getRuntime().maxMemory() / 1024) / 8) {
 		@Override
 		protected int sizeOf(String key, Bitmap value) {
-			return value.getByteCount();
+			return value.getByteCount() / 1024;
 		}
 	};
 	public static RarityData[] sRarityData;
@@ -78,6 +80,7 @@ public class FortniteCompanionApp extends Application {
 	public EventsPublicServiceLive eventsPublicServiceLive;
 	public FortniteContentWebsiteService fortniteContentWebsiteService;
 	public FortnitePublicService fortnitePublicService;
+	public FriendsPublicService friendsPublicService;
 	public PersonaPublicService personaPublicService;
 	public FortBasicDataResponse basicData;
 	public EventDownloadResponse eventData;
@@ -105,6 +108,7 @@ public class FortniteCompanionApp extends Application {
 		eventsPublicServiceLive = retrofitBuilder.baseUrl(EVENTS_PUBLIC_SERVICE).build().create(EventsPublicServiceLive.class);
 		fortniteContentWebsiteService = retrofitBuilder.baseUrl(FORTNITECONTENT_WEBSITE).build().create(FortniteContentWebsiteService.class);
 		fortnitePublicService = retrofitBuilder.baseUrl(FORTNITE_PUBLIC_SERVICE).build().create(FortnitePublicService.class);
+		friendsPublicService = retrofitBuilder.baseUrl(FRIENDS_PUBLIC_SERVICE).build().create(FriendsPublicService.class);
 		personaPublicService = retrofitBuilder.baseUrl(PERSONA_PUBLIC_SERVICE).build().create(PersonaPublicService.class);
 		itemRegistry = new Registry(this);
 		FortItemStack.sRegistry = itemRegistry;

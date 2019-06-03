@@ -25,5 +25,5 @@ public interface EventsPublicServiceLive {
 
 	// /api/v1/leaderboards/Fortnite/epicgames_OnlineOpen_Week2_ASIA/OnlineOpen_Week2_ASIA_Event2/bd7021824e39499d8be7936cf1e1189d?page=0&rank=0&teamAccountIds=&appId=Fortnite&showLiveSessions=false
 	@GET("/api/v1/leaderboards/Fortnite/{eventId}/{eventWindowId}/{accountId}")
-	Call<LeaderboardsResponse> leaderboards(@Path("eventId") String eventId, @Path("eventWindowId") String eventWindowId, @Path("accountId") String accountId, @Query("page") int page, @Query("rank") int rank, @Query("teamAccountIds") String teamAccountIds, @Query("appId") String appId, @Query("showLiveSessions") boolean showLiveSessions);
+	Call<LeaderboardsResponse> leaderboards(@Path("eventId") String eventId, @Path("eventWindowId") String eventWindowId, @Path("accountId") String accountId, @Query("page") Integer page, @Query("rank") Integer rank, @Query("teamAccountIds") String teamAccountIds, @Query("appId") String appId, @Query("showLiveSessions") Boolean showLiveSessions);
 }
