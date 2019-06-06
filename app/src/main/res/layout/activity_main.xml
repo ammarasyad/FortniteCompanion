@@ -62,7 +62,7 @@
 				<Button
 					android:id="@+id/main_screen_btn_profile"
 					android:layout_width="0dp"
-					android:layout_height="100dp"
+					android:layout_height="@dimen/main_screen_btn_height"
 					android:enabled="false"
 					android:text="@string/title_profile"
 					app:layout_columnWeight="1" />
@@ -70,35 +70,35 @@
 				<Button
 					android:id="@+id/main_screen_btn_challenges"
 					android:layout_width="0dp"
-					android:layout_height="100dp"
+					android:layout_height="@dimen/main_screen_btn_height"
 					android:text="@string/title_challenges"
 					app:layout_columnWeight="1" />
 
 				<Button
 					android:id="@+id/main_screen_btn_events"
 					android:layout_width="0dp"
-					android:layout_height="100dp"
+					android:layout_height="@dimen/main_screen_btn_height"
 					android:text="@string/title_events"
 					app:layout_columnWeight="1" />
 
 				<Button
 					android:id="@+id/main_screen_btn_stats"
 					android:layout_width="0dp"
-					android:layout_height="100dp"
+					android:layout_height="@dimen/main_screen_btn_height"
 					android:text="@string/title_stats"
 					app:layout_columnWeight="1" />
 
 				<Button
 					android:id="@+id/main_screen_btn_locker"
 					android:layout_width="0dp"
-					android:layout_height="100dp"
+					android:layout_height="@dimen/main_screen_btn_height"
 					android:text="@string/title_locker"
 					app:layout_columnWeight="1" />
 
 				<Button
 					android:id="@+id/main_screen_btn_item_shop"
 					android:layout_width="0dp"
-					android:layout_height="100dp"
+					android:layout_height="@dimen/main_screen_btn_height"
 					android:enabled="false"
 					android:text="@string/title_item_shop"
 					app:layout_columnWeight="1" />
@@ -106,15 +106,15 @@
 				<Button
 					android:id="@+id/main_screen_btn_news"
 					android:layout_width="0dp"
-					android:layout_height="100dp"
+					android:layout_height="@dimen/main_screen_btn_height"
 					android:text="@string/title_news"
 					app:layout_columnWeight="1" />
 
 				<Button
 					android:id="@+id/main_screen_btn_stw"
 					android:layout_width="0dp"
-					android:layout_height="100dp"
-					android:text="@string/title_stw_info"
+					android:layout_height="@dimen/main_screen_btn_height"
+					android:text="@string/title_stw"
 					app:layout_columnWeight="1" />
 			</androidx.gridlayout.widget.GridLayout>
 

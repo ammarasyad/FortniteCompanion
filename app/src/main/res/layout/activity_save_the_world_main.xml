@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:orientation="vertical"
+	tools:context=".activity.SaveTheWorldMainActivity">
+
+	<androidx.gridlayout.widget.GridLayout
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		app:columnCount="2">
+
+		<Button
+			android:id="@+id/stw_main_btn_daily_rewards"
+			android:layout_width="0dp"
+			android:layout_height="@dimen/main_screen_btn_height"
+			android:text="@string/title_daily_rewards"
+			app:layout_columnWeight="1" />
+
+		<Button
+			android:id="@+id/stw_main_btn_missions_info"
+			android:layout_width="0dp"
+			android:layout_height="@dimen/main_screen_btn_height"
+			android:text="@string/title_stw_info"
+			app:layout_columnWeight="1" />
+
+		<Button
+			android:id="@+id/stw_main_btn_research"
+			android:layout_width="0dp"
+			android:layout_height="@dimen/main_screen_btn_height"
+			android:text="@string/title_research"
+			app:layout_columnWeight="1" />
+
+		<Button
+			android:id="@+id/main_screen_btn_news"
+			android:layout_width="0dp"
+			android:layout_height="@dimen/main_screen_btn_height"
+			android:text="@string/title_news"
+			app:layout_columnWeight="1" />
+	</androidx.gridlayout.widget.GridLayout>
+</LinearLayout>

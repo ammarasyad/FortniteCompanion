@@ -59,6 +59,9 @@
 			android:name=".activity.StoreActivity"
 			android:label="@string/title_store" />
 		<activity
+			android:name=".activity.SaveTheWorldMainActivity"
+			android:label="@string/title_stw" />
+		<activity
 			android:name=".activity.StwWorldInfoActivity"
 			android:label="@string/title_stw_info" />
 		<activity

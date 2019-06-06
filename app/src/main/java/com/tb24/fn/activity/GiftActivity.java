@@ -54,6 +54,7 @@ public class GiftActivity extends BaseActivity implements View.OnClickListener {
 	private ViewGroup mainFrame;
 	private ViewGroup giftLayout;
 	private EditText giftMessage;
+	private TextView recipientSummary;
 	private TextView vbucksTotal;
 	private Button buttonPrev;
 	private Button buttonNext;
@@ -63,7 +64,6 @@ public class GiftActivity extends BaseActivity implements View.OnClickListener {
 	private List<Friend> friendsData;
 	private Map<String, String> displayNameMap = new HashMap<>();
 	private boolean isStep2;
-	private TextView recipientSummary;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

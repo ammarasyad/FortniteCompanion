@@ -17,7 +17,10 @@
 	<string name="title_news">News</string>
 	<string name="title_profile">Profile</string>
 	<string name="title_stats">Stats</string>
-	<string name="title_stw_info">Save the World Info</string>
+	<string name="title_stw">Save the World</string>
+	<string name="title_stw_info">Missions Info</string>
+	<string name="title_daily_rewards">Daily Rewards</string>
+	<string name="title_research">Research</string>
 	<string name="action_logout">Log Out</string>
 	<string name="locker_filter_all">All</string>
 	<string name="locker_filter_animated">Animated</string>

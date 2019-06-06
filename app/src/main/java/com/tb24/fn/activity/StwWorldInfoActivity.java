@@ -5,6 +5,8 @@ import android.view.ViewGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.AppCompatTextView;
+
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -21,8 +23,8 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 public class StwWorldInfoActivity extends BaseActivity {
-	public static final Joiner NEWLINE = Joiner.on('\n');
-	public static final Function<WorldInfoResponse.WorldInfoItemStack, String> ITEM_STACK_STRING_FUNCTION = new Function<WorldInfoResponse.WorldInfoItemStack, String>() {
+	private static final Joiner NEWLINE = Joiner.on('\n');
+	private static final Function<WorldInfoResponse.WorldInfoItemStack, String> ITEM_STACK_STRING_FUNCTION = new Function<WorldInfoResponse.WorldInfoItemStack, String>() {
 		@Override
 		public String apply(WorldInfoResponse.WorldInfoItemStack input) {
 			return "  " + (input.itemType == null ? "" : input.itemType);
@@ -31,7 +33,7 @@ public class StwWorldInfoActivity extends BaseActivity {
 	private LoadingViewController lc;
 	private Call<WorldInfoResponse> callWorldInfo;
 	private WorldInfoResponse data;
-	private TextView v;
+	private TextView mainContent;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -40,10 +42,10 @@ public class StwWorldInfoActivity extends BaseActivity {
 		setupActionBar();
 		ViewGroup frame = findViewById(R.id.main_content);
 		ScrollView scrollView = new ScrollView(this);
-		this.v = new TextView(this);
+		mainContent = new AppCompatTextView(this);
 		int p = (int) Utils.dp(getResources(), 16);
-		v.setPadding(p, p, p, p);
-		scrollView.addView(v);
+		mainContent.setPadding(p, p, p, p);
+		scrollView.addView(mainContent);
 		frame.addView(scrollView, -1, -1);
 		lc = new LoadingViewController(this, frame, "");
 		loadStwWorldInfo();
@@ -128,6 +130,6 @@ public class StwWorldInfoActivity extends BaseActivity {
 			})) + "\n\n\n");
 		}
 
-		v.setText(sb.toString());
+		mainContent.setText(sb.toString());
 	}
 }

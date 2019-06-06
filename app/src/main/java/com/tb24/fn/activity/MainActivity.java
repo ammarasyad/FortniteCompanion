@@ -102,7 +102,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		findViewById(R.id.main_screen_btn_news).setOnClickListener(this);
 		findViewById(R.id.main_screen_btn_news).setOnLongClickListener(this);
 		findViewById(R.id.main_screen_btn_stw).setOnClickListener(this);
-		findViewById(R.id.main_screen_btn_stw).setOnLongClickListener(this);
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		loginBtn = findViewById(R.id.main_screen_btn_login);
 		loginBtn.setOnClickListener(this);
@@ -410,7 +409,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 				startActivity(intent);
 				break;
 			case R.id.main_screen_btn_stw:
-				startActivity(new Intent(this, StwWorldInfoActivity.class));
+				startActivity(new Intent(this, SaveTheWorldMainActivity.class));
 				break;
 			case R.id.main_screen_btn_login:
 				openLogin();
@@ -424,56 +423,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 			Intent intent = new Intent(this, NewsActivity.class);
 			intent.putExtra("a", 0);
 			startActivity(intent);
-			return true;
-		} else if (v.getId() == R.id.main_screen_btn_stw) {
-			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp(
-					"ClaimLoginReward",
-					PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""),
-					"campaign",
-					getThisApplication().profileManager.getRvn("campaign"),
-					new JsonObject());
-			new Thread("Daily Reward Claim Worker") {
-				@Override
-				public void run() {
-					try {
-						Response<FortMcpResponse> response = call.execute();
-
-						if (response.isSuccessful()) {
-							final FortMcpResponse mcpResponse = response.body();
-							getThisApplication().profileManager.executeProfileChanges(mcpResponse);
-							runOnUiThread(new Runnable() {
-								@Override
-								public void run() {
-									JsonObject notificationObj = mcpResponse.notifications[0];
-									JsonArray itemsArr = notificationObj.getAsJsonArray("items");
-									AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this)
-											.setTitle("Daily Rewards")
-											.setMessage(String.format("%,d days logged in", JsonUtils.getIntOr("daysLoggedIn", notificationObj, 0)) + (itemsArr.size() == 0 ? '\n' + "Reward for today has already been claimed." : ""))
-											.setPositiveButton(android.R.string.ok, null);
-									LinearLayout layout = new LinearLayout(MainActivity.this);
-
-									if (itemsArr.size() > 0) {
-										for (JsonElement item : itemsArr) {
-											JsonObject itemObj = item.getAsJsonObject();
-											View slot = getLayoutInflater().inflate(R.layout.slot_view, layout);
-											FortItemStack itemStack = new FortItemStack(JsonUtils.getStringOr("itemType", itemObj, "???:Invalid"), JsonUtils.getIntOr("quantity", itemObj, 1));
-											ItemUtils.populateSlotView(MainActivity.this, slot, itemStack, getThisApplication().itemRegistry.get(itemStack.templateId));
-										}
-
-										builder.setView(layout);
-									}
-
-									builder.show();
-								}
-							});
-						} else {
-							Utils.dialogError(MainActivity.this, EpicError.parse(response).getDisplayText());
-						}
-					} catch (IOException e) {
-						Utils.throwableDialog(MainActivity.this, e);
-					}
-				}
-			}.start();
 			return true;
 		}
 
