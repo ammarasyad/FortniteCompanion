@@ -28,7 +28,7 @@
 				android:id="@+id/p_banner"
 				android:layout_width="64dp"
 				android:layout_height="64dp"
-				android:layout_marginEnd="12dp"
+				android:layout_marginEnd="16dp"
 				android:contentDescription="Banner" />
 
 			<LinearLayout
@@ -42,6 +42,7 @@
 					style="@style/BurbankSmall.Black"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
+					android:singleLine="true"
 					android:textColor="?android:textColorPrimary"
 					android:textSize="22sp"
 					tools:text="First Last" />
@@ -50,6 +51,7 @@
 					android:id="@+id/profile_email"
 					android:layout_width="match_parent"
 					android:layout_height="wrap_content"
+					android:singleLine="true"
 					tools:text="yourname@example.com" />
 			</LinearLayout>
 

@@ -1,5 +1,6 @@
 package com.tb24.fn.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -43,8 +44,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.tb24.fn.FortniteCompanionApp;
+import com.tb24.fn.GameProfileRepository;
 import com.tb24.fn.R;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.GameProfile;
@@ -52,7 +53,6 @@ import com.tb24.fn.model.LeaderboardsResponse;
 import com.tb24.fn.util.BaseAdapter;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.ProfileLookupCallback;
-import com.tb24.fn.util.ProfileNotFoundException;
 import com.tb24.fn.util.Utils;
 
 import java.io.IOException;
@@ -60,7 +60,6 @@ import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -82,11 +81,6 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 		}
 	};
 	public static final Joiner AMP_JOINER = Joiner.on(" & ");
-	private static final String TAG = EventWindowLeaderboardActivity.class.getSimpleName();
-	private static final int ENTRIES_PER_PAGE = 100;
-	private static final int MAX_FAIL_COUNT = 3;
-	private static final int DELAY_BETWEEN_PAGES = 100;
-	private static final int DELAY_BETWEEN_FAILURES = 750;
 	private static final NumberFormat PERCENT_INSTANCE;
 
 	static {
@@ -185,7 +179,7 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 							}
 
 							final Map<String, GameProfile> map = new HashMap<>();
-							fetchNames(criteriaIds, new ProfileLookupCallback() {
+							GameProfileRepository.findProfileDataByIds(EventWindowLeaderboardActivity.this, criteriaIds, new ProfileLookupCallback() {
 								@Override
 								public void onProfileLookupSucceeded(GameProfile profile) {
 									map.put(profile.getId(), profile);
@@ -193,7 +187,7 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 
 								@Override
 								public void onProfileLookupFailed(GameProfile profile, Exception exception) {
-									Log.e(TAG, "Profile " + profile.getId() + " failed to find name", exception);
+									Log.e("EvtWinLbdActivity", "Profile " + profile.getId() + " failed to find name", exception);
 								}
 							});
 
@@ -233,7 +227,7 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 							setFooterToErrorFromNonMain();
 						}
 					} catch (IOException var5) {
-						Log.e(TAG, "Couldn\'t fetch leaderboard entries of page " + (page + 1), var5);
+						Log.e("EvtWinLbdActivity", "Couldn\'t fetch leaderboard entries of page " + (page + 1), var5);
 						stopLoading = true;
 						setFooterToErrorFromNonMain();
 					} finally {
@@ -241,60 +235,6 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 					}
 				}
 			}.start();
-		}
-	}
-
-	private void fetchNames(Set<String> criteriaIds, ProfileLookupCallback callback) {
-		for (final List<String> request : Iterables.partition(criteriaIds, ENTRIES_PER_PAGE)) {
-			int failCount = 0;
-			boolean failed;
-
-			do {
-				failed = false;
-
-				try {
-					final Response<GameProfile[]> response = getThisApplication().accountPublicService.accountMultiple(request).execute();
-
-					if (response.isSuccessful()) {
-						failCount = 0;
-						GameProfile[] body = response.body();
-						final Set<String> missing = Sets.newHashSet(request);
-
-						for (final GameProfile profile : body) {
-//							Log.d(TAG, "Successfully looked up profile " + profile);
-							missing.remove(profile.getId().toLowerCase());
-							callback.onProfileLookupSucceeded(profile);
-						}
-
-						for (final String id : missing) {
-							Log.d(TAG, "Couldn't find profile " + id);
-							callback.onProfileLookupFailed(new GameProfile(id, null), new ProfileNotFoundException("Server did not find the requested profile"));
-						}
-
-						try {
-							Thread.sleep(DELAY_BETWEEN_PAGES);
-						} catch (final InterruptedException ignored) {
-						}
-					} else {
-						EpicError.parse(response);
-					}
-				} catch (final IOException e) {
-					failCount++;
-
-					if (failCount == MAX_FAIL_COUNT) {
-						for (final String id : request) {
-//							Log.d(TAG, "Couldn't find profile " + id + " because of a server error");
-							callback.onProfileLookupFailed(new GameProfile(null, id), e);
-						}
-					} else {
-						try {
-							Thread.sleep(DELAY_BETWEEN_FAILURES);
-						} catch (final InterruptedException ignored) {
-						}
-						failed = true;
-					}
-				}
-			} while (failed);
 		}
 	}
 
@@ -313,6 +253,7 @@ public class EventWindowLeaderboardActivity extends BaseActivity implements Base
 		fetchMoreEntriesAsync();
 	}
 
+	@SuppressLint("DefaultLocale")
 	@NonNull
 	private View leaderboardEntryView(Context ctx, LeaderboardsResponse.LeaderboardEntry entry) {
 		View view = LayoutInflater.from(ctx).inflate(R.layout.template_table, null);

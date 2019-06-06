@@ -384,7 +384,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 		private static final int VIEW_TYPE_CHEATSHEET = 3;
 		private final ChallengeBundleActivity activity;
 		private List<QuestEntry> data;
-		private int expandedPosition = -1;
+		private FortItemStack expandedItem;
 
 		public ChallengeAdapter(ChallengeBundleActivity activity, List<QuestEntry> data) {
 			this.activity = activity;
@@ -666,7 +666,7 @@ public class ChallengeBundleActivity extends BaseActivity {
 				}
 			}
 
-			holder.actions.setVisibility(adapter.expandedPosition == position ? View.VISIBLE : View.GONE);
+			holder.actions.setVisibility(adapter.expandedItem == activeQuestItem ? View.VISIBLE : View.GONE);
 			holder.btnReplace.setVisibility(isEligibleForReplacement ? View.VISIBLE : View.GONE);
 			holder.btnAssist.setVisibility(isEligibleForAssist ? View.VISIBLE : View.GONE);
 			holder.btnAssist.setText("Party Assist" + (isPartyAssisted ? " \u2714" : ""));
@@ -757,17 +757,31 @@ public class ChallengeBundleActivity extends BaseActivity {
 				@Override
 				public void onClick(View v) {
 					if (isEligibleForReplacement || isEligibleForAssist) {
-						boolean newState = adapter.expandedPosition != holder.getAdapterPosition();
+						boolean newState = adapter.expandedItem != activeQuestItem;
 
-						if (adapter.expandedPosition >= 0) {
-							adapter.notifyItemChanged(adapter.expandedPosition);
+						if (adapter.expandedItem != null) {
+							int i = -1;
+							List<QuestEntry> data = adapter.data;
+
+							for (int i1 = 0; i1 < data.size(); i1++) {
+								QuestEntry entry = data.get(i1);
+
+								if (entry instanceof DefaultQuestEntry && ((DefaultQuestEntry) entry).activeQuestItem == adapter.expandedItem) {
+									i = i1;
+									break;
+								}
+							}
+
+							adapter.expandedItem = null;
+
+							if (i >= 0) {
+								adapter.notifyItemChanged(i);
+							}
 						}
 
 						if (newState) {
-							adapter.expandedPosition = holder.getAdapterPosition();
+							adapter.expandedItem = activeQuestItem;
 							adapter.notifyItemChanged(holder.getAdapterPosition());
-						} else {
-							adapter.expandedPosition = -1;
 						}
 					}
 				}

@@ -680,7 +680,6 @@ public class ItemShopActivity extends BaseActivity {
 								}
 							} else if (v == btnGift) {
 								// TODO gifting: firstly you have to add friends endpoint
-								Toast.makeText(activity, "Gifting not available yet", Toast.LENGTH_SHORT).show();
 								Intent intent = new Intent(activity, GiftActivity.class);
 								intent.putExtra("a", activity.getThisApplication().gson.toJson(item));
 								activity.startActivity(intent);

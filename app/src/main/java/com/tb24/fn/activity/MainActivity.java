@@ -34,6 +34,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.tb24.fn.FortniteCompanionApp;
 import com.tb24.fn.R;
 import com.tb24.fn.event.LoggedOutEvent;
@@ -43,10 +46,13 @@ import com.tb24.fn.model.AthenaProfileAttributes;
 import com.tb24.fn.model.CommonPublicProfileAttributes;
 import com.tb24.fn.model.EpicError;
 import com.tb24.fn.model.ExchangeResponse;
+import com.tb24.fn.model.FortItemStack;
 import com.tb24.fn.model.FortMcpProfile;
 import com.tb24.fn.model.FortMcpResponse;
 import com.tb24.fn.model.GameProfile;
 import com.tb24.fn.model.XGameProfile;
+import com.tb24.fn.util.ItemUtils;
+import com.tb24.fn.util.JsonUtils;
 import com.tb24.fn.util.LoadingViewController;
 import com.tb24.fn.util.Utils;
 
@@ -54,6 +60,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -95,6 +102,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		findViewById(R.id.main_screen_btn_news).setOnClickListener(this);
 		findViewById(R.id.main_screen_btn_news).setOnLongClickListener(this);
 		findViewById(R.id.main_screen_btn_stw).setOnClickListener(this);
+		findViewById(R.id.main_screen_btn_stw).setOnLongClickListener(this);
 		prefs = PreferenceManager.getDefaultSharedPreferences(this);
 		loginBtn = findViewById(R.id.main_screen_btn_login);
 		loginBtn.setOnClickListener(this);
@@ -410,6 +418,68 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		}
 	}
 
+	@Override
+	public boolean onLongClick(View v) {
+		if (v.getId() == R.id.main_screen_btn_news) {
+			Intent intent = new Intent(this, NewsActivity.class);
+			intent.putExtra("a", 0);
+			startActivity(intent);
+			return true;
+		} else if (v.getId() == R.id.main_screen_btn_stw) {
+			final Call<FortMcpResponse> call = getThisApplication().fortnitePublicService.mcp(
+					"ClaimLoginReward",
+					PreferenceManager.getDefaultSharedPreferences(this).getString("epic_account_id", ""),
+					"campaign",
+					getThisApplication().profileManager.getRvn("campaign"),
+					new JsonObject());
+			new Thread("Daily Reward Claim Worker") {
+				@Override
+				public void run() {
+					try {
+						Response<FortMcpResponse> response = call.execute();
+
+						if (response.isSuccessful()) {
+							final FortMcpResponse mcpResponse = response.body();
+							getThisApplication().profileManager.executeProfileChanges(mcpResponse);
+							runOnUiThread(new Runnable() {
+								@Override
+								public void run() {
+									JsonObject notificationObj = mcpResponse.notifications[0];
+									JsonArray itemsArr = notificationObj.getAsJsonArray("items");
+									AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this)
+											.setTitle("Daily Rewards")
+											.setMessage(String.format("%,d days logged in", JsonUtils.getIntOr("daysLoggedIn", notificationObj, 0)) + (itemsArr.size() == 0 ? '\n' + "Reward for today has already been claimed." : ""))
+											.setPositiveButton(android.R.string.ok, null);
+									LinearLayout layout = new LinearLayout(MainActivity.this);
+
+									if (itemsArr.size() > 0) {
+										for (JsonElement item : itemsArr) {
+											JsonObject itemObj = item.getAsJsonObject();
+											View slot = getLayoutInflater().inflate(R.layout.slot_view, layout);
+											FortItemStack itemStack = new FortItemStack(JsonUtils.getStringOr("itemType", itemObj, "???:Invalid"), JsonUtils.getIntOr("quantity", itemObj, 1));
+											ItemUtils.populateSlotView(MainActivity.this, slot, itemStack, getThisApplication().itemRegistry.get(itemStack.templateId));
+										}
+
+										builder.setView(layout);
+									}
+
+									builder.show();
+								}
+							});
+						} else {
+							Utils.dialogError(MainActivity.this, EpicError.parse(response).getDisplayText());
+						}
+					} catch (IOException e) {
+						Utils.throwableDialog(MainActivity.this, e);
+					}
+				}
+			}.start();
+			return true;
+		}
+
+		return false;
+	}
+
 	private void openLogin() {
 		startActivityForResult(new Intent(this, LoginActivity.class), UPDATE_IF_OK_REQ_CODE);
 	}
@@ -452,18 +522,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener, 
 		}
 
 		return super.onOptionsItemSelected(item);
-	}
-
-	@Override
-	public boolean onLongClick(View v) {
-		if (v.getId() == R.id.main_screen_btn_news) {
-			Intent intent = new Intent(this, NewsActivity.class);
-			intent.putExtra("a", 0);
-			startActivity(intent);
-			return true;
-		}
-
-		return false;
 	}
 
 	private static class SeasonBackgroundDrawable extends Drawable {

@@ -22,7 +22,8 @@ public class CommonCoreProfileAttributes extends ProfileAttributes {
 	public JsonObject ban_history;
 	public InAppPurchases in_app_purchases;
 	public JsonArray permissions;
-	public Date undo_timeout;
+	// can be date, can be "min"
+	public String undo_timeout;
 	public PurchaseList monthly_purchases;
 	public Boolean allowed_to_send_gifts;
 	public Boolean mfa_enabled;
@@ -40,7 +41,7 @@ public class CommonCoreProfileAttributes extends ProfileAttributes {
 		public String offerId;
 		public Date purchaseDate;
 		public JsonArray fulfillments;
-		public LootResult lootResult;
+		public LootResult[] lootResult;
 		public Integer totalMtxPaid;
 		// let's play safe, make it generic JsonElement, who knows it isn't a string
 		public Map<String, JsonElement> metadata;

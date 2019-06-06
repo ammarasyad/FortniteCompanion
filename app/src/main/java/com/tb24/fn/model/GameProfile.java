@@ -2,11 +2,15 @@ package com.tb24.fn.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Map;
+
 public class GameProfile {
 	@SerializedName("id")
 	private String id;
 	@SerializedName("displayName")
 	private String displayName;
+	@SerializedName("externalAuths")
+	private Map<String, ExternalAuth> externalAuths;
 
 	public GameProfile() {
 	}
@@ -42,6 +46,10 @@ public class GameProfile {
 
 		if (displayName.length() < 3) throw new IllegalArgumentException("length < 3");
 		this.displayName = displayName;
+	}
+
+	public Map<String, ExternalAuth> getExternalAuths() {
+		return externalAuths;
 	}
 
 	@Override

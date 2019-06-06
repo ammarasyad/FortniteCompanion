@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 
 import java.util.Date;
 
+// Taken from com.mojang.realms library. Big thanks to Mojang.
 public class JsonUtils {
 	public static String getStringOr(String key, JsonObject node, String defaultValue) {
 		JsonElement element = node.get(key);
