@@ -20,6 +20,7 @@
 		android:layout_height="match_parent"
 		android:gravity="center"
 		android:textSize="8sp"
+		app:layout_constraintDimensionRatio="H,3:5"
 		tools:text="Name" />
 
 	<com.tb24.fn.view.OutlineTextView
@@ -33,13 +34,15 @@
 		android:textStyle="bold"
 		app:outlineColor="#80000000"
 		app:outlineWidth="2.5"
+		app:layout_constraintDimensionRatio="H,3:5"
 		tools:text="10" />
 
 	<com.tb24.fn.view.SlotCustomImageView
 		android:id="@+id/item_img"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:scaleType="fitCenter" />
+		android:scaleType="fitCenter"
+		app:layout_constraintDimensionRatio="H,3:5" />
 
 	<ImageView
 		android:id="@+id/item_favorite"
@@ -50,6 +53,7 @@
 		android:layout_marginTop="-5dp"
 		android:layout_marginEnd="-2dp"
 		android:visibility="gone"
+		app:layout_constraintDimensionRatio="H,3:5"
 		tools:visibility="visible" />
 
 	<TextView
@@ -69,5 +73,6 @@
 		android:textSize="12dp"
 		android:textStyle="bold"
 		android:visibility="gone"
+		app:layout_constraintDimensionRatio="H,3:5"
 		tools:visibility="visible" />
 </com.tb24.fn.view.SlotView>

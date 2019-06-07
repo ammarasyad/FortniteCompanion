@@ -54,124 +54,202 @@
 			tools:text="Outfit" />
 	</LinearLayout>
 
-	<HorizontalScrollView
+	<!--<HorizontalScrollView-->
+	<!--android:layout_width="match_parent"-->
+	<!--android:layout_height="0dp"-->
+	<!--android:layout_weight="1">-->
+
+	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="0dp"
-		android:layout_weight="1">
+		android:layout_height="wrap_content"
+		android:orientation="vertical">
 
-		<LinearLayout
-			android:layout_width="wrap_content"
+		<com.tb24.fn.view.LockerRowLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
+
+			<include
+				android:id="@+id/locker_slot_character"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="108dp"
+				android:layout_marginStart="4dp"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
+
+			<include
+				android:id="@+id/locker_slot_backpack"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
+
+			<include
+				android:id="@+id/locker_slot_pickaxe"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
+
+			<include
+				android:id="@+id/locker_slot_glider"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
+
+			<include
+				android:id="@+id/locker_slot_skydivecontrail"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
+		</com.tb24.fn.view.LockerRowLayout>
+
+		<com.tb24.fn.view.LockerRowLayout
+			android:id="@+id/locker_emote_slots"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:orientation="vertical">
+			android:layout_marginTop="4dp">
 
-			<LinearLayout
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content">
+			<include
+				android:id="@+id/locker_slot_emote1"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="108dp"
+				android:layout_marginStart="4dp"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
 
-				<include
-					android:id="@+id/locker_slot_character"
-					layout="@layout/slot_view" />
+			<include
+				android:id="@+id/locker_slot_emote2"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
 
-				<include
-					android:id="@+id/locker_slot_backpack"
-					layout="@layout/slot_view" />
+			<include
+				android:id="@+id/locker_slot_emote3"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
 
-				<include
-					android:id="@+id/locker_slot_pickaxe"
-					layout="@layout/slot_view" />
+			<include
+				android:id="@+id/locker_slot_emote4"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
 
-				<include
-					android:id="@+id/locker_slot_glider"
-					layout="@layout/slot_view" />
+			<include
+				android:id="@+id/locker_slot_emote5"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
 
-				<include
-					android:id="@+id/locker_slot_skydivecontrail"
-					layout="@layout/slot_view" />
-			</LinearLayout>
+			<include
+				android:id="@+id/locker_slot_emote6"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
+		</com.tb24.fn.view.LockerRowLayout>
 
-			<LinearLayout
-				android:id="@+id/locker_emote_slots"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content">
+		<com.tb24.fn.view.LockerRowLayout
+			android:id="@+id/locker_wrap_slots"
+			android:layout_width="match_parent"
+			android:layout_height="0dp"
+			android:layout_marginStart="4dp"
+			android:layout_marginTop="4dp"
+			android:layout_weight="1">
 
-				<include
-					android:id="@+id/locker_slot_emote1"
-					layout="@layout/slot_view" />
+			<include
+				android:id="@+id/locker_slot_wrap1"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="108dp"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
 
-				<include
-					android:id="@+id/locker_slot_emote2"
-					layout="@layout/slot_view" />
+			<include
+				android:id="@+id/locker_slot_wrap2"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
 
-				<include
-					android:id="@+id/locker_slot_emote3"
-					layout="@layout/slot_view" />
+			<include
+				android:id="@+id/locker_slot_wrap3"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
 
-				<include
-					android:id="@+id/locker_slot_emote4"
-					layout="@layout/slot_view" />
+			<include
+				android:id="@+id/locker_slot_wrap4"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
 
-				<include
-					android:id="@+id/locker_slot_emote5"
-					layout="@layout/slot_view" />
+			<include
+				android:id="@+id/locker_slot_wrap5"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
 
-				<include
-					android:id="@+id/locker_slot_emote6"
-					layout="@layout/slot_view" />
-			</LinearLayout>
+			<include
+				android:id="@+id/locker_slot_wrap6"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
 
-			<LinearLayout
-				android:id="@+id/locker_wrap_slots"
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content">
+			<include
+				android:id="@+id/locker_slot_wrap7"
+				layout="@layout/slot_view"
+				android:layout_width="wrap_content"
+				android:layout_height="match_parent"
+				android:layout_marginEnd="8dp"
+				android:layout_weight="1" />
+		</com.tb24.fn.view.LockerRowLayout>
 
-				<include
-					android:id="@+id/locker_slot_wrap1"
-					layout="@layout/slot_view" />
+		<com.tb24.fn.view.LockerRowLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content">
 
-				<include
-					android:id="@+id/locker_slot_wrap2"
-					layout="@layout/slot_view" />
+			<include
+				android:id="@+id/locker_slot_banner"
+				layout="@layout/slot_view"
+				android:visibility="gone" />
 
-				<include
-					android:id="@+id/locker_slot_wrap3"
-					layout="@layout/slot_view" />
+			<include
+				android:id="@+id/locker_slot_musicpack"
+				layout="@layout/slot_view" />
 
-				<include
-					android:id="@+id/locker_slot_wrap4"
-					layout="@layout/slot_view" />
-
-				<include
-					android:id="@+id/locker_slot_wrap5"
-					layout="@layout/slot_view" />
-
-				<include
-					android:id="@+id/locker_slot_wrap6"
-					layout="@layout/slot_view" />
-
-				<include
-					android:id="@+id/locker_slot_wrap7"
-					layout="@layout/slot_view" />
-			</LinearLayout>
-
-			<LinearLayout
-				android:layout_width="match_parent"
-				android:layout_height="wrap_content">
-
-				<include
-					android:id="@+id/locker_slot_banner"
-					layout="@layout/slot_view"
-					android:visibility="gone" />
-
-				<include
-					android:id="@+id/locker_slot_musicpack"
-					layout="@layout/slot_view" />
-
-				<include
-					android:id="@+id/locker_slot_loadingscreen"
-					layout="@layout/slot_view" />
-			</LinearLayout>
-		</LinearLayout>
-	</HorizontalScrollView>
+			<include
+				android:id="@+id/locker_slot_loadingscreen"
+				layout="@layout/slot_view" />
+		</com.tb24.fn.view.LockerRowLayout>
+	</LinearLayout>
+	<!--</HorizontalScrollView>-->
 
 	<!--<include-->
 	<!--android:id="@+id/locker_item_detail_box"-->

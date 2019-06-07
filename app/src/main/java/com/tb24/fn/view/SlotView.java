@@ -6,11 +6,12 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
+
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.tb24.fn.util.Utils;
 
-public class SlotView extends RelativeLayout {
+public class SlotView extends ConstraintLayout {
 	private Paint paint;
 	private Rect rect = new Rect();
 	private int one;
